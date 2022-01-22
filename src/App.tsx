@@ -4,16 +4,17 @@ import { BrowserRouter } from "react-router-dom";
 
 import "./App.css";
 import ClientPrincipalExperiements from "./ClientPrincipalExperiments";
+import { UserProfileContextProvider } from "./services/UserProfileContext";
 
 function App() {
   return (
     <ClientPrincipalContextProvider>
       <BrowserRouter>
         <div className="App">
-          <ClientPrincipalExperiements />
-          {/* <UserProfileContextProvider> */}
-          {/* <Layout /> */}
-          {/* </UserProfileContextProvider> */}
+          <UserProfileContextProvider>
+            <ClientPrincipalExperiements />
+            {/* <Layout /> */}
+          </UserProfileContextProvider>
         </div>
       </BrowserRouter>
     </ClientPrincipalContextProvider>
