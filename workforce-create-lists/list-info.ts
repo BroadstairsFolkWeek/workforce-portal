@@ -26,6 +26,21 @@ const loginsList: PopulateListDef = {
         text: {},
       },
       {
+        name: "GivenName",
+        displayName: "Given Name",
+        indexed: true,
+        required: false,
+        enforceUniqueValues: false,
+        text: {},
+      },
+      {
+        name: "Surname",
+        indexed: true,
+        required: false,
+        enforceUniqueValues: false,
+        text: {},
+      },
+      {
         name: "IdentityProviderUserId",
         displayName: "Identity Provider User Id",
         indexed: true,
