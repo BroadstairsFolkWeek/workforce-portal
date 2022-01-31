@@ -6,7 +6,7 @@ FROM mcr.microsoft.com/azure-functions/python:3.0-python3.8-core-tools
 COPY library-scripts/*.sh library-scripts/*.env /tmp/library-scripts/
 
 # Install Node.js and Azure Static Web Apps CLI
-ARG NODE_VERSION="lts/*"
+ARG NODE_VERSION="lts/fermium"
 ENV NVM_DIR="/usr/local/share/nvm" \
     NVM_SYMLINK_CURRENT=true \
     PATH="${NVM_DIR}/current/bin:${PATH}"
