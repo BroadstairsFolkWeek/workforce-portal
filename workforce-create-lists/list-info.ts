@@ -123,6 +123,15 @@ const applicationsList: PopulateListDef = {
         text: {},
       },
       {
+        name: "PreviousVolunteer",
+        displayName: "Previous Volunteer",
+        indexed: false,
+        required: false,
+        enforceUniqueValues: false,
+        boolean: {},
+        default: { value: "0" },
+      },
+      {
         name: "PreviousTeam",
         displayName: "Previous Team",
         indexed: false,
@@ -260,6 +269,7 @@ const applicationsList: PopulateListDef = {
         enforceUniqueValues: false,
         text: {},
       },
+      { name: "Version", index: false, required: true, number: {} },
     ]),
 };
 

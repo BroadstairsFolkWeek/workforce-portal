@@ -3,22 +3,27 @@ import { ClientPrincipalContextProvider } from "@aaronpowell/react-static-web-ap
 import { BrowserRouter } from "react-router-dom";
 
 import "./App.css";
-import ClientPrincipalExperiements from "./ClientPrincipalExperiments";
 import { UserProfileContextProvider } from "./components/contexts/UserProfileContext";
 import { ClientPrincipalClaimsContextProvider } from "./components/contexts/ClientPrincipalClaimsContext";
+import Layout from "./components/Layout";
+import { ApplicationContextProvider } from "./components/contexts/ApplicationContext";
+import { EditApplicationContextProvider } from "./components/contexts/EditApplicationContext";
 
 function App() {
   return (
     <ClientPrincipalContextProvider>
       <ClientPrincipalClaimsContextProvider>
-        <BrowserRouter>
-          <UserProfileContextProvider>
-            <div className="App">
-              <ClientPrincipalExperiements />
-              {/* <Layout /> */}
-            </div>
-          </UserProfileContextProvider>
-        </BrowserRouter>
+        <UserProfileContextProvider>
+          <ApplicationContextProvider>
+            <EditApplicationContextProvider>
+              <BrowserRouter>
+                <div className="App">
+                  <Layout />
+                </div>
+              </BrowserRouter>
+            </EditApplicationContextProvider>
+          </ApplicationContextProvider>
+        </UserProfileContextProvider>
       </ClientPrincipalClaimsContextProvider>
     </ClientPrincipalContextProvider>
   );

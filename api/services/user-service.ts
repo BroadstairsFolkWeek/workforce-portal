@@ -56,10 +56,6 @@ export const updateUserClaims = async (
   userInfo: UserInfo,
   claims: Claim[]
 ): Promise<void> => {
-  logInfo("Update user claim.");
-  logInfo("UserInfo: " + JSON.stringify(userInfo, null, 2));
-  logInfo("Claims: " + JSON.stringify(claims, null, 2));
-
   if (!userInfo || !userInfo.userId || !userInfo.userDetails) {
     throw new UserServiceError("unauthenticated");
   }
@@ -106,4 +102,14 @@ export const updateUserClaims = async (
 
     await createUserListItem(newUserLogin);
   }
+};
+
+export const getUserProfile = async (
+  userInfo: UserInfo
+): Promise<UserLogin | null> => {
+  if (!userInfo || !userInfo.userId) {
+    throw new UserServiceError("unauthenticated");
+  }
+
+  return getUserLogin(userInfo.userId);
 };
