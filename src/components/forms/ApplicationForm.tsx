@@ -75,95 +75,115 @@ const ApplicationForm: React.FC = () => {
       >
         {(formik) => {
           return (
-            <form className="text-left" onSubmit={formik.handleSubmit}>
+            <>
               {errorComponent}
-              <TextArea name="address" label="Address (inc. postcode)" />
-              <TextInput name="telephone" label="Telephone" type="text" />
-              <TextInput
-                name="emergencyContactName"
-                label="Emergency contact name"
-                type="text"
-              />
-              <TextInput
-                name="emergencyContactTelephone"
-                label="Emergency contact telephone"
-                type="text"
-              />
-              <div className="mt-2">
-                <label>
-                  <Field
-                    type="checkbox"
-                    name="previousVolunteer"
-                    className="mr-2"
+              <form className="text-left" onSubmit={formik.handleSubmit}>
+                <div className="mb-8">
+                  <TextArea name="address" label="Address (inc. postcode)" />
+                  <TextInput name="telephone" label="Telephone" type="text" />
+                </div>
+
+                <div className="my-8">
+                  <TextInput
+                    name="emergencyContactName"
+                    label="Emergency contact name"
+                    type="text"
                   />
-                  Have you volunteered for folkweek before?
-                </label>
-              </div>
-              <TextInput
-                name="previousTeam"
-                label="If so, for which team?"
-                type="text"
-              />
-              <TextInput
-                name="personsPreference"
-                label="Any people you would like to work with?"
-                type="text"
-              />
-              <div className="mt-2">
-                <label>
+                  <TextInput
+                    name="emergencyContactTelephone"
+                    label="Emergency contact telephone"
+                    type="text"
+                  />
+                </div>
+
+                <div className="my-8">
+                  <div className="flex flex-row justify-between items-center">
+                    <span> Have you volunteered for folkweek before?</span>
+                    <Field
+                      type="checkbox"
+                      name="previousVolunteer"
+                      className="mr-2"
+                    />
+                  </div>
+                  {formik.values.previousVolunteer ? (
+                    <div className="ml-4">
+                      <TextInput
+                        name="previousTeam"
+                        label="Which team?"
+                        type="text"
+                      />
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className="my-8">
+                  <TextInput
+                    name="personsPreference"
+                    label="Are there any people you would like to work with? If so, please provide their names."
+                    type="text"
+                  />
+                </div>
+
+                <div className="flex flex-row justify-between items-center my-8">
+                  <span>Do you have a first aid certificate?</span>
                   <Field
                     type="checkbox"
                     name="firstAidCertificate"
                     className="mr-2"
                   />
-                  Do you have a first aid certificate?
-                </label>
-              </div>
-              <TextInput
-                name="occupationOrSkills"
-                label="Occupation / transferrable skills"
-                type="text"
-              />
-              <TextInput
-                name="dbsDisclosureNumber"
-                label="DBS disclosure number"
-                description="Only needed if applyiny to join the Children's Team"
-                type="text"
-              />
-              <TextInput
-                name="dbsDisclosureDate"
-                label="DBS disclosure date"
-                description="Only needed if applyiny to join the Children's Team"
-                type="text"
-              />
-              <div className="mt-2">
-                <label>
+                </div>
+
+                <div className="my-8">
+                  <TextInput
+                    name="occupationOrSkills"
+                    label="Occupation / transferrable skills"
+                    type="text"
+                  />
+                </div>
+
+                <div className="my-8">
+                  <TextInput
+                    name="dbsDisclosureNumber"
+                    label="DBS disclosure number"
+                    description="Only needed if applyiny to join the Children's Team"
+                    type="text"
+                  />
+                  <TextInput
+                    name="dbsDisclosureDate"
+                    label="DBS disclosure date"
+                    description="Only needed if applyiny to join the Children's Team"
+                    type="text"
+                  />
+                </div>
+
+                <div className="flex flex-row justify-between items-center my-8">
+                  <span>Do you want to register for camping?</span>
                   <Field type="checkbox" name="camping" className="mr-2" />
-                  Do you want to register for camping?
-                </label>
-              </div>
+                </div>
 
-              <div className="mt-2">
-                <label>
-                  T shirt size
+                <div className="flex flex-row justify-between items-center my-8">
+                  <span>T shirt size</span>
                   <Field name="tShirtSize" as="select">
-                    <option value="S">S</option>
-                    <option value="M">M</option>
-                    <option value="L">L</option>
-                    <option value="XL">XL</option>
-                    <option value="XXL">XXL</option>
+                    {formik.values.tShirtSize ? null : (
+                      <option value="">Select size</option>
+                    )}
+                    <option>S</option>
+                    <option>M</option>
+                    <option>L</option>
+                    <option>XL</option>
+                    <option>XXL</option>
                   </Field>
-                </label>
-              </div>
+                </div>
 
-              <button
-                type="submit"
-                disabled={formik.isSubmitting}
-                className="block m-auto my-4 p-4 bg-bfw-yellow hover:bg-bfw-link rounded text-lg text-menu-text disabled:bg-gray-100 disabled:text-gray-500 disabled:border-gray-200 disabled:shadow-none"
-              >
-                Save Workforce Application
-              </button>
-            </form>
+                <button
+                  type="submit"
+                  disabled={formik.isSubmitting}
+                  className="block m-auto my-4 p-4 bg-bfw-yellow hover:bg-bfw-link rounded text-lg text-menu-text disabled:bg-gray-100 disabled:text-gray-500 disabled:border-gray-200 disabled:shadow-none"
+                >
+                  Save Workforce Application
+                </button>
+              </form>
+            </>
           );
         }}
       </Formik>
