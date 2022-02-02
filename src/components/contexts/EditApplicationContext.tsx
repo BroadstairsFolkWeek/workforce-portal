@@ -38,15 +38,6 @@ const EditApplicationContextProvider = ({
   const newApplication = useCallback(async () => {
     setMode("new");
     setApplication({
-      address: "",
-      emergencyContactName: "",
-      emergencyContactTelephone: "",
-      previousVolunteer: false,
-      previousTeam: "",
-      firstAidCertificate: false,
-      occupationOrSkills: "",
-      dbsDisclosureNumber: "",
-      dbsDisclosureDate: "",
       camping: false,
       tShirtSize: undefined,
       ageGroup: undefined,
@@ -54,6 +45,8 @@ const EditApplicationContextProvider = ({
       teamPreference3: "",
       personsPreference: "",
       version: 0,
+      lastSaved: "",
+      status: "info-required",
     });
   }, []);
 

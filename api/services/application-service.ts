@@ -41,6 +41,66 @@ export const getApplication = async (
   }
 };
 
+const isApplicationFieldMissing = (
+  addableApplication: AddableApplication,
+  field: keyof AddableApplication
+): boolean => {
+  if (addableApplication[field] === undefined) {
+    return true;
+  }
+
+  if (
+    typeof addableApplication[field] === "string" &&
+    addableApplication[field]?.toString().trim().length === 0
+  ) {
+    return true;
+  }
+
+  return false;
+};
+
+const determineApplicationStatus = (
+  addableApplication: AddableApplication
+): AddableApplication["status"] => {
+  const mandatoryFields: Array<keyof AddableApplication> = [
+    "telephone",
+    "address",
+    "emergencyContactName",
+    "emergencyContactTelephone",
+    "ageGroup",
+    "tShirtSize",
+  ];
+  if (
+    mandatoryFields.some((field) =>
+      isApplicationFieldMissing(addableApplication, field)
+    )
+  ) {
+    return "info-required";
+  }
+
+  if (
+    [
+      addableApplication.teamPreference1,
+      addableApplication.teamPreference2,
+      addableApplication.teamPreference3,
+    ].includes("Children's Events")
+  ) {
+    const mandatoryChildrensTeamFields: Array<keyof AddableApplication> = [
+      "dbsDisclosureNumber",
+      "dbsDisclosureDate",
+    ];
+    if (
+      mandatoryChildrensTeamFields.some((field) =>
+        isApplicationFieldMissing(addableApplication, field)
+      )
+    ) {
+      return "info-required";
+    }
+  }
+
+  return "ready-to-submit";
+};
+
 export const saveApplication = async (
   addableApplication: AddableApplication,
   userProfile: UserLogin
@@ -56,6 +116,9 @@ export const saveApplication = async (
         ...addableApplication,
         version: existingApplication.version + 1,
       };
+      updatedApplication.status =
+        determineApplicationStatus(updatedApplication);
+
       return updateApplicationListItem(updatedApplication);
     } else {
       // The application being saved has a different version number to the existing application. The user may

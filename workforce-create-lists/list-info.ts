@@ -270,6 +270,22 @@ const applicationsList: PopulateListDef = {
         text: {},
       },
       { name: "Version", index: false, required: true, number: {} },
+      {
+        name: "Status",
+        index: true,
+        required: true,
+        choice: {
+          allowTextEntry: false,
+          choices: [
+            "info-required",
+            "photo-required",
+            "documents-required",
+            "ready-to-submit",
+            "complete",
+          ],
+          displayAs: "dropDownMenu",
+        },
+      },
     ]),
 };
 

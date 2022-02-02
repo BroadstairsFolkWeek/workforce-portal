@@ -63,6 +63,23 @@ const listItemToAgeGroup = (
   }
 };
 
+const listItemToStatus = (
+  item: PersistedApplicationListItem
+): Application["status"] => {
+  switch (item.Status) {
+    case "info-required":
+    case "photo-required":
+    case "documents-required":
+    case "ready-to-submit":
+    case "complete":
+      return item.Status;
+    default:
+      throw new Error(
+        "Invalid Status read from PersistedApplicationListItem: " + item.Status
+      );
+  }
+};
+
 const listItemToApplication = (
   item: PersistedApplicationListItem
 ): Application => {
@@ -86,9 +103,11 @@ const listItemToApplication = (
     teamPreference3: item.TeamPreference3 ?? undefined,
     personsPreference: item.PersonsPreference ?? undefined,
     version: item.Version,
-    dbId: item.ID,
     identityProviderUserId: item.IdentityProviderUserId,
     userDetails: item.Title,
+    dbId: item.ID,
+    lastSaved: item.Modified,
+    status: listItemToStatus(item),
   };
 };
 
@@ -105,32 +124,30 @@ const setOnListItemIfDefined = <T extends AddableListItem>(
 const addableApplicationToListItem = (
   application: AddableApplication
 ): AddableApplicationListItem => {
-  const listItem = {
+  const listItem: AddableApplicationListItem = {
     Title: application.userDetails,
     IdentityProviderUserId: application.identityProviderUserId,
     Version: application.version,
+    Status: application.status,
+    Telephone: application.telephone,
+    Address: application.address,
+    AgeGroup: application.ageGroup as string,
+    TShirtSize: application.tShirtSize as string,
+    EmergencyContactName: application.emergencyContactName,
+    EmergencyContactTelephone: application.emergencyContactTelephone,
+    PreviousVolunteer: application.previousVolunteer,
+    PreviousTeam: application.previousTeam,
+    FirstAidCertificate: application.firstAidCertificate,
+    OccupationOrSkills: application.occupationOrSkills,
+    DbsDisclosureNumber: application.dbsDisclosureNumber,
+    DbsDisclosureDate: application.dbsDisclosureDate,
+    Camping: application.camping,
+    OtherInformation: application.otherInformation,
+    TeamPreference1: application.teamPreference1,
+    TeamPreference2: application.teamPreference2,
+    TeamPreference3: application.teamPreference3,
+    PersonsPreference: application.personsPreference,
   };
-
-  setOnListItemIfDefined<AddableApplicationListItem>(
-    listItem,
-    "Telephone",
-    application.telephone
-  );
-  setOnListItemIfDefined<AddableApplicationListItem>(
-    listItem,
-    "Address",
-    application.address
-  );
-  setOnListItemIfDefined<AddableApplicationListItem>(
-    listItem,
-    "EmergencyContactName",
-    application.emergencyContactName
-  );
-  setOnListItemIfDefined<AddableApplicationListItem>(
-    listItem,
-    "EmergencyContactTelephone",
-    application.emergencyContactTelephone
-  );
 
   return listItem;
 };

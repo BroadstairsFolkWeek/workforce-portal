@@ -96,6 +96,21 @@ const ApplicationForm: React.FC = () => {
                   />
                 </div>
 
+                <div className="flex flex-row justify-between items-center my-8">
+                  <span>Age group</span>
+                  <Field name="ageGroup" as="select">
+                    {formik.values.ageGroup ? null : (
+                      <option value="">Select group</option>
+                    )}
+                    <option>18-20</option>
+                    <option>21-25</option>
+                    <option>26-35</option>
+                    <option>36-55</option>
+                    <option>56-65</option>
+                    <option>66+</option>
+                  </Field>
+                </div>
+
                 <div className="my-8">
                   <div className="flex flex-row justify-between items-center">
                     <span> Have you volunteered for folkweek before?</span>

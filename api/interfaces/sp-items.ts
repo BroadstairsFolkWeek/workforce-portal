@@ -4,7 +4,13 @@ export interface AddableMultiLookupId {
 
 export interface AddableListItem {
   Title: string;
-  [x: string]: string | number | boolean | AddableMultiLookupId | null;
+  [x: string]:
+    | string
+    | number
+    | boolean
+    | AddableMultiLookupId
+    | null
+    | undefined;
 }
 
 export interface UpdatableListItem extends Partial<AddableListItem> {}

@@ -34,6 +34,7 @@ export const sanitiseApplicationFromApiClient = (
 
     identityProviderUserId: userLogin.userId,
     userDetails: userLogin.userDetails,
+    status: "info-required",
   };
 
   return sanitisedApplication;

@@ -26,6 +26,7 @@ interface ApplicationListItem {
   TeamPreference3?: string;
   PersonsPreference?: string;
   Version: number;
+  Status: string;
 }
 
 export type AddableApplicationListItem = AddableListItem & ApplicationListItem;

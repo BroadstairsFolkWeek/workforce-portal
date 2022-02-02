@@ -55,10 +55,17 @@ export type AddableApplication = ApplicationDto & {
   photoFileName?: string;
   identityProviderUserId: string;
   userDetails: string;
+  status:
+    | "info-required"
+    | "photo-required"
+    | "documents-required"
+    | "ready-to-submit"
+    | "complete";
 };
 
 export type UpdatableApplication = Partial<AddableApplication>;
 
 export type Application = AddableApplication & {
   dbId: number;
+  lastSaved: string;
 };
