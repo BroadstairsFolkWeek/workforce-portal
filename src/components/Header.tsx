@@ -30,9 +30,11 @@ const Header: React.FC = () => {
       <div className="sm:col-span-2 p-1 bg-black text-right">
         <div>{authPanel}</div>
       </div>
-      <div className="mx-4 my-1 h-32 bg-header-logo bg-contain bg-no-repeat bg-center"></div>
-      <div className="flex-grow p-1">
-        <h1 className="text-4xl font-black">Workforce Portal</h1>
+      <div className="mx-4 my-1 sm:my-4 h-32 bg-header-logo bg-contain bg-no-repeat bg-center"></div>
+      <div className="flex flex-grow flex-col justify-around my-1 p-1">
+        <h1 className="text-4xl sm:text-6xl font-black text-center">
+          Workforce Portal
+        </h1>
       </div>
     </div>
   );
