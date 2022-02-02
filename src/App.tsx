@@ -2,7 +2,7 @@ import React from "react";
 import { ClientPrincipalContextProvider } from "@aaronpowell/react-static-web-apps-auth";
 import { BrowserRouter } from "react-router-dom";
 
-import "./App.css";
+// import "./App.css";
 import { UserProfileContextProvider } from "./components/contexts/UserProfileContext";
 import { ClientPrincipalClaimsContextProvider } from "./components/contexts/ClientPrincipalClaimsContext";
 import Layout from "./components/Layout";
@@ -17,9 +17,9 @@ function App() {
           <ApplicationContextProvider>
             <EditApplicationContextProvider>
               <BrowserRouter>
-                <div className="App">
-                  <Layout />
-                </div>
+                {/* <div className="App"> */}
+                <Layout />
+                {/* </div> */}
               </BrowserRouter>
             </EditApplicationContextProvider>
           </ApplicationContextProvider>
