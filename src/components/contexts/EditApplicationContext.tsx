@@ -5,7 +5,8 @@ import { useApplication } from "./ApplicationContext";
 export type IEditApplicationContext = {
   application: Application | null;
   newApplication: () => void;
-  saveApplication: (application: Application) => Promise<void>;
+  editApplication: () => void;
+  saveApplication: (application: Application) => Promise<number>;
 };
 
 const invalidFunction = () => {
@@ -17,6 +18,7 @@ const invalidFunction = () => {
 const EditApplicationContext = React.createContext<IEditApplicationContext>({
   application: null,
   newApplication: invalidFunction,
+  editApplication: invalidFunction,
   saveApplication: invalidFunction,
 });
 
@@ -29,13 +31,13 @@ const EditApplicationContextProvider = ({
   const {
     application: existingApplication,
     loaded: existingApplicationLoaded,
+    setApplication: setExistingApplication,
   } = useApplication();
   const [application, setApplication] = useState<Application | null>(null);
 
   const newApplication = useCallback(async () => {
     setMode("new");
     setApplication({
-      telephone: "",
       address: "",
       emergencyContactName: "",
       emergencyContactTelephone: "",
@@ -46,16 +48,21 @@ const EditApplicationContextProvider = ({
       dbsDisclosureNumber: "",
       dbsDisclosureDate: "",
       camping: false,
-      tShirtSize: "",
-      ageGroup: "",
+      tShirtSize: undefined,
+      ageGroup: undefined,
       otherInformation: "",
-      teamPreference1: "",
-      teamPreference2: "",
       teamPreference3: "",
       personsPreference: "",
       version: 0,
     });
   }, []);
+
+  const editApplication = useCallback(() => {
+    if (existingApplication) {
+      setApplication(existingApplication);
+      setMode("edit");
+    }
+  }, [existingApplication]);
 
   useEffect(() => {
     if (mode === "edit" && existingApplicationLoaded) {
@@ -68,8 +75,33 @@ const EditApplicationContextProvider = ({
   }, [mode, existingApplication, existingApplicationLoaded, newApplication]);
 
   const saveApplication = useCallback(
-    async (editedApplication: Application) => {},
-    []
+    async (editedApplication: Application) => {
+      try {
+        const saveApplicationResponse = await fetch("/api/saveApplication", {
+          method: "POST",
+          body: JSON.stringify(editedApplication),
+        });
+
+        if (
+          saveApplicationResponse.status === 200 ||
+          saveApplicationResponse.status === 409
+        ) {
+          const savedApplication: Application =
+            await saveApplicationResponse.json();
+          if (savedApplication) {
+            setApplication(savedApplication);
+            setExistingApplication(savedApplication);
+          }
+        }
+
+        // Return the status code as a way for callers to detect different types of errors.
+        return saveApplicationResponse.status;
+      } catch (err: any) {
+        console.log(err);
+        return -1;
+      }
+    },
+    [setExistingApplication]
   );
 
   return (
@@ -77,6 +109,7 @@ const EditApplicationContextProvider = ({
       value={{
         application,
         newApplication,
+        editApplication,
         saveApplication,
       }}
     >

@@ -21,6 +21,7 @@
     "@pnp/common-commonjs": "^2.11.0",
     "@pnp/logging-commonjs": "^2.11.0",
     "@pnp/nodejs-commonjs": "^2.11.0",
-    "@pnp/sp-commonjs": "^2.11.0"
+    "@pnp/sp-commonjs": "^2.11.0",
+    "runtypes": "^6.5.0"
   }
 }

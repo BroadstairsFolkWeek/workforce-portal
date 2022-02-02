@@ -3,6 +3,7 @@ export interface WorkforcePortalConfig {
   spClientId: string;
   spClientSecret: string;
   spLoginsListGuid: string;
+  spApplicationsListGuid: string;
 }
 
 function getEnvOrThrow(envName: string): string {
@@ -18,6 +19,7 @@ const config: WorkforcePortalConfig = {
   spClientId: getEnvOrThrow("WORKFORCE_CLIENT_ID"),
   spClientSecret: getEnvOrThrow("WORKFORCE_CLIENT_SECRET"),
   spLoginsListGuid: getEnvOrThrow("WORKFORCE_LOGINS_LIST_GUID"),
+  spApplicationsListGuid: getEnvOrThrow("WORKFORCE_APPLICATIONS_LIST_GUID"),
 };
 
 export function getWorkforcePortalConfig(): Readonly<WorkforcePortalConfig> {

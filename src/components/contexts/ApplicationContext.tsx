@@ -6,18 +6,22 @@ export type IApplicationContext = {
   loaded: boolean;
   application: Application | null;
   error: string | null;
+  refresh: () => void;
+  setApplication: (application: Application) => void;
 };
 
-// const invalidFunction = () => {
-//   throw new Error(
-//     "ApplicationContext consumer is not wrapped in a corresponding provider."
-//   );
-// };
+const invalidFunction = () => {
+  throw new Error(
+    "ApplicationContext consumer is not wrapped in a corresponding provider."
+  );
+};
 
 const ApplicationContext = React.createContext<IApplicationContext>({
   loaded: false,
   application: null,
   error: null,
+  refresh: invalidFunction,
+  setApplication: invalidFunction,
 });
 
 const ApplicationContextProvider = ({
@@ -60,6 +64,8 @@ const ApplicationContextProvider = ({
         loaded,
         application,
         error,
+        refresh: fetchApplication,
+        setApplication,
       }}
     >
       {children}

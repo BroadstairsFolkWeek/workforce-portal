@@ -26,7 +26,7 @@ module.exports = {
   },
   variants: {
     extend: {
-      backgroundColor: ["odd", "even", "first", "last"],
+      backgroundColor: ["odd", "even", "first", "last", "disabled"],
       borderRadius: ["first", "last"],
       margin: ["odd", "even"],
     },
