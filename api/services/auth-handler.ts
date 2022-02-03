@@ -15,7 +15,18 @@ export const logoutHandler = (req: HttpRequest): HttpResponseContextObject => {
   return {
     status: 302,
     headers: {
-      Location: getLogoutUrl(req, config.authSignUpSignInAuthority),
+      Location: getLogoutUrl(req),
+    },
+  };
+};
+
+export const logoutStage2Handler = (
+  req: HttpRequest
+): HttpResponseContextObject => {
+  return {
+    status: 302,
+    headers: {
+      Location: getSwaLogoutUrl(req),
     },
   };
 };
@@ -44,17 +55,31 @@ const getPostLogoutUrl = (req: HttpRequest): string => {
   return new URL("/", currentFunctionsUrl).href;
 };
 
-const getLogoutUrl = (req: HttpRequest, authority: string): URL => {
-  const currentFunctionsUrl = getCurrentFunctionsUrl(req);
+const getLogoutSecondStageUrl = (req: HttpRequest): URL => {
+  const currentFunctionsUrl = getCurrentFunctionsHref(req);
+  return new URL("/api/logoutStage2", currentFunctionsUrl);
+};
 
-  let logoutUrl: URL;
+// Generate the URL needed to log the user out from the configured identity provider, noted via the configured
+// Sign-Up-Sign-In authority. If authority is set to 'local' then rely only on the standard SWA logout URL.
+const getLogoutUrl = (req: HttpRequest): URL => {
+  const authority = config.authSignUpSignInAuthority;
 
-  if (currentFunctionsUrl.hostname === "localhost") {
-    logoutUrl = new URL("/.auth/logout", currentFunctionsUrl);
+  if (authority === "local") {
+    return getSwaLogoutUrl(req);
   } else {
-    logoutUrl = new URL(authority + "/oauth2/v2.0/logout");
+    const logoutUrl = new URL(authority + "/oauth2/v2.0/logout");
+    logoutUrl.searchParams.append(
+      "redirect_uri",
+      getLogoutSecondStageUrl(req).href
+    );
+    return logoutUrl;
   }
+};
 
+const getSwaLogoutUrl = (req: HttpRequest): URL => {
+  const currentFunctionsUrl = getCurrentFunctionsUrl(req);
+  const logoutUrl = new URL("/.auth/logout", currentFunctionsUrl);
   logoutUrl.searchParams.append("redirect_uri", getPostLogoutUrl(req));
   return logoutUrl;
 };
