@@ -1,4 +1,4 @@
-import { PropsWithChildren, useCallback, useState } from "react";
+import { PropsWithChildren, useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Application } from "../interfaces/application";
 import ApplicationControls from "./ApplicationControls";
@@ -49,9 +49,11 @@ const ApplicationFooter = ({
 
 const ApplicationDisplayPanel: React.FC = () => {
   const navigate = useNavigate();
-  const { newApplication, editApplication } = useEditApplication();
+  const { newApplication, editApplication, deleteApplication } =
+    useEditApplication();
   const { loaded: applicationLoaded, application } = useApplication();
   const [processing, setProcessing] = useState(false);
+  const [deleteErrorCode, setDeleteErrorCode] = useState(204);
 
   const newApplicationHandler = useCallback(() => {
     setProcessing(true);
@@ -67,10 +69,14 @@ const ApplicationDisplayPanel: React.FC = () => {
     setProcessing(false);
   }, [editApplication, navigate]);
 
-  const deleteItemHandler = useCallback(() => {
+  const deleteItemHandler = useCallback(async () => {
+    console.log("Deleting item...");
     setProcessing(true);
+    const deleteStatusCode = await deleteApplication();
+    console.log("Setting deleteErrorCode to " + deleteStatusCode);
+    setDeleteErrorCode(deleteStatusCode);
     setProcessing(false);
-  }, []);
+  }, [deleteApplication]);
 
   const uploadDocumentsHandler = useCallback(() => {
     setProcessing(true);
@@ -85,9 +91,7 @@ const ApplicationDisplayPanel: React.FC = () => {
   const editButtonClickedHandler: React.MouseEventHandler<HTMLButtonElement> =
     useCallback(
       (ev) => {
-        // Stop event propagation since we also have a click handler on the whole ApplicationListItem component.
         ev.stopPropagation();
-
         editItemHandler();
       },
       [editItemHandler]
@@ -96,9 +100,7 @@ const ApplicationDisplayPanel: React.FC = () => {
   const deleteButtonClickedHandler: React.MouseEventHandler<HTMLButtonElement> =
     useCallback(
       (ev) => {
-        // Stop event propagation since we also have a click handler on the whole ApplicationListItem component.
         ev.stopPropagation();
-
         deleteItemHandler();
       },
       [deleteItemHandler]
@@ -107,9 +109,7 @@ const ApplicationDisplayPanel: React.FC = () => {
   const uploadButtonClickedHandler: React.MouseEventHandler<HTMLButtonElement> =
     useCallback(
       (ev) => {
-        // Stop event propagation since we also have a click handler on the whole ApplicationListItem component.
         ev.stopPropagation();
-
         uploadDocumentsHandler();
       },
       [uploadDocumentsHandler]
@@ -118,13 +118,38 @@ const ApplicationDisplayPanel: React.FC = () => {
   const submitButtonClickedHandler: React.MouseEventHandler<HTMLButtonElement> =
     useCallback(
       (ev) => {
-        // Stop event propagation since we also have a click handler on the whole ApplicationListItem component.
         ev.stopPropagation();
-
         submitItemHandler();
       },
       [submitItemHandler]
     );
+
+  const errorComponent = useMemo(() => {
+    if (deleteErrorCode !== 204) {
+      switch (deleteErrorCode) {
+        case 409:
+          return (
+            <div className="p-4 bg-red-100 overflow-hidden">
+              <p>
+                Your workforce application form appears to have been updated on
+                a different device. Please refresh this page and try again.
+              </p>
+            </div>
+          );
+
+        case 404:
+        default:
+          return (
+            <div className="p-4 bg-red-100 overflow-hidden">
+              <p>
+                There was a problem deleting your workforce application. Please
+                refresh this page and try again.
+              </p>
+            </div>
+          );
+      }
+    }
+  }, [deleteErrorCode]);
 
   if (applicationLoaded) {
     if (application) {
@@ -196,6 +221,7 @@ const ApplicationDisplayPanel: React.FC = () => {
             <div className="py-4 pr-2 w-40">{controlsComponent}</div>
           </div>
 
+          {errorComponent}
           <ApplicationFooter application={application} />
         </div>
       );

@@ -7,7 +7,7 @@ export type IApplicationContext = {
   application: Application | null;
   error: string | null;
   refresh: () => void;
-  setApplication: (application: Application) => void;
+  setApplication: (application: Application | null) => void;
 };
 
 const invalidFunction = () => {

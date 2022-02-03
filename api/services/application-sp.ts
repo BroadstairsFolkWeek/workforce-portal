@@ -3,9 +3,13 @@ import {
   AddableApplicationListItem,
   PersistedApplicationListItem,
 } from "../interfaces/application-sp";
-import { AddableListItem } from "../interfaces/sp-items";
 import { getWorkforcePortalConfig } from "./configuration-service";
-import { applyToItemsByFilter, createItem, updateItem } from "./sp-service";
+import {
+  applyToItemsByFilter,
+  createItem,
+  deleteItem,
+  updateItem,
+} from "./sp-service";
 
 const workforcePortalConfig = getWorkforcePortalConfig();
 const workforceSiteUrl = workforcePortalConfig.spSiteUrl;
@@ -111,16 +115,6 @@ const listItemToApplication = (
   };
 };
 
-const setOnListItemIfDefined = <T extends AddableListItem>(
-  listItem: T,
-  column: keyof T,
-  value: any
-) => {
-  if (value !== undefined) {
-    listItem[column] = value;
-  }
-};
-
 const addableApplicationToListItem = (
   application: AddableApplication
 ): AddableApplicationListItem => {
@@ -187,4 +181,10 @@ export const createApplicationListItem = async (
     addableApplicationToListItem(application)
   );
   return listItemToApplication(addResult.data);
+};
+
+export const deleteApplicationListItem = async (
+  application: Application
+): Promise<void> => {
+  return deleteItem(workforceSiteUrl, applicationsListGuid, application.dbId);
 };

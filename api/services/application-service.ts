@@ -3,6 +3,7 @@ import { AddableApplication, Application } from "../interfaces/application";
 import { UserLogin } from "../interfaces/user-login";
 import {
   createApplicationListItem,
+  deleteApplicationListItem,
   getUserApplication,
   updateApplicationListItem,
 } from "./application-sp";
@@ -130,5 +131,23 @@ export const saveApplication = async (
     }
   } else {
     return createApplicationListItem({ ...addableApplication, version: 1 });
+  }
+};
+
+export const deleteApplication = async (
+  userInfo: UserInfo,
+  applicationVersion: number
+): Promise<void> => {
+  // Retrieve any application the user may have already saved.
+  const existingApplication = await getUserApplication(userInfo.userId!);
+
+  if (applicationVersion !== existingApplication?.version) {
+    throw new ApplicationServiceError("version-conflict");
+  }
+
+  if (existingApplication) {
+    await deleteApplicationListItem(existingApplication);
+  } else {
+    throw new ApplicationServiceError("application-not-found");
   }
 };

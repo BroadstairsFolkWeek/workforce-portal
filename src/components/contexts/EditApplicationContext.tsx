@@ -7,6 +7,7 @@ export type IEditApplicationContext = {
   newApplication: () => void;
   editApplication: () => void;
   saveApplication: (application: Application) => Promise<number>;
+  deleteApplication: () => Promise<number>;
 };
 
 const invalidFunction = () => {
@@ -20,6 +21,7 @@ const EditApplicationContext = React.createContext<IEditApplicationContext>({
   newApplication: invalidFunction,
   editApplication: invalidFunction,
   saveApplication: invalidFunction,
+  deleteApplication: invalidFunction,
 });
 
 const EditApplicationContextProvider = ({
@@ -97,6 +99,25 @@ const EditApplicationContextProvider = ({
     [setExistingApplication]
   );
 
+  const deleteApplication = useCallback(async () => {
+    try {
+      const deleteApplicationResponse = await fetch("/api/deleteApplication", {
+        method: "POST",
+        body: JSON.stringify({ version: existingApplication?.version }),
+      });
+
+      if (deleteApplicationResponse.status === 204) {
+        setApplication(null);
+        setExistingApplication(null);
+      }
+
+      return deleteApplicationResponse.status;
+    } catch (err: any) {
+      console.log(err);
+      return -1;
+    }
+  }, [existingApplication, setExistingApplication]);
+
   return (
     <EditApplicationContext.Provider
       value={{
@@ -104,6 +125,7 @@ const EditApplicationContextProvider = ({
         newApplication,
         editApplication,
         saveApplication,
+        deleteApplication,
       }}
     >
       {children}
