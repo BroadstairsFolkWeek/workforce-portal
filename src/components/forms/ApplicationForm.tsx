@@ -160,13 +160,13 @@ const ApplicationForm: React.FC = () => {
                   <TextInput
                     name="dbsDisclosureNumber"
                     label="DBS disclosure number"
-                    description="Only needed if applyiny to join the Children's Team"
+                    description="Only needed if applying to join the Children's Team"
                     type="text"
                   />
                   <TextInput
                     name="dbsDisclosureDate"
                     label="DBS disclosure date"
-                    description="Only needed if applyiny to join the Children's Team"
+                    description="Only needed if applying to join the Children's Team"
                     type="text"
                   />
                 </div>
