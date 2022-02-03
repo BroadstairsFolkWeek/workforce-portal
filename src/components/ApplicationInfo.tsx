@@ -53,11 +53,8 @@ const addMultilineDescriptionComponents = (
 ) => {
   if (application[property] !== undefined) {
     descriptionComponents.push(
-      <div className="my-2">
-        <div
-          className="block overflow-hidden whitespace-nowrap"
-          key={descriptionComponents.length}
-        >
+      <div key={descriptionComponents.length} className="my-2">
+        <div className="block overflow-hidden whitespace-nowrap">
           {formFieldDescriptions[property]}:
         </div>
         <div className="block " key={descriptionComponents.length}>
