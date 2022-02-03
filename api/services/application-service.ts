@@ -125,7 +125,7 @@ export const saveApplication = async (
       // have saved the application from another device.
       throw new ApplicationServiceError(
         "version-conflict",
-        existingApplication
+        `Existing version: ${existingApplication.version}. Saving version: ${addableApplication.version}.`
       );
     }
   } else {

@@ -6,16 +6,26 @@ import {
   saveApplication,
 } from "../services/application-service";
 import { getUserProfile, isUserServiceError } from "../services/user-service";
-import { setLoggerFromContext } from "../utilties/logging";
+import {
+  logError,
+  logInfo,
+  logTrace,
+  setLoggerFromContext,
+} from "../utilties/logging";
 
 const httpTrigger: AzureFunction = async function (
   context: Context,
   req: HttpRequest
 ): Promise<void> {
   setLoggerFromContext(context);
+  logTrace("saveApplication: entry");
 
   const userInfo = getUserInfo(req);
   if (userInfo) {
+    logTrace(
+      `saveApplication: User is authenticated. User ID: ${userInfo.userId}/${userInfo.identityProvider}`
+    );
+
     try {
       const userProfile = await getUserProfile(userInfo);
       if (userProfile) {
@@ -29,6 +39,9 @@ const httpTrigger: AzureFunction = async function (
         );
         context.res = { status: 200, body: savedApplication };
       } else {
+        logError(
+          `saveApplication: User profile does not exist for authenticated user. User ID: ${userInfo.userId}/${userInfo.identityProvider}`
+        );
         context.res = {
           status: 404,
           body: "User Profile does not exist, cannot save application.",
@@ -36,28 +49,52 @@ const httpTrigger: AzureFunction = async function (
       }
     } catch (err) {
       if (isUserServiceError(err)) {
-        switch (err.error) {
-          case "unauthenticated":
-            context.res = {
-              status: 401,
-              body: "Cannot save application when not authenticated.",
-            };
-            break;
+        if (err.error === "unauthenticated") {
+          logTrace(`saveApplication: User is not authenticated.`);
+          context.res = {
+            status: 401,
+            body: "Cannot save application when not authenticated.",
+          };
+        } else {
+          logError(
+            `saveApplication: Unrecognised user service error: ${
+              err.error
+            } - ${err.arg1?.toString()}`
+          );
+          context.res = {
+            status: 500,
+            body: "Unknown user service error",
+          };
         }
       } else if (isApplicationServiceError(err)) {
-        switch (err.error) {
-          case "version-conflict":
-            context.res = {
-              status: 409,
-              body: err.arg1,
-            };
-            break;
+        if (err.error === "version-conflict") {
+          logInfo(
+            `saveApplication: Version conflict: ${
+              err.error
+            } - ${err.arg1?.toString()}`
+          );
+          context.res = {
+            status: 409,
+            body: "Version conflict. The application you are editing appears to have already been updated.",
+          };
+        } else {
+          logError(
+            `saveApplication: Unrecognised application service error: ${
+              err.error
+            } - ${err.arg1?.toString()}`
+          );
+          context.res = {
+            status: 500,
+            body: "Unknown application service error",
+          };
         }
       } else {
+        logError(`saveApplication: Unknown error: ${err.message}`);
         throw err;
       }
     }
   } else {
+    logTrace(`saveApplication: User is not authenticated.`);
     context.res = {
       status: 401,
       body: "Cannot save application when not authenticated.",
