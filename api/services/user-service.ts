@@ -1,11 +1,6 @@
 import { UserInfo } from "@aaronpowell/static-web-apps-api-auth";
 import { Claim } from "../interfaces/claim";
-import {
-  AddableUserLogin,
-  UpdatableUserLogin,
-  UserLogin,
-} from "../interfaces/user-login";
-import { logInfo } from "../utilties/logging";
+import { AddableUserLogin, UserLogin } from "../interfaces/user-login";
 import {
   createUserListItem,
   getUserLogin,
@@ -55,7 +50,7 @@ const extractOrThrowEmail = (claims: Claim[]): string => {
 export const updateUserClaims = async (
   userInfo: UserInfo,
   claims: Claim[]
-): Promise<void> => {
+): Promise<UserLogin> => {
   if (!userInfo || !userInfo.userId || !userInfo.userDetails) {
     throw new UserServiceError("unauthenticated");
   }
@@ -80,7 +75,7 @@ export const updateUserClaims = async (
       email: extractOrThrowEmail(claims),
     };
 
-    await updateUserListItem(updatedUserLogin);
+    return updateUserListItem(updatedUserLogin);
   } else {
     const newUserLogin: AddableUserLogin = {
       userDetails: userInfo.userDetails,
@@ -100,7 +95,7 @@ export const updateUserClaims = async (
       email: extractOrThrowEmail(claims),
     };
 
-    await createUserListItem(newUserLogin);
+    return createUserListItem(newUserLogin);
   }
 };
 

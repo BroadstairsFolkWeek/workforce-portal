@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { UserLogin } from "../../../api/interfaces/user-login";
 import { useClientPrincipalClaims } from "./ClientPrincipalClaimsContext";
 
@@ -29,41 +29,44 @@ const UserProfileContextProvider = ({
 }: {
   children: JSX.Element;
 }) => {
-  const { claims } = useClientPrincipalClaims();
+  const { claims, loaded: claimsLoaded } = useClientPrincipalClaims();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loaded, setLoaded] = useState(false);
 
-  const fetchProfile = useCallback(async () => {
-    try {
-      const res = await fetch("/api/profile");
-      if (res.ok) {
-        setUserProfile(await res.json());
-      }
-    } catch (e) {
-      if (window.location.hostname === "localhost") {
-        console.warn(
-          "Can't access the profile endpoint. For local development, please use the Static Web Apps CLI to emulate authentication: https://github.com/azure/static-web-apps-cli"
-        );
+  useEffect(() => {
+    if (claimsLoaded) {
+      if (claims.length) {
+        fetch("/api/notifyPrincipalClaims", {
+          method: "POST",
+          body: JSON.stringify(claims),
+        })
+          .then((res) => {
+            if (res.ok) {
+              res
+                .json()
+                .then((profile) => {
+                  setUserProfile(profile);
+                  setLoaded(true);
+                })
+                .catch((err) => {
+                  // Non-success response. Assume the user is not authenticated.
+                  setLoaded(true);
+                });
+            } else {
+              // Non-success response. Assume the user is not authenticated.
+              setLoaded(true);
+            }
+          })
+          .catch((err) => {
+            // Non-success response. Assume the user is not authenticated.
+            setLoaded(true);
+          });
       } else {
-        console.error(`Failed to unpack user profile from JSON.`, e);
+        // No claims to load, assume the user is not authenticated.
+        setLoaded(true);
       }
     }
-
-    setLoaded(true);
-  }, []);
-
-  useEffect(() => {
-    fetchProfile();
-  }, [fetchProfile]);
-
-  useEffect(() => {
-    if (claims.length) {
-      fetch("/api/notifyPrincipalClaims", {
-        method: "POST",
-        body: JSON.stringify(claims),
-      }).then(() => fetchProfile);
-    }
-  }, [claims, fetchProfile]);
+  }, [claims, claimsLoaded]);
 
   return (
     <UserProfileContext.Provider value={{ loaded, userProfile }}>

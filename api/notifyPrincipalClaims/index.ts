@@ -39,10 +39,10 @@ const httpTrigger: AzureFunction = async function (
     const claims = req.body as Claim[];
 
     try {
-      await updateUserClaims(userInfo, claims);
+      const userProfile = await updateUserClaims(userInfo, claims);
 
       context.res = {
-        status: 201,
+        body: userProfile,
       };
     } catch (err) {
       if (isUserServiceError(err)) {
