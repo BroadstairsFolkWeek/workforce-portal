@@ -68,10 +68,11 @@ export const updateUserClaims = async (
         claims,
         "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname"
       ),
-      identityProvider: extractClaimOrThrow(
-        claims,
-        "http://schemas.microsoft.com/identity/claims/identityprovider"
-      ),
+      identityProvider:
+        extractClaim(
+          claims,
+          "http://schemas.microsoft.com/identity/claims/identityprovider"
+        ) ?? "email",
       email: extractOrThrowEmail(claims),
     };
 
@@ -88,10 +89,12 @@ export const updateUserClaims = async (
         claims,
         "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname"
       ),
-      identityProvider: extractClaimOrThrow(
-        claims,
-        "http://schemas.microsoft.com/identity/claims/identityprovider"
-      ),
+      identityProvider:
+        extractClaim(
+          claims,
+          "http://schemas.microsoft.com/identity/claims/identityprovider"
+        ) ?? "email",
+
       email: extractOrThrowEmail(claims),
     };
 
