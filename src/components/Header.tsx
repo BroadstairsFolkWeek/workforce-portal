@@ -8,7 +8,7 @@ const Header: React.FC = () => {
   if (loaded) {
     if (userProfile) {
       authPanel = (
-        <a className="m-1 p-1 text-bfw-link" href="/.auth/logout">
+        <a className="m-1 p-1 text-bfw-link" href="/api/logout">
           Sign Out {userProfile.userDetails}
         </a>
       );

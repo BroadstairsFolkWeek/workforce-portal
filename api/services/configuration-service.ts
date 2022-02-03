@@ -4,6 +4,7 @@ export interface WorkforcePortalConfig {
   spClientSecret: string;
   spLoginsListGuid: string;
   spApplicationsListGuid: string;
+  authSignUpSignInAuthority: string;
 }
 
 function getEnvOrThrow(envName: string): string {
@@ -20,6 +21,7 @@ const config: WorkforcePortalConfig = {
   spClientSecret: getEnvOrThrow("WORKFORCE_CLIENT_SECRET"),
   spLoginsListGuid: getEnvOrThrow("WORKFORCE_LOGINS_LIST_GUID"),
   spApplicationsListGuid: getEnvOrThrow("WORKFORCE_APPLICATIONS_LIST_GUID"),
+  authSignUpSignInAuthority: getEnvOrThrow("SIGN_UP_SIGN_IN_AUTHORITY"),
 };
 
 export function getWorkforcePortalConfig(): Readonly<WorkforcePortalConfig> {

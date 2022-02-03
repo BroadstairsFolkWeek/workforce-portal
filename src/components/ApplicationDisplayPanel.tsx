@@ -190,7 +190,7 @@ const ApplicationDisplayPanel: React.FC = () => {
           </ApplicationHeader>
 
           <div className="flex flex-row">
-            <div className="p-4 overflow-hidden">
+            <div className="p-4 flex-grow overflow-hidden">
               <ApplicationInfo application={application} />
             </div>
             <div className="py-4 pr-2 w-40">{controlsComponent}</div>
