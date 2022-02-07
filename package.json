@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@aaronpowell/react-static-web-apps-auth": "^1.2.1",
-    "@fluentui/react": "^8.46.0",
+    "@fluentui/react": "^8.52.3",
     "@tailwindcss/forms": "^0.3.4",
     "formik": "^2.2.9",
     "luxon": "^2.2.0",
