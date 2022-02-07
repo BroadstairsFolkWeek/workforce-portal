@@ -107,7 +107,9 @@ export const saveApplication = async (
   userProfile: UserLogin
 ): Promise<Application> => {
   // Retrieve any application the user may have already saved.
-  const existingApplication = await getUserApplication(userProfile.userId);
+  const existingApplication = await getUserApplication(
+    userProfile.identityProviderUserId
+  );
 
   if (existingApplication) {
     // If an application exists then we can update it as long as the version numbers match.

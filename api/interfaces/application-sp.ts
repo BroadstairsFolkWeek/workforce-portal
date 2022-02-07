@@ -20,13 +20,13 @@ interface ApplicationListItem {
   AgeGroup?: string;
   OtherInformation?: string;
   PhotoFileName?: string;
-  IdentityProviderUserId: string;
   TeamPreference1?: string;
   TeamPreference2?: string;
   TeamPreference3?: string;
   PersonsPreference?: string;
   Version: number;
   Status: string;
+  IdentityProviderUserId: string;
 }
 
 export type AddableApplicationListItem = AddableListItem & ApplicationListItem;

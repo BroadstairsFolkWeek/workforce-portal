@@ -49,12 +49,28 @@ const loginsList: PopulateListDef = {
         text: {},
       },
       {
+        name: "IdentityProviderUserDetails",
+        displayName: "Identity Provider User Details",
+        indexed: true,
+        required: true,
+        enforceUniqueValues: true,
+        text: {},
+      },
+      {
         name: "IdentityProvider",
         displayName: "Identity Provider",
         indexed: true,
         required: true,
         enforceUniqueValues: false,
         text: {},
+      },
+      {
+        name: "PhotoRequired",
+        displayName: "Photo Required",
+        indexed: true,
+        required: true,
+        enforceUniqueValues: false,
+        boolean: {},
       },
     ]),
 };

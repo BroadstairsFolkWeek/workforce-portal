@@ -6,10 +6,12 @@ import {
 
 interface UserLoginListItem {
   Title: string;
-  Email: string;
-  GivenName: string;
-  Surname: string;
+  Email?: string;
+  GivenName?: string;
+  Surname?: string;
+  PhotoRequired: boolean;
   IdentityProviderUserId: string;
+  IdentityProviderUserDetails;
   IdentityProvider: string;
 }
 

@@ -1,10 +1,12 @@
 export type AddableUserLogin = {
-  userDetails: string;
-  userId: string;
+  displayName: string;
+  email?: string;
+  givenName?: string;
+  surname?: string;
+  photoRequired: boolean;
   identityProvider: string;
-  email: string;
-  givenName: string;
-  surname: string;
+  identityProviderUserId: string;
+  identityProviderUserDetails: string;
 };
 
 export type UpdatableUserLogin = Partial<AddableUserLogin>;

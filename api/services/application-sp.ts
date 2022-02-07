@@ -88,6 +88,7 @@ const listItemToApplication = (
   item: PersistedApplicationListItem
 ): Application => {
   return {
+    title: item.Title,
     telephone: item.Telephone ?? undefined,
     address: item.Address ?? undefined,
     emergencyContactName: item.EmergencyContactName ?? undefined,
@@ -108,7 +109,6 @@ const listItemToApplication = (
     personsPreference: item.PersonsPreference ?? undefined,
     version: item.Version,
     identityProviderUserId: item.IdentityProviderUserId,
-    userDetails: item.Title,
     dbId: item.ID,
     lastSaved: item.Modified,
     status: listItemToStatus(item),
@@ -119,7 +119,7 @@ const addableApplicationToListItem = (
   application: AddableApplication
 ): AddableApplicationListItem => {
   const listItem: AddableApplicationListItem = {
-    Title: application.userDetails,
+    Title: application.title,
     IdentityProviderUserId: application.identityProviderUserId,
     Version: application.version,
     Status: application.status,

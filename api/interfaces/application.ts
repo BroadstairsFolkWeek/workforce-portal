@@ -52,9 +52,9 @@ export const ApplicationDtoRunType = Record({
 export type ApplicationDto = Static<typeof ApplicationDtoRunType>;
 
 export type AddableApplication = ApplicationDto & {
+  title: string;
   photoFileName?: string;
   identityProviderUserId: string;
-  userDetails: string;
   status:
     | "info-required"
     | "photo-required"

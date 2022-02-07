@@ -1,6 +1,7 @@
 import { UserInfo } from "@aaronpowell/static-web-apps-api-auth";
 import { Claim } from "../interfaces/claim";
 import { AddableUserLogin, UserLogin } from "../interfaces/user-login";
+import { getGraphUser } from "./users-graph";
 import {
   createUserListItem,
   getUserLogin,
@@ -42,9 +43,9 @@ const extractClaimOrThrow = (claims: Claim[], claimType: string): string => {
   return claim;
 };
 
-const extractOrThrowEmail = (claims: Claim[]): string => {
-  const emails = extractClaimOrThrow(claims, "emails");
-  return emails.split(",")[0];
+const extractEmail = (claims: Claim[]): string | undefined => {
+  const emails = extractClaim(claims, "emails");
+  return emails ? emails.split(",")[0] : undefined;
 };
 
 export const updateUserClaims = async (
@@ -55,47 +56,55 @@ export const updateUserClaims = async (
     throw new UserServiceError("unauthenticated");
   }
 
+  const claimedIdentityProvider =
+    extractClaim(
+      claims,
+      "http://schemas.microsoft.com/identity/claims/identityprovider"
+    ) ?? "email";
+  const claimedGivenName = extractClaim(
+    claims,
+    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname"
+  );
+  const claimedSurname = extractClaim(
+    claims,
+    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname"
+  );
+
+  const claimedEmail = extractEmail(claims);
+
   const userLogin = await getUserLogin(userInfo.userId);
   if (userLogin) {
     const updatedUserLogin: UserLogin = {
       ...userLogin,
-      userDetails: userInfo.userDetails,
-      givenName: extractClaimOrThrow(
-        claims,
-        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname"
-      ),
-      surname: extractClaimOrThrow(
-        claims,
-        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname"
-      ),
-      identityProvider:
-        extractClaim(
-          claims,
-          "http://schemas.microsoft.com/identity/claims/identityprovider"
-        ) ?? "email",
-      email: extractOrThrowEmail(claims),
     };
+
+    if (claimedIdentityProvider !== userLogin.identityProvider) {
+      updatedUserLogin.identityProvider = claimedIdentityProvider;
+    }
+
+    if (claimedGivenName !== userLogin.givenName) {
+      updatedUserLogin.givenName = claimedGivenName;
+    }
+
+    if (claimedSurname !== userLogin.surname) {
+      updatedUserLogin.surname = claimedSurname;
+    }
+
+    if (claimedEmail !== userLogin.email) {
+      updatedUserLogin.email = claimedEmail;
+    }
 
     return updateUserListItem(updatedUserLogin);
   } else {
     const newUserLogin: AddableUserLogin = {
-      userDetails: userInfo.userDetails,
-      userId: userInfo.userId,
-      givenName: extractClaimOrThrow(
-        claims,
-        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname"
-      ),
-      surname: extractClaimOrThrow(
-        claims,
-        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname"
-      ),
-      identityProvider:
-        extractClaim(
-          claims,
-          "http://schemas.microsoft.com/identity/claims/identityprovider"
-        ) ?? "email",
-
-      email: extractOrThrowEmail(claims),
+      displayName: userInfo.userDetails,
+      identityProviderUserId: userInfo.userId,
+      identityProviderUserDetails: userInfo.userDetails,
+      givenName: claimedGivenName,
+      surname: claimedSurname,
+      identityProvider: claimedIdentityProvider,
+      email: claimedEmail,
+      photoRequired: true,
     };
 
     return createUserListItem(newUserLogin);
@@ -109,5 +118,28 @@ export const getUserProfile = async (
     throw new UserServiceError("unauthenticated");
   }
 
-  return getUserLogin(userInfo.userId);
+  const userLogin = await getUserLogin(userInfo.userId);
+  if (userLogin) {
+    return userLogin;
+  }
+
+  const graphUser = await getGraphUser(userInfo.userId);
+  console.log(JSON.stringify(graphUser, null, 2));
+
+  if (graphUser && graphUser.identityProvider) {
+    const newUserLogin: AddableUserLogin = {
+      displayName: graphUser.displayName ?? "unknown",
+      identityProviderUserId: userInfo.userId,
+      identityProviderUserDetails: userInfo.userDetails ?? "unknown",
+      givenName: graphUser.givenName,
+      surname: graphUser.surname,
+      email: graphUser.email,
+      identityProvider: graphUser.identityProvider,
+      photoRequired: true,
+    };
+
+    return createUserListItem(newUserLogin);
+  } else {
+    return null;
+  }
 };

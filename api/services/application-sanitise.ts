@@ -32,8 +32,8 @@ export const sanitiseApplicationFromApiClient = (
     personsPreference: applicationDto.personsPreference,
     version: applicationDto.version,
 
-    identityProviderUserId: userLogin.userId,
-    userDetails: userLogin.userDetails,
+    identityProviderUserId: userLogin.identityProviderUserId,
+    title: userLogin.displayName,
     status: "info-required",
   };
 

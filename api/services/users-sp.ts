@@ -57,12 +57,14 @@ export const getUsersByFilters = async (
 
 const listItemToUserLogin = (item: PersistedUserLoginListItem): UserLogin => {
   return {
-    userId: item.IdentityProviderUserId,
-    identityProvider: item.IdentityProvider,
     email: item.Email,
-    userDetails: item.Title,
+    displayName: item.Title,
     givenName: item.GivenName,
     surname: item.Surname,
+    photoRequired: item.PhotoRequired,
+    identityProvider: item.IdentityProvider,
+    identityProviderUserId: item.IdentityProviderUserId,
+    identityProviderUserDetails: item.IdentityProviderUserDetails,
     dbId: item.ID,
   };
 };
@@ -71,11 +73,13 @@ const addableUserLoginToListItem = (
   user: AddableUserLogin
 ): AddableUserLoginListItem => {
   return {
-    Title: user.userDetails,
-    IdentityProvider: user.identityProvider,
-    IdentityProviderUserId: user.userId,
+    Title: user.displayName,
     Email: user.email,
     GivenName: user.givenName,
     Surname: user.surname,
+    PhotoRequired: user.photoRequired,
+    IdentityProvider: user.identityProvider,
+    IdentityProviderUserId: user.identityProviderUserId,
+    IdentityProviderUserDetails: user.identityProviderUserDetails,
   };
 };
