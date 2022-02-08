@@ -44,14 +44,6 @@ const extractClaim = (
   return claims.find((c) => c.typ === claimType)?.val ?? undefined;
 };
 
-const extractClaimOrThrow = (claims: Claim[], claimType: string): string => {
-  const claim = extractClaim(claims, claimType);
-  if (!claim) {
-    throw new UserServiceError("missing-claim", claimType);
-  }
-  return claim;
-};
-
 const extractEmail = (claims: Claim[]): string | undefined => {
   const emails = extractClaim(claims, "emails");
   return emails ? emails.split(",")[0] : undefined;
@@ -121,23 +113,18 @@ export const updateUserClaims = async (
   }
 };
 
-export const getUserProfile = async (
+const getUserProfilePropertiesFromGraph = async (
   userInfo: UserInfo
-): Promise<UserLogin | null> => {
+): Promise<AddableUserLogin | null> => {
   if (!userInfo || !userInfo.userId) {
     throw new UserServiceError("unauthenticated");
-  }
-
-  const userLogin = await getUserLogin(userInfo.userId);
-  if (userLogin) {
-    return userLogin;
   }
 
   const graphUser = await getGraphUser(userInfo.userId);
   console.log(JSON.stringify(graphUser, null, 2));
 
   if (graphUser && graphUser.identityProvider) {
-    const newUserLogin: AddableUserLogin = {
+    const userLoginFromGraph: AddableUserLogin = {
       displayName: graphUser.displayName ?? "unknown",
       identityProviderUserId: userInfo.userId,
       identityProviderUserDetails: userInfo.userDetails ?? "unknown",
@@ -148,10 +135,62 @@ export const getUserProfile = async (
       photoRequired: true,
       version: 1,
     };
-
-    return createUserListItem(newUserLogin);
+    return userLoginFromGraph;
   } else {
     return null;
+  }
+};
+
+export const getUserProfile = async (
+  userInfo: UserInfo
+): Promise<UserLogin | null> => {
+  if (!userInfo || !userInfo.userId) {
+    throw new UserServiceError("unauthenticated");
+  }
+
+  const userLogin = await getUserLogin(userInfo.userId);
+  if (userLogin) {
+    // Check and populate any missing mandatory properties on the user profile.
+    if (!userLogin.identityProvider || !userLogin.identityProviderUserDetails) {
+      const graphUser = await getUserProfilePropertiesFromGraph(userInfo);
+      if (graphUser && graphUser.identityProvider) {
+        const updatingUserLogin: UserLogin = {
+          ...userLogin,
+        };
+
+        if (!userLogin.identityProvider) {
+          updatingUserLogin.identityProvider = graphUser.identityProvider;
+        }
+
+        if (!userLogin.identityProviderUserDetails) {
+          updatingUserLogin.identityProviderUserDetails =
+            graphUser.identityProviderUserDetails;
+        }
+
+        return updateUserListItem(updatingUserLogin);
+      }
+    }
+
+    return userLogin;
+  } else {
+    const graphUser = await getUserProfilePropertiesFromGraph(userInfo);
+    if (graphUser && graphUser.identityProvider) {
+      const newUserLogin: AddableUserLogin = {
+        displayName: graphUser.displayName ?? "unknown",
+        identityProviderUserId: userInfo.userId,
+        identityProviderUserDetails: userInfo.userDetails ?? "unknown",
+        givenName: graphUser.givenName,
+        surname: graphUser.surname,
+        email: graphUser.email,
+        identityProvider: graphUser.identityProvider,
+        photoRequired: true,
+        version: 1,
+      };
+
+      return createUserListItem(newUserLogin);
+    } else {
+      return null;
+    }
   }
 };
 
