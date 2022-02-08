@@ -72,6 +72,24 @@ const loginsList: PopulateListDef = {
         enforceUniqueValues: false,
         boolean: {},
       },
+      {
+        name: "Telephone",
+        indexed: false,
+        required: false,
+        enforceUniqueValues: false,
+        text: {},
+      },
+      {
+        name: "Address",
+        indexed: false,
+        required: false,
+        enforceUniqueValues: false,
+        text: {
+          allowMultipleLines: true,
+          linesForEditing: 5,
+        },
+      },
+      { name: "Version", index: false, required: true, number: {} },
     ]),
 };
 

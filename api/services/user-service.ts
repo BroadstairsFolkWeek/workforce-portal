@@ -1,6 +1,10 @@
 import { UserInfo } from "@aaronpowell/static-web-apps-api-auth";
 import { Claim } from "../interfaces/claim";
-import { AddableUserLogin, UserLogin } from "../interfaces/user-login";
+import {
+  AddableUserLogin,
+  UpdatableUserLogin,
+  UserLogin,
+} from "../interfaces/user-login";
 import { getGraphUser } from "./users-graph";
 import {
   createUserListItem,
@@ -11,14 +15,19 @@ import {
 const USER_SERVICE_ERROR_TYPE_VAL =
   "user-service-error-d992f06a-75df-478c-a169-ec4024b48092";
 
-type UserServiceErrorType = "unauthenticated" | "missing-claim";
+type UserServiceErrorType =
+  | "unauthenticated"
+  | "missing-claim"
+  | "version-conflict"
+  | "missing-user-profile";
+
 export class UserServiceError {
   private type: typeof USER_SERVICE_ERROR_TYPE_VAL =
     USER_SERVICE_ERROR_TYPE_VAL;
   public error: UserServiceErrorType;
-  public arg1: string | null;
+  public arg1: any | null;
 
-  constructor(error: UserServiceErrorType, arg1?: string) {
+  constructor(error: UserServiceErrorType, arg1?: any) {
     this.error = error;
     this.arg1 = arg1 ?? null;
   }
@@ -105,6 +114,7 @@ export const updateUserClaims = async (
       identityProvider: claimedIdentityProvider,
       email: claimedEmail,
       photoRequired: true,
+      version: 1,
     };
 
     return createUserListItem(newUserLogin);
@@ -136,10 +146,38 @@ export const getUserProfile = async (
       email: graphUser.email,
       identityProvider: graphUser.identityProvider,
       photoRequired: true,
+      version: 1,
     };
 
     return createUserListItem(newUserLogin);
   } else {
     return null;
+  }
+};
+
+export const updateUserProfile = async (
+  updatableProfile: UpdatableUserLogin,
+  userInfo: UserInfo
+): Promise<UserLogin> => {
+  // Retrieve the existing user profile
+  const existingProfile = await getUserProfile(userInfo);
+
+  if (existingProfile) {
+    // Update the user's profile it as long as the version numbers match.
+    if (existingProfile.version === updatableProfile.version) {
+      const updatedProfile: UserLogin = {
+        ...existingProfile,
+        ...updatableProfile,
+        version: existingProfile.version + 1,
+      };
+
+      return updateUserListItem(updatedProfile);
+    } else {
+      // The profile being saved has a different version number to the existing application. The user may
+      // have saved the profile from another device.
+      throw new UserServiceError("version-conflict", existingProfile);
+    }
+  } else {
+    throw new UserServiceError("missing-user-profile");
   }
 };
