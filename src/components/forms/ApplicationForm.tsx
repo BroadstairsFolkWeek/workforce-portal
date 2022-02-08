@@ -1,7 +1,10 @@
 import { Field, Formik } from "formik";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useEditApplication } from "../contexts/EditApplicationContext";
+import {
+  ApplicationUpdate,
+  useEditApplication,
+} from "../contexts/EditApplicationContext";
 import PageLayout from "../PageLayout";
 import { TextArea, TextInput } from "./Fields";
 
@@ -10,6 +13,48 @@ const ApplicationForm: React.FC = () => {
   const { application, saveApplication } = useEditApplication();
   const [saveErrorCode, setSaveErrorCode] = useState(0);
   const [scrollToTop, setScrollToTop] = useState(false);
+
+  const initialValues: ApplicationUpdate = useMemo(() => {
+    if (application) {
+      return {
+        emergencyContactName: application.emergencyContactName ?? "",
+        emergencyContactTelephone: application.emergencyContactTelephone ?? "",
+        previousVolunteer: application.previousVolunteer ?? false,
+        previousTeam: application.previousTeam ?? "",
+        firstAidCertificate: application.firstAidCertificate ?? false,
+        occupationOrSkills: application.occupationOrSkills ?? "",
+        dbsDisclosureNumber: application.dbsDisclosureNumber ?? "",
+        dbsDisclosureDate: application.dbsDisclosureDate ?? "",
+        camping: application.camping ?? false,
+        tShirtSize: application.tShirtSize ?? "S",
+        ageGroup: application.ageGroup ?? "18-20",
+        otherInformation: application.otherInformation ?? "",
+        teamPreference1: application.teamPreference1 ?? "",
+        teamPreference2: application.teamPreference2 ?? "",
+        teamPreference3: application.teamPreference3 ?? "",
+        personsPreference: application.personsPreference ?? "",
+      } as ApplicationUpdate;
+    } else {
+      return {
+        emergencyContactName: "",
+        emergencyContactTelephone: "",
+        previousVolunteer: false,
+        previousTeam: "",
+        firstAidCertificate: false,
+        occupationOrSkills: "",
+        dbsDisclosureNumber: "",
+        dbsDisclosureDate: "",
+        camping: false,
+        tShirtSize: undefined,
+        ageGroup: undefined,
+        otherInformation: "",
+        teamPreference1: "",
+        teamPreference2: "",
+        teamPreference3: "",
+        personsPreference: "",
+      } as ApplicationUpdate;
+    }
+  }, [application]);
 
   useEffect(() => {
     if (scrollToTop) {
@@ -61,7 +106,7 @@ const ApplicationForm: React.FC = () => {
     <PageLayout>
       <h1 className="text-2xl font-black">Workforce Application Form</h1>
       <Formik
-        initialValues={application}
+        initialValues={initialValues}
         enableReinitialize={true}
         onSubmit={async (values, { setSubmitting }) => {
           const saveStatus = await saveApplication(values);
@@ -79,11 +124,6 @@ const ApplicationForm: React.FC = () => {
               {errorComponent}
               <form className="text-left" onSubmit={formik.handleSubmit}>
                 <div className="mb-8">
-                  <TextArea name="address" label="Address (inc. postcode)" />
-                  <TextInput name="telephone" label="Telephone" type="text" />
-                </div>
-
-                <div className="my-8">
                   <TextInput
                     name="emergencyContactName"
                     label="Emergency contact name"

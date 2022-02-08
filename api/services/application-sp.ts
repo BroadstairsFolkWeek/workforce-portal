@@ -143,6 +143,12 @@ const addableApplicationToListItem = (
     PersonsPreference: application.personsPreference,
   };
 
+  if (listItem.DbsDisclosureDate !== undefined) {
+    if (listItem.DbsDisclosureDate.length === 0) {
+      delete listItem.DbsDisclosureDate;
+    }
+  }
+
   return listItem;
 };
 

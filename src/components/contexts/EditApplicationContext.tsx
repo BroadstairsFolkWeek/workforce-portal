@@ -2,11 +2,31 @@ import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Application } from "../../interfaces/application";
 import { useApplication } from "./ApplicationContext";
 
+export type ApplicationUpdate = Pick<
+  Application,
+  | "emergencyContactName"
+  | "emergencyContactTelephone"
+  | "previousVolunteer"
+  | "previousTeam"
+  | "firstAidCertificate"
+  | "occupationOrSkills"
+  | "dbsDisclosureNumber"
+  | "dbsDisclosureDate"
+  | "camping"
+  | "tShirtSize"
+  | "ageGroup"
+  | "otherInformation"
+  | "teamPreference1"
+  | "teamPreference2"
+  | "teamPreference3"
+  | "personsPreference"
+>;
+
 export type IEditApplicationContext = {
   application: Application | null;
   newApplication: () => void;
   editApplication: () => void;
-  saveApplication: (application: Application) => Promise<number>;
+  saveApplication: (updates: ApplicationUpdate) => Promise<number>;
   deleteApplication: () => Promise<number>;
 };
 
@@ -70,33 +90,43 @@ const EditApplicationContextProvider = ({
   }, [mode, existingApplication, existingApplicationLoaded, newApplication]);
 
   const saveApplication = useCallback(
-    async (editedApplication: Application) => {
+    async (updates: ApplicationUpdate) => {
       try {
-        const saveApplicationResponse = await fetch("/api/saveApplication", {
-          method: "POST",
-          body: JSON.stringify(editedApplication),
-        });
+        if (application) {
+          const updatedApplication: Application = {
+            ...application,
+            ...updates,
+          };
 
-        if (
-          saveApplicationResponse.status === 200 ||
-          saveApplicationResponse.status === 409
-        ) {
-          const savedApplication: Application =
-            await saveApplicationResponse.json();
-          if (savedApplication) {
-            setApplication(savedApplication);
-            setExistingApplication(savedApplication);
+          const saveApplicationResponse = await fetch("/api/saveApplication", {
+            method: "POST",
+            body: JSON.stringify(updatedApplication),
+          });
+
+          if (
+            saveApplicationResponse.status === 200 ||
+            saveApplicationResponse.status === 409
+          ) {
+            const savedApplication: Application =
+              await saveApplicationResponse.json();
+            if (savedApplication) {
+              setApplication(savedApplication);
+              setExistingApplication(savedApplication);
+            }
           }
-        }
 
-        // Return the status code as a way for callers to detect different types of errors.
-        return saveApplicationResponse.status;
+          // Return the status code as a way for callers to detect different types of errors.
+          return saveApplicationResponse.status;
+        } else {
+          console.error("No application to update");
+          return -1;
+        }
       } catch (err: any) {
         console.log(err);
         return -1;
       }
     },
-    [setExistingApplication]
+    [application, setExistingApplication]
   );
 
   const deleteApplication = useCallback(async () => {

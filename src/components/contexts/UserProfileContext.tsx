@@ -69,7 +69,7 @@ const UserProfileContextProvider = ({
           // Return the status code as a way for callers to detect different types of errors.
           return saveResponse.status;
         } else {
-          // No logged in, can't save.
+          // Not logged in, can't save.
           return 401;
         }
       } catch (err: any) {
