@@ -6,7 +6,7 @@ import {
   useEditApplication,
 } from "../contexts/EditApplicationContext";
 import PageLayout from "../PageLayout";
-import { TextArea, TextInput } from "./Fields";
+import { TextInput } from "./Fields";
 
 const ApplicationForm: React.FC = () => {
   const navigate = useNavigate();
