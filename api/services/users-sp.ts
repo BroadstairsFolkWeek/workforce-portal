@@ -63,7 +63,7 @@ const listItemToUserLogin = (item: PersistedUserLoginListItem): UserLogin => {
     surname: item.Surname,
     telephone: item.Telephone,
     address: item.Address,
-    photoRequired: item.PhotoRequired,
+    photoRequired: item.PhotoRequired === undefined ? true : item.PhotoRequired,
     identityProvider: item.IdentityProvider,
     identityProviderUserId: item.IdentityProviderUserId,
     identityProviderUserDetails: item.IdentityProviderUserDetails,
