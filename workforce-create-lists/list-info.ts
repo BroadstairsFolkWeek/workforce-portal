@@ -1,13 +1,15 @@
-import { ColumnDefinition } from "@microsoft/microsoft-graph-types";
+import { ColumnDefinition, ListInfo } from "@microsoft/microsoft-graph-types";
 
 export type PopulateListDef = {
   displayName: string;
+  template: ListInfo["template"];
   description: string;
   columns: () => Promise<ColumnDefinition[]>;
 };
 
 const loginsList: PopulateListDef = {
   displayName: "Portal User Logins",
+  template: "genericList",
   description: "List of logins used for the Workforce Portal.",
   columns: () =>
     Promise.resolve([
@@ -95,6 +97,7 @@ const loginsList: PopulateListDef = {
 
 const teamsList: PopulateListDef = {
   displayName: "Teams",
+  template: "genericList",
   description: "List of teams and their duties / skills",
   columns: () =>
     Promise.resolve([
@@ -120,6 +123,7 @@ const teamsList: PopulateListDef = {
 
 const applicationsList: PopulateListDef = {
   displayName: "Workforce Applications",
+  template: "genericList",
   description: "List of applications to join workforce for BFW 2022.",
   columns: () =>
     Promise.resolve([
@@ -323,6 +327,46 @@ const applicationsList: PopulateListDef = {
     ]),
 };
 
-const allLists: PopulateListDef[] = [loginsList, teamsList, applicationsList];
+const workforceProfilePhotos: PopulateListDef = {
+  displayName: "Workforce Photos",
+  template: "documentLibrary",
+  description: "Workforce profile and ID badge photos",
+  columns: async () => {
+    const complianceReviewsColumns: ColumnDefinition[] = [
+      {
+        name: "IdentityProviderUserId",
+        displayName: "Identity Provider User Id",
+        indexed: true,
+        required: true,
+        enforceUniqueValues: false,
+        text: {},
+      },
+      {
+        name: "GivenName",
+        displayName: "Given Name",
+        indexed: true,
+        required: false,
+        enforceUniqueValues: false,
+        text: {},
+      },
+      {
+        name: "Surname",
+        indexed: true,
+        required: false,
+        enforceUniqueValues: false,
+        text: {},
+      },
+    ];
+
+    return Promise.resolve(complianceReviewsColumns);
+  },
+};
+
+const allLists: PopulateListDef[] = [
+  loginsList,
+  teamsList,
+  applicationsList,
+  workforceProfilePhotos,
+];
 
 export default allLists;

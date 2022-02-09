@@ -1,4 +1,4 @@
-import { ColumnDefinition } from "@microsoft/microsoft-graph-types";
+import { ColumnDefinition, ListInfo } from "@microsoft/microsoft-graph-types";
 import { getClient, getSiteBaseApi } from "./site-api";
 
 export async function getListByDisplayName(
@@ -31,9 +31,23 @@ export async function getListByDisplayName(
   }
 }
 
-export async function createList(displayName: string, description: string) {
+export async function createList(
+  displayName: string,
+  description: string,
+  template: ListInfo["template"] = "genericList"
+) {
   const siteBaseApi = await getSiteBaseApi();
+
+  const requestBody = {
+    displayName,
+    description,
+    list: {
+      hidden: false,
+      template,
+    },
+  };
+
   await getClient()
     .api(siteBaseApi + "/lists")
-    .post({ displayName, description });
+    .post(requestBody);
 }

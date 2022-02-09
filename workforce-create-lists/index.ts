@@ -18,7 +18,11 @@ async function ensureList(
     return existingListInfo;
   }
 
-  await createList(applicationsList.displayName, applicationsList.description);
+  await createList(
+    applicationsList.displayName,
+    applicationsList.description,
+    applicationsList.template
+  );
   return ensureList(applicationsList);
 }
 
