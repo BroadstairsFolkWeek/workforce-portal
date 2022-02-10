@@ -5,6 +5,8 @@ export interface WorkforcePortalConfig {
   spLoginsListGuid: string;
   spApplicationsListGuid: string;
   spWorkforcePhotosServerRelativeUrl: string;
+  spWorkforcePhotosLibraryTitle: string;
+  maxProfilePhotosPerPerson: number;
   authSignUpSignInAuthority: string;
   b2cTenantId: string;
   b2cClientId: string;
@@ -19,6 +21,12 @@ function getEnvOrThrow(envName: string): string {
   }
 }
 
+function getEnvNumberOrThrow(envName: string): number {
+  const valueAsString = getEnvOrThrow(envName);
+
+  return Number.parseInt(valueAsString);
+}
+
 const config: WorkforcePortalConfig = {
   spSiteUrl: getEnvOrThrow("WORKFORCE_SITE"),
   spClientId: getEnvOrThrow("WORKFORCE_CLIENT_ID"),
@@ -27,6 +35,12 @@ const config: WorkforcePortalConfig = {
   spApplicationsListGuid: getEnvOrThrow("WORKFORCE_APPLICATIONS_LIST_GUID"),
   spWorkforcePhotosServerRelativeUrl: getEnvOrThrow(
     "WORKFORCE_PHOTOS_SERVER_RELATIVE_URL"
+  ),
+  spWorkforcePhotosLibraryTitle: getEnvOrThrow(
+    "WORKFORCE_PHOTOS_LIBRARY_TITLE"
+  ),
+  maxProfilePhotosPerPerson: getEnvNumberOrThrow(
+    "MAX_PROFILE_PHOTOS_PER_PERSON"
   ),
   authSignUpSignInAuthority: getEnvOrThrow("SIGN_UP_SIGN_IN_AUTHORITY"),
   b2cTenantId: getEnvOrThrow("B2C_TENANT_ID"),

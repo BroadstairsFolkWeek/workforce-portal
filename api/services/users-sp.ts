@@ -1,15 +1,19 @@
-import { IFileAddResult } from "@pnp/sp-commonjs";
+import { IFileAddResult, IItem } from "@pnp/sp-commonjs";
 import { AddableUserLogin, UserLogin } from "../interfaces/user-login";
 import {
   AddableUserLoginListItem,
   PersistedUserLoginListItem,
 } from "../interfaces/user-login-sp";
+import { PersistedUserPhotoListItem } from "../interfaces/user-photo-sp";
+import { logTrace } from "../utilties/logging";
 import { getWorkforcePortalConfig } from "./configuration-service";
 import {
   addFileToFolder,
   applyToItemsByFilter,
+  applyToPagedItemsdByFilter,
   createItem,
-  isFileinFolderExists,
+  deleteItem,
+  getLibraryAsList,
   updateItem,
 } from "./sp-service";
 
@@ -18,6 +22,9 @@ const workforceSiteUrl = workforcePortalConfig.spSiteUrl;
 const userLoginsListGuid = workforcePortalConfig.spLoginsListGuid;
 const userPhotosServerRelativeUrl =
   workforcePortalConfig.spWorkforcePhotosServerRelativeUrl;
+const userPhotosDocumentLibraryTitle =
+  workforcePortalConfig.spWorkforcePhotosLibraryTitle;
+const maxPhotosPerPerson = workforcePortalConfig.maxProfilePhotosPerPerson;
 
 export const getUserLogin = async (
   userId: string
@@ -99,39 +106,122 @@ const addableUserLoginToListItem = (
   };
 };
 
+export const getUserPhotosListItemsByFilters = async (
+  filter?: string
+): Promise<PersistedUserPhotoListItem[]> => {
+  const photosList = await getLibraryAsList(
+    workforceSiteUrl,
+    userPhotosDocumentLibraryTitle
+  );
+
+  const appliedFunction = (listItems: PersistedUserPhotoListItem[]) =>
+    Promise.resolve(listItems);
+  return applyToPagedItemsdByFilter<PersistedUserPhotoListItem>(
+    workforceSiteUrl,
+    photosList.Id,
+    appliedFunction,
+    filter
+  );
+};
+
+const getUserPhotosByUserId = async (
+  identityProviderUserId: string
+): Promise<PersistedUserPhotoListItem[]> => {
+  return getUserPhotosListItemsByFilters(
+    `IdentityProviderUserId eq '${identityProviderUserId}'`
+  );
+};
+
+const deletePhotoByListItemId = async (itemId: number): Promise<void> => {
+  const photosList = await getLibraryAsList(
+    workforceSiteUrl,
+    userPhotosDocumentLibraryTitle
+  );
+
+  return deleteItem(workforceSiteUrl, photosList.Id, itemId);
+};
+
 export const addProfilePhotoItem = async (
   fileBaseName: string,
   fileExtension: string,
-  imageContent: Buffer
-): Promise<IFileAddResult | "FILE_ALREADY_EXISTS"> => {
-  let filenameSuffix = 0;
+  imageContent: Buffer,
+  identityProviderUserId: string,
+  givenName: string,
+  surname: string
+): Promise<IFileAddResult | "COULD_NOT_DETERMINE_NEW_FILENAME"> => {
+  const existingUserPhotoListItems = await getUserPhotosByUserId(
+    identityProviderUserId
+  );
 
-  while (filenameSuffix < 5) {
+  logTrace(
+    "addProfilePhoto: Number of photos that already exist for user: " +
+      existingUserPhotoListItems.length
+  );
+
+  // Delete older photos if adding this new photo will breach the limit on the number of
+  // photos stored per user.
+  while (existingUserPhotoListItems.length >= maxPhotosPerPerson) {
+    const oldestPhotoListItem = existingUserPhotoListItems[0];
+    logTrace("addProfilePhoto: Deleting photo: " + oldestPhotoListItem.Title);
+    await deletePhotoByListItemId(oldestPhotoListItem.ID);
+    existingUserPhotoListItems.shift();
+  }
+
+  // Build the list of exiting filenames to check against when generating the filename
+  // for the new photo.
+  const existingFilenames = existingUserPhotoListItems.map(
+    (item) => item.Title
+  );
+  logTrace(
+    `addProfilePhoto: Existing photo filenames: [${existingFilenames.join(
+      ", "
+    )}]`
+  );
+
+  let newFilename;
+  let filenameSuffix = 0;
+  while (filenameSuffix < maxPhotosPerPerson) {
     const candidateFilename =
       fileBaseName +
       (filenameSuffix ? "-" + filenameSuffix : "") +
       "." +
       fileExtension;
-    if (
-      !(await isFileinFolderExists(
-        workforceSiteUrl,
-        userPhotosServerRelativeUrl,
+
+    logTrace(
+      "addProfilePhoto: checking if candidate filename in use: " +
         candidateFilename
-      ))
-    ) {
-      const addResult = await addFileToFolder(
-        workforceSiteUrl,
-        userPhotosServerRelativeUrl,
-        fileBaseName + "." + fileExtension,
-        imageContent
-      );
+    );
 
-      console.log("File add result:", JSON.stringify(addResult, null, 2));
-      return addResult;
+    const fileExists = existingFilenames.find((ef) => ef === candidateFilename);
+    if (!fileExists) {
+      newFilename = candidateFilename;
+      break;
     }
-
     filenameSuffix++;
   }
 
-  return "FILE_ALREADY_EXISTS";
+  if (newFilename) {
+    logTrace("addProfilePhoto: Adding file: " + newFilename);
+    const addResult = await addFileToFolder(
+      workforceSiteUrl,
+      userPhotosServerRelativeUrl,
+      newFilename,
+      imageContent
+    );
+
+    logTrace(
+      "addProfilePhoto: File added. Setting associated metadata (columns)."
+    );
+    const associatedItem: IItem = await addResult.file.getItem();
+    await associatedItem.update({
+      Title: newFilename,
+      IdentityProviderUserId: identityProviderUserId,
+      GivenName: givenName,
+      Surname: surname,
+    });
+
+    return addResult;
+  }
+
+  return "COULD_NOT_DETERMINE_NEW_FILENAME";
 };

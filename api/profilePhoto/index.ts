@@ -51,10 +51,10 @@ const httpTrigger: AzureFunction = async function (
     } else {
       const imageFile = files[0];
       try {
-        const [fileName, fileExtension, fileBuffer] =
+        const [, fileExtension, fileBuffer] =
           sanitiseImageFromApiClient(imageFile);
 
-        await setProfilePicture(userInfo, fileName, fileExtension, fileBuffer);
+        await setProfilePicture(userInfo, fileExtension, fileBuffer);
 
         context.res = {
           status: 200,

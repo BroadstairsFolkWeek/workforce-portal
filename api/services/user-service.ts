@@ -1,4 +1,3 @@
-import * as path from "path";
 import { UserInfo } from "@aaronpowell/static-web-apps-api-auth";
 import { Claim } from "../interfaces/claim";
 import { ACCEPTED_IMAGE_EXTENSIONS } from "../interfaces/sp-files";
@@ -227,24 +226,24 @@ export const updateUserProfile = async (
 
 export const setProfilePicture = async (
   userInfo: UserInfo,
-  fileName: string,
   fileExtension: ACCEPTED_IMAGE_EXTENSIONS,
   fileBuffer: Buffer
 ): Promise<string> => {
   const userProfile = await getUserProfile(userInfo);
   if (userProfile) {
     const strippedFileName =
-      userProfile.displayName +
-      " - " +
-      path.basename(fileName, path.extname(fileName));
+      userProfile.displayName + " - " + userProfile.identityProviderUserId;
 
     const fileAddResult = await addProfilePhotoItem(
       strippedFileName,
       fileExtension,
-      fileBuffer
+      fileBuffer,
+      userProfile.identityProviderUserId,
+      userProfile.givenName ?? "",
+      userProfile.surname ?? ""
     );
 
-    if (fileAddResult === "FILE_ALREADY_EXISTS") {
+    if (fileAddResult === "COULD_NOT_DETERMINE_NEW_FILENAME") {
       throw new UserServiceError("profile-photo-already-exists");
     } else {
       return fileAddResult.data.Name;
