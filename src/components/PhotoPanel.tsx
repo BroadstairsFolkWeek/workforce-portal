@@ -132,7 +132,7 @@ const PhotoPanel: React.FC<PhotoPanelProps> = ({ onDismiss }) => {
         formData: true,
       })
       .on("complete", uploadCompleteHandler);
-  }, []);
+  }, [uploadCompleteHandler]);
 
   useEffect(() => {
     return () => uppy.close();
