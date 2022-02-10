@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import {
   ContextualMenuItemType,
   DefaultButton,
@@ -7,8 +8,9 @@ import {
   IContextualMenuStyles,
   IStyleFunctionOrObject,
 } from "@fluentui/react";
-import { useMemo, useState } from "react";
+
 import { useUserProfile } from "./contexts/UserProfileContext";
+import PhotoPanel from "./PhotoPanel";
 import ProfilePanel from "./ProfilePanel";
 
 const buttonStyles: IButtonStyles = {
@@ -29,6 +31,7 @@ const contextMenuStyles: IStyleFunctionOrObject<
 const ProfileControl: React.FC = () => {
   const { loaded, userProfile } = useUserProfile();
   const [showProfilePanel, setShowProfilePanel] = useState<boolean>(false);
+  const [showPhotoPanel, setShowPhotoPanel] = useState<boolean>(false);
 
   const menuProps = useMemo<IContextualMenuProps>(
     () => ({
@@ -39,6 +42,11 @@ const ProfileControl: React.FC = () => {
           text: "Edit profile",
           onClick: () => setShowProfilePanel(true),
         },
+        {
+          key: "setPhoto",
+          text: "Set photo",
+          onClick: () => setShowPhotoPanel(true),
+        },
         { key: "divider_1", itemType: ContextualMenuItemType.Divider },
         { key: "signOut", text: "Sign out", href: "/api/logout" },
       ],
@@ -46,13 +54,15 @@ const ProfileControl: React.FC = () => {
     []
   );
 
-  const profilePanel = useMemo(() => {
+  const panel = useMemo(() => {
     if (showProfilePanel) {
       return <ProfilePanel onDismiss={() => setShowProfilePanel(false)} />;
+    } else if (showPhotoPanel) {
+      return <PhotoPanel onDismiss={() => setShowPhotoPanel(false)} />;
     } else {
       return null;
     }
-  }, [showProfilePanel]);
+  }, [showProfilePanel, showPhotoPanel]);
 
   if (loaded) {
     if (userProfile) {
@@ -63,7 +73,7 @@ const ProfileControl: React.FC = () => {
             menuProps={menuProps}
             styles={buttonStyles}
           />
-          {profilePanel}
+          {panel}
         </>
       );
     } else {

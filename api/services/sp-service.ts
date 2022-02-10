@@ -5,6 +5,7 @@ import { IFolderInfo } from "@pnp/sp-commonjs/folders";
 import { SPFetchClient } from "@pnp/nodejs-commonjs";
 import { getWorkforcePortalConfig } from "./configuration-service";
 import { UpdatableListItem } from "../interfaces/sp-items";
+import { Readable } from "stream";
 
 const workforcePortalConfig = getWorkforcePortalConfig();
 
@@ -125,6 +126,28 @@ export const isFolderExists = async (
   }
 };
 
+export const isFileinFolderExists = async (
+  site: string,
+  folderServerRelativePath: string,
+  filename: string
+): Promise<[true, string] | [false]> => {
+  const web = Web(site);
+
+  try {
+    const file = await web
+      .getFileByServerRelativeUrl(folderServerRelativePath + "/" + filename)
+      .select("Exists", "ServerRelativeUrl")
+      .get();
+    if (file.Exists) {
+      return [true, file.ServerRelativeUrl];
+    } else {
+      return [false];
+    }
+  } catch (e) {
+    return [false];
+  }
+};
+
 export const ensureFolder = async (
   site: string,
   libraryTitle: string,
@@ -150,9 +173,14 @@ export const addFileToFolder = async (
 ) => {
   const web = Web(site);
 
+  const stream = new Readable();
+  stream.push(content);
+  stream.push(null);
+
   const fileAddResult = await web
     .getFolderByServerRelativeUrl(folderServerRelativePath)
-    .files.add(fileName, content, false);
+    .files.configure({ headers: { "content-length": `${content.length}` } })
+    .add(fileName, stream);
 
-  console.log("File add result", fileAddResult);
+  return fileAddResult;
 };

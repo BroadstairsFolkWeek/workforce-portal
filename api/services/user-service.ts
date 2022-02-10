@@ -1,5 +1,7 @@
+import * as path from "path";
 import { UserInfo } from "@aaronpowell/static-web-apps-api-auth";
 import { Claim } from "../interfaces/claim";
+import { ACCEPTED_IMAGE_EXTENSIONS } from "../interfaces/sp-files";
 import {
   AddableUserLogin,
   UpdatableUserLogin,
@@ -7,6 +9,7 @@ import {
 } from "../interfaces/user-login";
 import { getGraphUser } from "./users-graph";
 import {
+  addProfilePhotoItem,
   createUserListItem,
   getUserLogin,
   updateUserListItem,
@@ -19,7 +22,8 @@ type UserServiceErrorType =
   | "unauthenticated"
   | "missing-claim"
   | "version-conflict"
-  | "missing-user-profile";
+  | "missing-user-profile"
+  | "profile-photo-already-exists";
 
 export class UserServiceError {
   private type: typeof USER_SERVICE_ERROR_TYPE_VAL =
@@ -215,6 +219,35 @@ export const updateUserProfile = async (
       // The profile being saved has a different version number to the existing application. The user may
       // have saved the profile from another device.
       throw new UserServiceError("version-conflict", existingProfile);
+    }
+  } else {
+    throw new UserServiceError("missing-user-profile");
+  }
+};
+
+export const setProfilePicture = async (
+  userInfo: UserInfo,
+  fileName: string,
+  fileExtension: ACCEPTED_IMAGE_EXTENSIONS,
+  fileBuffer: Buffer
+): Promise<string> => {
+  const userProfile = await getUserProfile(userInfo);
+  if (userProfile) {
+    const strippedFileName =
+      userProfile.displayName +
+      " - " +
+      path.basename(fileName, path.extname(fileName));
+
+    const fileAddResult = await addProfilePhotoItem(
+      strippedFileName,
+      fileExtension,
+      fileBuffer
+    );
+
+    if (fileAddResult === "FILE_ALREADY_EXISTS") {
+      throw new UserServiceError("profile-photo-already-exists");
+    } else {
+      return fileAddResult.data.Name;
     }
   } else {
     throw new UserServiceError("missing-user-profile");

@@ -1,14 +1,23 @@
+import { IFileAddResult } from "@pnp/sp-commonjs";
 import { AddableUserLogin, UserLogin } from "../interfaces/user-login";
 import {
   AddableUserLoginListItem,
   PersistedUserLoginListItem,
 } from "../interfaces/user-login-sp";
 import { getWorkforcePortalConfig } from "./configuration-service";
-import { applyToItemsByFilter, createItem, updateItem } from "./sp-service";
+import {
+  addFileToFolder,
+  applyToItemsByFilter,
+  createItem,
+  isFileinFolderExists,
+  updateItem,
+} from "./sp-service";
 
 const workforcePortalConfig = getWorkforcePortalConfig();
 const workforceSiteUrl = workforcePortalConfig.spSiteUrl;
 const userLoginsListGuid = workforcePortalConfig.spLoginsListGuid;
+const userPhotosServerRelativeUrl =
+  workforcePortalConfig.spWorkforcePhotosServerRelativeUrl;
 
 export const getUserLogin = async (
   userId: string
@@ -88,4 +97,41 @@ const addableUserLoginToListItem = (
     IdentityProviderUserDetails: user.identityProviderUserDetails,
     Version: user.version,
   };
+};
+
+export const addProfilePhotoItem = async (
+  fileBaseName: string,
+  fileExtension: string,
+  imageContent: Buffer
+): Promise<IFileAddResult | "FILE_ALREADY_EXISTS"> => {
+  let filenameSuffix = 0;
+
+  while (filenameSuffix < 5) {
+    const candidateFilename =
+      fileBaseName +
+      (filenameSuffix ? "-" + filenameSuffix : "") +
+      "." +
+      fileExtension;
+    if (
+      !(await isFileinFolderExists(
+        workforceSiteUrl,
+        userPhotosServerRelativeUrl,
+        candidateFilename
+      ))
+    ) {
+      const addResult = await addFileToFolder(
+        workforceSiteUrl,
+        userPhotosServerRelativeUrl,
+        fileBaseName + "." + fileExtension,
+        imageContent
+      );
+
+      console.log("File add result:", JSON.stringify(addResult, null, 2));
+      return addResult;
+    }
+
+    filenameSuffix++;
+  }
+
+  return "FILE_ALREADY_EXISTS";
 };

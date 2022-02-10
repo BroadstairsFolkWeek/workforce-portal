@@ -4,6 +4,7 @@ export interface WorkforcePortalConfig {
   spClientSecret: string;
   spLoginsListGuid: string;
   spApplicationsListGuid: string;
+  spWorkforcePhotosServerRelativeUrl: string;
   authSignUpSignInAuthority: string;
   b2cTenantId: string;
   b2cClientId: string;
@@ -24,6 +25,9 @@ const config: WorkforcePortalConfig = {
   spClientSecret: getEnvOrThrow("WORKFORCE_CLIENT_SECRET"),
   spLoginsListGuid: getEnvOrThrow("WORKFORCE_LOGINS_LIST_GUID"),
   spApplicationsListGuid: getEnvOrThrow("WORKFORCE_APPLICATIONS_LIST_GUID"),
+  spWorkforcePhotosServerRelativeUrl: getEnvOrThrow(
+    "WORKFORCE_PHOTOS_SERVER_RELATIVE_URL"
+  ),
   authSignUpSignInAuthority: getEnvOrThrow("SIGN_UP_SIGN_IN_AUTHORITY"),
   b2cTenantId: getEnvOrThrow("B2C_TENANT_ID"),
   b2cClientId: getEnvOrThrow("B2C_CLIENT_ID"),
