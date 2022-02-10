@@ -10,6 +10,7 @@ import { getGraphUser } from "./users-graph";
 import {
   addProfilePhotoFileWithItem,
   createUserListItem,
+  deleteProfilePhotoFile,
   getProfilePhotoFile,
   getUserLogin,
   updateUserListItem,
@@ -168,6 +169,16 @@ export const getProfilePicture = async (
     extension,
     mimeType,
   };
+};
+
+export const deleteProfilePicture = async (
+  userInfo: UserInfo
+): Promise<boolean> => {
+  if (!userInfo || !userInfo.userId) {
+    throw new UserServiceError("unauthenticated");
+  }
+
+  return deleteProfilePhotoFile(userInfo.userId);
 };
 
 export const setProfilePicture = async (

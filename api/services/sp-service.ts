@@ -244,3 +244,15 @@ export const getImageFileForListItem = async (
 
   return null;
 };
+
+export const deleteFileForListItem = async (
+  site: string,
+  listId: string,
+  listItemId: number
+): Promise<void> => {
+  const web = Web(site);
+  const list = web.lists.getById(listId);
+  const item = list.items.getById(listItemId);
+  const file = item.file;
+  return file.delete();
+};

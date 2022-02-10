@@ -12,6 +12,9 @@ import {
 import { useUserProfile } from "./contexts/UserProfileContext";
 import PhotoPanel from "./PhotoPanel";
 import ProfilePanel from "./ProfilePanel";
+import { useUserProfilePhotos } from "./contexts/UserProfilePhotosContext";
+
+import hoodenHorse from "../images/hoodenHorse.jpg";
 
 const buttonStyles: IButtonStyles = {
   root: { height: "unset", backgroundColor: "#00000000", color: "#F6C70B" },
@@ -30,8 +33,19 @@ const contextMenuStyles: IStyleFunctionOrObject<
 
 const ProfileControl: React.FC = () => {
   const { loaded, userProfile } = useUserProfile();
+  const { profilePhotoDataSrc } = useUserProfilePhotos();
   const [showProfilePanel, setShowProfilePanel] = useState<boolean>(false);
   const [showPhotoPanel, setShowPhotoPanel] = useState<boolean>(false);
+
+  const profileImage = useMemo(() => {
+    return (
+      <img
+        alt="Profile"
+        className="h-10"
+        src={profilePhotoDataSrc ? profilePhotoDataSrc : hoodenHorse}
+      />
+    );
+  }, [profilePhotoDataSrc]);
 
   const menuProps = useMemo<IContextualMenuProps>(
     () => ({
@@ -67,14 +81,15 @@ const ProfileControl: React.FC = () => {
   if (loaded) {
     if (userProfile) {
       return (
-        <>
+        <div className="flex justify-end gap-2">
           <DefaultButton
             text={userProfile.displayName}
             menuProps={menuProps}
             styles={buttonStyles}
           />
+          {profileImage}
           {panel}
-        </>
+        </div>
       );
     } else {
       return (

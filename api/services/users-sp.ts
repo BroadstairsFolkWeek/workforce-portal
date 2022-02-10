@@ -12,6 +12,7 @@ import {
   applyToItemsByFilter,
   applyToPagedItemsdByFilter,
   createItem,
+  deleteFileForListItem,
   deleteItem,
   getImageFileForListItem,
   getLibraryAsList,
@@ -255,5 +256,33 @@ export const getProfilePhotoFile = async (
     );
   } else {
     return null;
+  }
+};
+
+export const deleteProfilePhotoFile = async (
+  identityProviderUserId: string
+): Promise<boolean> => {
+  const existingUserPhotoListItems = await getUserPhotosByUserId(
+    identityProviderUserId
+  );
+
+  if (existingUserPhotoListItems && existingUserPhotoListItems.length) {
+    const selectedFile =
+      existingUserPhotoListItems[existingUserPhotoListItems.length - 1];
+
+    const photosList = await getLibraryAsList(
+      workforceSiteUrl,
+      userPhotosDocumentLibraryTitle
+    );
+
+    return deleteFileForListItem(
+      workforceSiteUrl,
+      photosList.Id,
+      selectedFile.ID
+    )
+      .then(() => true)
+      .catch(() => false);
+  } else {
+    return false;
   }
 };

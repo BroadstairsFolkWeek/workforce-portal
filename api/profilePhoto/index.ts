@@ -2,6 +2,7 @@ import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import { getUserInfo, UserInfo } from "@aaronpowell/static-web-apps-api-auth";
 import parseMultipartFormData from "@anzp/azure-function-multipart";
 import {
+  deleteProfilePicture,
   getProfilePicture,
   isUserServiceError,
   setProfilePicture,
@@ -87,6 +88,21 @@ const handlePostProfilePhoto = async function (
   }
 };
 
+const handleDeleteProfilePhoto = async function (
+  userInfo: UserInfo
+): Promise<Context["res"]> {
+  const result = await deleteProfilePicture(userInfo);
+  if (result) {
+    return {
+      status: 200,
+    };
+  } else {
+    return {
+      status: 404,
+    };
+  }
+};
+
 const httpTrigger: AzureFunction = async function (
   context: Context,
   req: HttpRequest
@@ -94,12 +110,16 @@ const httpTrigger: AzureFunction = async function (
   setLoggerFromContext(context);
   logTrace("profilePhoto: entry. Method: " + req.method);
 
-  if (req.method !== "GET" && req.method !== "POST") {
+  if (
+    req.method !== "GET" &&
+    req.method !== "POST" &&
+    req.method !== "DELETE"
+  ) {
     logTrace(`profilePhoto: Invalid HTTP method: ${req.method}`);
     context.res = {
       status: 405,
       headers: {
-        Allow: "GET, POST",
+        Allow: "GET, POST, DELETE",
       },
     };
     return;
@@ -116,8 +136,10 @@ const httpTrigger: AzureFunction = async function (
       const indexString = req.query.index ?? "0";
       const index = Number.parseInt(indexString);
       context.res = await handleGetProfilePhoto(userInfo, index);
-    } else {
+    } else if (req.method === "POST") {
       context.res = await handlePostProfilePhoto(req, userInfo);
+    } else {
+      context.res = await handleDeleteProfilePhoto(userInfo);
     }
   } else {
     logTrace(`profilePhoto: User is not authenticated.`);
