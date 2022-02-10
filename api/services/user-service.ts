@@ -149,13 +149,14 @@ export const updateUserProfile = async (
 };
 
 export const getProfilePicture = async (
-  userInfo: UserInfo
+  userInfo: UserInfo,
+  index: number = 0
 ): Promise<FileContentWithInfo | null> => {
   if (!userInfo || !userInfo.userId) {
     throw new UserServiceError("unauthenticated");
   }
 
-  const getPhotoResult = await getProfilePhotoFile(userInfo.userId);
+  const getPhotoResult = await getProfilePhotoFile(userInfo.userId, index);
   if (!getPhotoResult) {
     return null;
   }

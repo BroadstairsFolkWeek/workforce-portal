@@ -18,9 +18,10 @@ import {
 } from "../services/api-sanitise-service";
 
 const handleGetProfilePhoto = async function (
-  userInfo: UserInfo
+  userInfo: UserInfo,
+  index: number
 ): Promise<Context["res"]> {
-  const result = await getProfilePicture(userInfo);
+  const result = await getProfilePicture(userInfo, index);
   if (result) {
     return {
       status: 200,
@@ -112,7 +113,9 @@ const httpTrigger: AzureFunction = async function (
     );
 
     if (req.method === "GET") {
-      context.res = await handleGetProfilePhoto(userInfo);
+      const indexString = req.query.index ?? "0";
+      const index = Number.parseInt(indexString);
+      context.res = await handleGetProfilePhoto(userInfo, index);
     } else {
       context.res = await handlePostProfilePhoto(req, userInfo);
     }

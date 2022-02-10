@@ -227,14 +227,21 @@ export const addProfilePhotoFileWithItem = async (
   return "COULD_NOT_DETERMINE_NEW_FILENAME";
 };
 
-export const getProfilePhotoFile = async (identityProviderUserId: string) => {
+export const getProfilePhotoFile = async (
+  identityProviderUserId: string,
+  index: number
+) => {
   const existingUserPhotoListItems = await getUserPhotosByUserId(
     identityProviderUserId
   );
 
-  if (existingUserPhotoListItems && existingUserPhotoListItems.length) {
-    const latestFile =
-      existingUserPhotoListItems[existingUserPhotoListItems.length - 1];
+  if (
+    existingUserPhotoListItems &&
+    existingUserPhotoListItems.length &&
+    existingUserPhotoListItems.length > index
+  ) {
+    const selectedFile =
+      existingUserPhotoListItems[existingUserPhotoListItems.length - 1 - index];
 
     const photosList = await getLibraryAsList(
       workforceSiteUrl,
@@ -244,7 +251,7 @@ export const getProfilePhotoFile = async (identityProviderUserId: string) => {
     return getImageFileForListItem(
       workforceSiteUrl,
       photosList.Id,
-      latestFile.ID
+      selectedFile.ID
     );
   } else {
     return null;
