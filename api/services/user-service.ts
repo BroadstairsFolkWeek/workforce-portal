@@ -1,5 +1,6 @@
 import { UserInfo } from "@aaronpowell/static-web-apps-api-auth";
 import { Claim } from "../interfaces/claim";
+import { FileContentWithInfo } from "../interfaces/file";
 import { ACCEPTED_IMAGE_EXTENSIONS } from "../interfaces/sp-files";
 import {
   AddableUserLogin,
@@ -8,8 +9,9 @@ import {
 } from "../interfaces/user-login";
 import { getGraphUser } from "./users-graph";
 import {
-  addProfilePhotoItem,
+  addProfilePhotoFileWithItem,
   createUserListItem,
+  getProfilePhotoFile,
   getUserLogin,
   updateUserListItem,
 } from "./users-sp";
@@ -224,6 +226,27 @@ export const updateUserProfile = async (
   }
 };
 
+export const getProfilePicture = async (
+  userInfo: UserInfo
+): Promise<FileContentWithInfo | null> => {
+  if (!userInfo || !userInfo.userId) {
+    throw new UserServiceError("unauthenticated");
+  }
+
+  const getPhotoResult = await getProfilePhotoFile(userInfo.userId);
+  if (!getPhotoResult) {
+    return null;
+  }
+
+  const [filename, content, extension, mimeType] = getPhotoResult;
+  return {
+    filename,
+    content,
+    extension,
+    mimeType,
+  };
+};
+
 export const setProfilePicture = async (
   userInfo: UserInfo,
   fileExtension: ACCEPTED_IMAGE_EXTENSIONS,
@@ -234,7 +257,7 @@ export const setProfilePicture = async (
     const strippedFileName =
       userProfile.displayName + " - " + userProfile.identityProviderUserId;
 
-    const fileAddResult = await addProfilePhotoItem(
+    const fileAddResult = await addProfilePhotoFileWithItem(
       strippedFileName,
       fileExtension,
       fileBuffer,

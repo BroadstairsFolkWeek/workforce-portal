@@ -1,3 +1,4 @@
+import * as path from "path";
 import { sp } from "@pnp/sp-commonjs/presets/all";
 import { Web } from "@pnp/sp-commonjs/webs";
 import { IListInfo } from "@pnp/sp-commonjs/lists";
@@ -6,6 +7,12 @@ import { IFolderInfo } from "@pnp/sp-commonjs/folders";
 import { SPFetchClient } from "@pnp/nodejs-commonjs";
 import { getWorkforcePortalConfig } from "./configuration-service";
 import { UpdatableListItem } from "../interfaces/sp-items";
+import {
+  ACCEPTED_IMAGE_EXTENSIONS,
+  ACCEPTED_IMAGE_MIME_TYPES,
+  ACCEPTED_MIME_TYPE_FILE_EXTENSIONS_MAPPING,
+  isAcceptedMimeType,
+} from "../interfaces/sp-files";
 
 const workforcePortalConfig = getWorkforcePortalConfig();
 
@@ -187,4 +194,53 @@ export const addFileToFolder = async (
     .files.add(fileName, content, false);
 
   return fileAddResult;
+};
+
+export const getFileForListItem = async (
+  site: string,
+  listId: string,
+  listItemId: number
+): Promise<[string, ArrayBuffer] | null> => {
+  const web = Web(site);
+  const list = web.lists.getById(listId);
+  const item = list.items.getById(listItemId);
+  const file = item.file;
+  const fileInfo = await file.get();
+  return [fileInfo.Name, await file.getBuffer()];
+};
+
+export const getImageFileForListItem = async (
+  site: string,
+  listId: string,
+  listItemId: number
+): Promise<
+  | [string, ArrayBuffer, ACCEPTED_IMAGE_EXTENSIONS, ACCEPTED_IMAGE_MIME_TYPES]
+  | null
+> => {
+  const getFileResult = await getFileForListItem(site, listId, listItemId);
+  if (!getFileResult) {
+    return null;
+  }
+
+  const [filename, content] = getFileResult;
+  const extensionWithDot = path.extname(filename);
+  if (!extensionWithDot) {
+    return null;
+  }
+
+  const extension = extensionWithDot.substring(1);
+  for (const mimeType in ACCEPTED_MIME_TYPE_FILE_EXTENSIONS_MAPPING) {
+    if (isAcceptedMimeType(mimeType)) {
+      if (ACCEPTED_MIME_TYPE_FILE_EXTENSIONS_MAPPING[mimeType] === extension) {
+        return [
+          filename,
+          content,
+          ACCEPTED_MIME_TYPE_FILE_EXTENSIONS_MAPPING[mimeType],
+          mimeType,
+        ];
+      }
+    }
+  }
+
+  return null;
 };

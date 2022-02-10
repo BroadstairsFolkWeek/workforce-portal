@@ -13,6 +13,7 @@ import {
   applyToPagedItemsdByFilter,
   createItem,
   deleteItem,
+  getImageFileForListItem,
   getLibraryAsList,
   updateItem,
 } from "./sp-service";
@@ -141,7 +142,7 @@ const deletePhotoByListItemId = async (itemId: number): Promise<void> => {
   return deleteItem(workforceSiteUrl, photosList.Id, itemId);
 };
 
-export const addProfilePhotoItem = async (
+export const addProfilePhotoFileWithItem = async (
   fileBaseName: string,
   fileExtension: string,
   imageContent: Buffer,
@@ -224,4 +225,28 @@ export const addProfilePhotoItem = async (
   }
 
   return "COULD_NOT_DETERMINE_NEW_FILENAME";
+};
+
+export const getProfilePhotoFile = async (identityProviderUserId: string) => {
+  const existingUserPhotoListItems = await getUserPhotosByUserId(
+    identityProviderUserId
+  );
+
+  if (existingUserPhotoListItems && existingUserPhotoListItems.length) {
+    const latestFile =
+      existingUserPhotoListItems[existingUserPhotoListItems.length - 1];
+
+    const photosList = await getLibraryAsList(
+      workforceSiteUrl,
+      userPhotosDocumentLibraryTitle
+    );
+
+    return getImageFileForListItem(
+      workforceSiteUrl,
+      photosList.Id,
+      latestFile.ID
+    );
+  } else {
+    return null;
+  }
 };
