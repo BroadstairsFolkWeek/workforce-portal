@@ -1,5 +1,4 @@
 import { UserInfo } from "@aaronpowell/static-web-apps-api-auth";
-import { Claim } from "../interfaces/claim";
 import { FileContentWithInfo } from "../interfaces/file";
 import { ACCEPTED_IMAGE_EXTENSIONS } from "../interfaces/sp-files";
 import {
@@ -21,7 +20,6 @@ const USER_SERVICE_ERROR_TYPE_VAL =
 
 type UserServiceErrorType =
   | "unauthenticated"
-  | "missing-claim"
   | "version-conflict"
   | "missing-user-profile"
   | "profile-photo-already-exists";
@@ -41,82 +39,6 @@ export class UserServiceError {
 export function isUserServiceError(obj: any): obj is UserServiceError {
   return obj?.type === USER_SERVICE_ERROR_TYPE_VAL;
 }
-
-const extractClaim = (
-  claims: Claim[],
-  claimType: string
-): string | undefined => {
-  return claims.find((c) => c.typ === claimType)?.val ?? undefined;
-};
-
-const extractEmail = (claims: Claim[]): string | undefined => {
-  const emails = extractClaim(claims, "emails");
-  return emails ? emails.split(",")[0] : undefined;
-};
-
-export const updateUserClaims = async (
-  userInfo: UserInfo,
-  claims: Claim[]
-): Promise<UserLogin> => {
-  if (!userInfo || !userInfo.userId || !userInfo.userDetails) {
-    throw new UserServiceError("unauthenticated");
-  }
-
-  const claimedIdentityProvider =
-    extractClaim(
-      claims,
-      "http://schemas.microsoft.com/identity/claims/identityprovider"
-    ) ?? "email";
-  const claimedGivenName = extractClaim(
-    claims,
-    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname"
-  );
-  const claimedSurname = extractClaim(
-    claims,
-    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname"
-  );
-
-  const claimedEmail = extractEmail(claims);
-
-  const userLogin = await getUserLogin(userInfo.userId);
-  if (userLogin) {
-    const updatedUserLogin: UserLogin = {
-      ...userLogin,
-    };
-
-    if (claimedIdentityProvider !== userLogin.identityProvider) {
-      updatedUserLogin.identityProvider = claimedIdentityProvider;
-    }
-
-    if (claimedGivenName !== userLogin.givenName) {
-      updatedUserLogin.givenName = claimedGivenName;
-    }
-
-    if (claimedSurname !== userLogin.surname) {
-      updatedUserLogin.surname = claimedSurname;
-    }
-
-    if (claimedEmail !== userLogin.email) {
-      updatedUserLogin.email = claimedEmail;
-    }
-
-    return updateUserListItem(updatedUserLogin);
-  } else {
-    const newUserLogin: AddableUserLogin = {
-      displayName: userInfo.userDetails,
-      identityProviderUserId: userInfo.userId,
-      identityProviderUserDetails: userInfo.userDetails,
-      givenName: claimedGivenName,
-      surname: claimedSurname,
-      identityProvider: claimedIdentityProvider,
-      email: claimedEmail,
-      photoRequired: true,
-      version: 1,
-    };
-
-    return createUserListItem(newUserLogin);
-  }
-};
 
 const getUserProfilePropertiesFromGraph = async (
   userInfo: UserInfo
