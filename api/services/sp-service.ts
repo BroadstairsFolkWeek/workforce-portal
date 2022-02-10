@@ -1,11 +1,11 @@
 import { sp } from "@pnp/sp-commonjs/presets/all";
 import { Web } from "@pnp/sp-commonjs/webs";
+import { IListInfo } from "@pnp/sp-commonjs/lists";
 import { IItemAddResult, IItemUpdateResult } from "@pnp/sp-commonjs/items";
 import { IFolderInfo } from "@pnp/sp-commonjs/folders";
 import { SPFetchClient } from "@pnp/nodejs-commonjs";
 import { getWorkforcePortalConfig } from "./configuration-service";
 import { UpdatableListItem } from "../interfaces/sp-items";
-import { Readable } from "stream";
 
 const workforcePortalConfig = getWorkforcePortalConfig();
 
@@ -52,7 +52,7 @@ export const deleteItem = async (
   return list.items.getById(itemId).delete();
 };
 
-const getPagedItemsdByFilter = async <T>(
+export const getPagedItemsdByFilter = async <T>(
   site: string,
   listGuid: string,
   filter?: string
@@ -66,7 +66,7 @@ const getPagedItemsdByFilter = async <T>(
   return await itemsQuery.getPaged<T[]>();
 };
 
-export const applyToPagedItemsdByFilter = async <T, U>(
+export const applyToPagedItemsdByFilter = async <T, U = T[]>(
   site: string,
   listGuid: string,
   callback: (items: T[]) => Promise<U>,
@@ -91,6 +91,15 @@ export const applyToItemsByFilter = async <T, U>(
   filter?: string
 ) => {
   return applyToPagedItemsdByFilter(site, listGuid, callback, filter, false);
+};
+
+export const getLibraryAsList = async (
+  site: string,
+  libraryTitle: string
+): Promise<IListInfo> => {
+  const web = Web(site);
+  const library = web.lists.getByTitle(libraryTitle).get();
+  return library;
 };
 
 export const createFolder = async (
@@ -173,14 +182,9 @@ export const addFileToFolder = async (
 ) => {
   const web = Web(site);
 
-  const stream = new Readable();
-  stream.push(content);
-  stream.push(null);
-
   const fileAddResult = await web
     .getFolderByServerRelativeUrl(folderServerRelativePath)
-    .files.configure({ headers: { "content-length": `${content.length}` } })
-    .add(fileName, stream);
+    .files.add(fileName, content, false);
 
   return fileAddResult;
 };
