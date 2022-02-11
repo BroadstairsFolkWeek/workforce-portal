@@ -1,5 +1,5 @@
 import { URL } from "url";
-import { HttpRequest } from "@azure/functions";
+import { HttpRequest, HttpRequestQuery } from "@azure/functions";
 import { getWorkforcePortalConfig } from "./configuration-service";
 
 const config = getWorkforcePortalConfig();
@@ -27,6 +27,17 @@ export const logoutStage2Handler = (
     status: 302,
     headers: {
       Location: getSwaLogoutUrl(req),
+    },
+  };
+};
+
+export const authErrorHandler = (
+  req: HttpRequest
+): HttpResponseContextObject => {
+  return {
+    status: 302,
+    headers: {
+      Location: getAuthErrorUrl(req),
     },
   };
 };
@@ -82,4 +93,17 @@ const getSwaLogoutUrl = (req: HttpRequest): URL => {
   const logoutUrl = new URL("/.auth/logout", currentFunctionsUrl);
   logoutUrl.searchParams.append("redirect_uri", getPostLogoutUrl(req));
   return logoutUrl;
+};
+
+const getAuthErrorUrl = (req: HttpRequest): URL => {
+  const currentFunctionsUrl = getCurrentFunctionsUrl(req);
+  const authErrorUrl = new URL("/autherror", currentFunctionsUrl);
+
+  const errorQuery: HttpRequestQuery = req.query;
+
+  for (const queryKey in errorQuery) {
+    const queryVal = errorQuery[queryKey];
+    authErrorUrl.searchParams.append(queryKey, queryVal);
+  }
+  return authErrorUrl;
 };
