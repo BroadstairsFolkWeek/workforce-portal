@@ -6,6 +6,7 @@ import {
   UpdatableUserLogin,
   UserLogin,
 } from "../interfaces/user-login";
+import { logError, logTrace } from "../utilties/logging";
 import { getGraphUser } from "./users-graph";
 import {
   addProfilePhotoFileWithItem,
@@ -101,6 +102,9 @@ export const getUserProfile = async (
 
     return userLogin;
   } else {
+    logTrace(
+      "getUserProfile: User profile does not exist. Creating based on data from Graph API."
+    );
     const graphUser = await getUserProfilePropertiesFromGraph(userInfo);
     if (graphUser && graphUser.identityProvider) {
       const newUserLogin: AddableUserLogin = {
@@ -115,8 +119,15 @@ export const getUserProfile = async (
         version: 1,
       };
 
+      logTrace(
+        "getUserProfile: About to create user profile: " +
+          JSON.stringify(newUserLogin)
+      );
       return createUserListItem(newUserLogin);
     } else {
+      logError(
+        "getUserProfile: Could not read information for user from Graph API. Profile not created."
+      );
       return null;
     }
   }

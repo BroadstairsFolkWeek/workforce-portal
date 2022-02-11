@@ -1,7 +1,12 @@
 import { getUserInfo } from "@aaronpowell/static-web-apps-api-auth";
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import { getUserProfile, isUserServiceError } from "../services/user-service";
-import { setLoggerFromContext } from "../utilties/logging";
+import {
+  logError,
+  logTrace,
+  logWarn,
+  setLoggerFromContext,
+} from "../utilties/logging";
 
 const httpTrigger: AzureFunction = async function (
   context: Context,
@@ -14,10 +19,12 @@ const httpTrigger: AzureFunction = async function (
     try {
       const userProfile = await getUserProfile(userInfo);
       if (userProfile) {
+        logTrace("profile: Got profile: " + JSON.stringify(userProfile));
         context.res = {
           body: userProfile,
         };
       } else {
+        logWarn("profile: Profile does not exist and was not created.");
         context.res = {
           status: 404,
           body: "Profile does not exist",
@@ -32,7 +39,24 @@ const httpTrigger: AzureFunction = async function (
               body: "Cannot retrieve profile when not authenticated.",
             };
             break;
+
+          default:
+            logError(
+              "profile: Unhandled UserServiceError: " +
+                err.error +
+                ": " +
+                err.arg1
+            );
+            context.res = {
+              status: 500,
+            };
+            break;
         }
+      } else {
+        logError("profile: Unhandle error: " + err);
+        context.res = {
+          status: 500,
+        };
       }
     }
   } else {
