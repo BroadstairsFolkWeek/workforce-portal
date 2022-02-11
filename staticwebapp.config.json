@@ -4,8 +4,8 @@
   },
   "responseOverrides": {
     "401": {
-      "rewrite": "/",
-      "statusCode": 401
+      "statusCode": 302,
+      "redirect": "/"
     }
   },
   "auth": {
