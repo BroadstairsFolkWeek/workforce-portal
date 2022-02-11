@@ -2,11 +2,8 @@
   "navigationFallback": {
     "rewrite": "/"
   },
-  "responseOverrides": {
-    "401": {
-      "statusCode": 302,
-      "redirect": "/"
-    }
+  "forwardingGateway": {
+    "allowedForwardedHosts": ["wf2.broadstairsfolkweek.org.uk"]
   },
   "auth": {
     "identityProviders": {
