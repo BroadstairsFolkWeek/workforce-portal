@@ -2,6 +2,12 @@
   "navigationFallback": {
     "rewrite": "/"
   },
+  "responseOverrides": {
+    "401": {
+      "rewrite": "/",
+      "statusCode": 401
+    }
+  },
   "auth": {
     "identityProviders": {
       "customOpenIdConnectProviders": {
