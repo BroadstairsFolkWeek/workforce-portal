@@ -1,5 +1,6 @@
 import { DateTime } from "luxon";
 import { Application } from "../interfaces/application";
+import { Team } from "../interfaces/team";
 
 const formFieldDescriptions: Required<{ [x in keyof Application]: string }> = {
   telephone: "Telephone",
@@ -113,7 +114,10 @@ const addTodoComponent = (
   }
 };
 
-export const applicationTodoComponents = (application: Application) => {
+export const applicationTodoComponents = (
+  application: Application,
+  requirements: Array<Team["requirements"]>
+) => {
   const infoNeededFields: Array<keyof Application> = [
     "address",
     "telephone",
@@ -122,6 +126,12 @@ export const applicationTodoComponents = (application: Application) => {
     "tShirtSize",
     "ageGroup",
   ];
+
+  const dbsRequired = requirements.findIndex((req) => req === "DBS") !== -1;
+  if (dbsRequired) {
+    infoNeededFields.push("dbsDisclosureNumber");
+    infoNeededFields.push("dbsDisclosureDate");
+  }
 
   const infoNeededDescriptions: string[] = [];
   infoNeededFields.forEach((f) =>

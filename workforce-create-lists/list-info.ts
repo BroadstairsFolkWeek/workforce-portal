@@ -119,6 +119,16 @@ const teamsList: PopulateListDef = {
         },
       },
       {
+        name: "Requirements",
+        description:
+          "Any requirements or qualifications that must be satisified to join this team.",
+        choice: {
+          allowTextEntry: false,
+          choices: ["DBS", "Drivers License"],
+          displayAs: "dropDownMenu",
+        },
+      },
+      {
         name: "DisplayOrder",
         displayName: "Display Order",
         description:

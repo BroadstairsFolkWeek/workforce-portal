@@ -5,12 +5,24 @@ export type ITeamsContext = {
   loaded: boolean;
   teams: Team[];
   error: string | null;
+  getRequirementForTeam: (teamName: string) => Team["requirements"] | null;
+  getRequirementsForTeams: (
+    ...teamPreferences: Array<string | undefined>
+  ) => Array<Team["requirements"]>;
+};
+
+const invalidFunction = () => {
+  throw new Error(
+    "TeamsContext consumer is not wrapped in a corresponding provider."
+  );
 };
 
 const TeamsContext = React.createContext<ITeamsContext>({
   loaded: false,
   teams: [],
   error: null,
+  getRequirementForTeam: invalidFunction,
+  getRequirementsForTeams: invalidFunction,
 });
 
 const TeamsContextProvider = ({ children }: { children: JSX.Element }) => {
@@ -36,6 +48,29 @@ const TeamsContextProvider = ({ children }: { children: JSX.Element }) => {
     setLoaded(true);
   }, []);
 
+  const getRequirementForTeam = useCallback(
+    (teamName) => {
+      const team = teams.find((team) => team.team === teamName);
+      if (team && team.requirements) {
+        return team.requirements;
+      } else {
+        return null;
+      }
+    },
+    [teams]
+  );
+
+  const getRequirementsForTeams = useCallback(
+    (...teamPreferences: Array<string | undefined>) => {
+      const teamNames = teamPreferences.filter((pref) => !!pref) as string[];
+      const reqs = teamNames
+        .map(getRequirementForTeam)
+        .filter((req) => !!req) as Array<Team["requirements"]>;
+      return reqs;
+    },
+    [getRequirementForTeam]
+  );
+
   useEffect(() => {
     fetchTeams();
   }, [fetchTeams]);
@@ -46,6 +81,8 @@ const TeamsContextProvider = ({ children }: { children: JSX.Element }) => {
         loaded,
         teams,
         error,
+        getRequirementForTeam,
+        getRequirementsForTeams,
       }}
     >
       {children}

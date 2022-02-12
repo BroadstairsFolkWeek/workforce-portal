@@ -1,3 +1,4 @@
+import { DatePicker } from "@fluentui/react";
 import { Field, Formik } from "formik";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -5,11 +6,13 @@ import {
   ApplicationUpdate,
   useEditApplication,
 } from "../contexts/EditApplicationContext";
+import { useTeams } from "../contexts/TeamsContext";
 import PageLayout from "../PageLayout";
-import { TextInput } from "./Fields";
+import { DateInput, TextInput } from "./Fields";
 import { TeamPreferenceField } from "./TeamPreferenceField";
 
 const ApplicationForm: React.FC = () => {
+  const { getRequirementsForTeams } = useTeams();
   const navigate = useNavigate();
   const { application, saveApplication } = useEditApplication();
   const [saveErrorCode, setSaveErrorCode] = useState(0);
@@ -24,8 +27,8 @@ const ApplicationForm: React.FC = () => {
         previousTeam: application.previousTeam ?? "",
         firstAidCertificate: application.firstAidCertificate ?? false,
         occupationOrSkills: application.occupationOrSkills ?? "",
-        dbsDisclosureNumber: application.dbsDisclosureNumber ?? "",
-        dbsDisclosureDate: application.dbsDisclosureDate ?? "",
+        dbsDisclosureNumber: application.dbsDisclosureNumber,
+        dbsDisclosureDate: application.dbsDisclosureDate,
         camping: application.camping ?? false,
         tShirtSize: application.tShirtSize ?? "S",
         ageGroup: application.ageGroup ?? "18-20",
@@ -120,6 +123,15 @@ const ApplicationForm: React.FC = () => {
         }}
       >
         {(formik) => {
+          const teamPreferenceRequirements = getRequirementsForTeams(
+            formik.values.teamPreference1,
+            formik.values.teamPreference2,
+            formik.values.teamPreference3
+          );
+
+          const dbsRequired =
+            teamPreferenceRequirements.findIndex((req) => req === "DBS") !== -1;
+
           return (
             <>
               {errorComponent}
@@ -219,20 +231,23 @@ const ApplicationForm: React.FC = () => {
                   />
                 </div>
 
-                <div className="my-8">
-                  <TextInput
-                    name="dbsDisclosureNumber"
-                    label="DBS disclosure number"
-                    description="Only needed if applying to join the Children's Team"
-                    type="text"
-                  />
-                  <TextInput
-                    name="dbsDisclosureDate"
-                    label="DBS disclosure date"
-                    description="Only needed if applying to join the Children's Team"
-                    type="text"
-                  />
-                </div>
+                {dbsRequired ? (
+                  <div className="my-8">
+                    <span>
+                      DBS disclosure information is required when applying to
+                      join the Children's Team
+                    </span>
+                    <TextInput
+                      name="dbsDisclosureNumber"
+                      label="DBS disclosure number"
+                      type="text"
+                    />
+                    <DateInput
+                      name="dbsDisclosureDate"
+                      label="DBS disclosure date"
+                    />
+                  </div>
+                ) : null}
 
                 <div className="flex flex-row justify-between items-center my-8">
                   <span>Do you want to register for camping?</span>

@@ -5,6 +5,7 @@ import ApplicationControls from "./ApplicationControls";
 import ApplicationInfo, { applicationTodoComponents } from "./ApplicationInfo";
 import { useApplication } from "./contexts/ApplicationContext";
 import { useEditApplication } from "./contexts/EditApplicationContext";
+import { useTeams } from "./contexts/TeamsContext";
 import Spinner from "./Spinner";
 
 const ApplicationHeader = ({
@@ -30,7 +31,15 @@ const ApplicationFooter = ({
 }: PropsWithChildren<{
   application: Application;
 }>) => {
-  const todoComponents = applicationTodoComponents(application);
+  const { getRequirementsForTeams } = useTeams();
+  const todoComponents = applicationTodoComponents(
+    application,
+    getRequirementsForTeams(
+      application.teamPreference1,
+      application.teamPreference2,
+      application.teamPreference3
+    )
+  );
 
   if (todoComponents.length > 0) {
     return (
