@@ -15,7 +15,7 @@ interface TeamPreferenceFieldProps {
 }
 
 const dropdownStyles: Partial<IDropdownStyles> = {
-  dropdown: { width: 400 },
+  dropdown: { width: 270 },
   dropdownOptionText: { overflow: "visible", whiteSpace: "normal" },
   dropdownItem: { height: "auto" },
   dropdownItemSelected: { height: "auto" },
