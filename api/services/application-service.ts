@@ -1,6 +1,7 @@
 import { UserInfo } from "@aaronpowell/static-web-apps-api-auth";
 import { AddableApplication, Application } from "../interfaces/application";
 import { UserLogin } from "../interfaces/user-login";
+import { logTrace, logWarn } from "../utilties/logging";
 import {
   createApplicationListItem,
   deleteApplicationListItem,
@@ -41,7 +42,10 @@ const isApplicationFieldMissing = (
   addableApplication: AddableApplication,
   field: keyof AddableApplication
 ): boolean => {
-  if (addableApplication[field] === undefined) {
+  if (
+    addableApplication[field] === undefined ||
+    addableApplication[field] === null
+  ) {
     return true;
   }
 
@@ -58,6 +62,11 @@ const isApplicationFieldMissing = (
 const determineApplicationStatus = (
   addableApplication: AddableApplication
 ): AddableApplication["status"] => {
+  logTrace(
+    "determineApplicationStatus: addableApplication: " +
+      JSON.stringify(addableApplication, null, 2)
+  );
+
   const mandatoryFields: Array<keyof AddableApplication> = [
     "telephone",
     "address",
@@ -103,6 +112,7 @@ export const saveApplication = async (
   existingApplication: Application | undefined
 ): Promise<Application> => {
   if (existingApplication) {
+    logTrace("saveApplication: Application already exists. Updating");
     // If an application exists then we can update it as long as the version numbers match.
     if (existingApplication.version === addableApplication.version) {
       const updatedApplication: Application = {
@@ -115,6 +125,10 @@ export const saveApplication = async (
       };
       updatedApplication.status =
         determineApplicationStatus(updatedApplication);
+      logTrace(
+        "saveApplication: Determined application status: " +
+          updatedApplication.status
+      );
 
       return updateApplicationListItem(updatedApplication);
     } else {
@@ -126,6 +140,9 @@ export const saveApplication = async (
       );
     }
   } else {
+    logTrace(
+      "saveApplication: Application does not exist. Creating new application."
+    );
     const addableApplicationWithProfileValuesAndVersion = {
       ...addableApplication,
       title: userProfile.displayName,
@@ -135,7 +152,10 @@ export const saveApplication = async (
     };
     addableApplicationWithProfileValuesAndVersion.status =
       determineApplicationStatus(addableApplicationWithProfileValuesAndVersion);
-
+    logTrace(
+      "saveApplication: Determined application status: " +
+        addableApplicationWithProfileValuesAndVersion.status
+    );
     return createApplicationListItem(
       addableApplicationWithProfileValuesAndVersion
     );
@@ -174,14 +194,20 @@ export const deleteApplication = async (
 ): Promise<void> => {
   // Retrieve any application the user may have already saved.
   const existingApplication = await getUserApplication(userInfo.userId!);
-
-  if (applicationVersion !== existingApplication?.version) {
-    throw new ApplicationServiceError("version-conflict");
-  }
-
   if (existingApplication) {
+    logTrace(
+      "deleteApplication: Retrieved existing application with version: " +
+        existingApplication.version
+    );
+
+    if (applicationVersion !== existingApplication.version) {
+      logWarn("deleteApplication: Aborting due to mismatched version numbers");
+      throw new ApplicationServiceError("version-conflict");
+    }
+
     await deleteApplicationListItem(existingApplication);
   } else {
+    logWarn("deleteApplication: Application not found");
     throw new ApplicationServiceError("application-not-found");
   }
 };
