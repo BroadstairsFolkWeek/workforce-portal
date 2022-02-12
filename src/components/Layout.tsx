@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { useUserProfile } from "./contexts/UserProfileContext";
 import ApplicationForm from "./forms/ApplicationForm";
+import ProfileForm from "./forms/ProfileForm";
 import Home from "./Home";
 import Spinner from "./Spinner";
 
@@ -34,6 +35,8 @@ const Layout: React.FC = () => {
       <Routes>
         <Route path="*" element={<Home />} />
         <Route path="/application" element={<ApplicationForm />} />
+        <Route path="/profile" element={<ProfileForm />} />
+        {/* <Route path="/profilePhoto" element={}/> */}
       </Routes>
     </>
   );

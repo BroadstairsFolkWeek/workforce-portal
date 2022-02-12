@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   ContextualMenuItemType,
   DefaultButton,
@@ -11,7 +12,6 @@ import {
 
 import { useUserProfile } from "./contexts/UserProfileContext";
 import PhotoPanel from "./PhotoPanel";
-import ProfilePanel from "./ProfilePanel";
 import { useUserProfilePhotos } from "./contexts/UserProfilePhotosContext";
 
 import hoodenHorse from "../images/hoodenHorse.jpg";
@@ -32,9 +32,9 @@ const contextMenuStyles: IStyleFunctionOrObject<
 };
 
 const ProfileControl: React.FC = () => {
+  const navigate = useNavigate();
   const { loaded, userProfile } = useUserProfile();
   const { profilePhotoDataSrc } = useUserProfilePhotos();
-  const [showProfilePanel, setShowProfilePanel] = useState<boolean>(false);
   const [showPhotoPanel, setShowPhotoPanel] = useState<boolean>(false);
 
   const profileImage = useMemo(() => {
@@ -54,7 +54,7 @@ const ProfileControl: React.FC = () => {
         {
           key: "editProfile",
           text: "Edit profile",
-          onClick: () => setShowProfilePanel(true),
+          onClick: () => navigate("/profile"),
         },
         {
           key: "setPhoto",
@@ -65,18 +65,16 @@ const ProfileControl: React.FC = () => {
         { key: "signOut", text: "Sign out", href: "/api/logout" },
       ],
     }),
-    []
+    [navigate]
   );
 
   const panel = useMemo(() => {
-    if (showProfilePanel) {
-      return <ProfilePanel onDismiss={() => setShowProfilePanel(false)} />;
-    } else if (showPhotoPanel) {
+    if (showPhotoPanel) {
       return <PhotoPanel onDismiss={() => setShowPhotoPanel(false)} />;
     } else {
       return null;
     }
-  }, [showProfilePanel, showPhotoPanel]);
+  }, [showPhotoPanel]);
 
   if (loaded) {
     if (userProfile) {
