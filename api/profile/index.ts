@@ -13,6 +13,7 @@ const httpTrigger: AzureFunction = async function (
   req: HttpRequest
 ): Promise<void> {
   setLoggerFromContext(context);
+  logTrace("profile: entry");
 
   const userInfo = getUserInfo(req);
   if (userInfo) {

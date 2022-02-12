@@ -50,7 +50,10 @@ const getUserProfilePropertiesFromGraph = async (
   }
 
   const graphUser = await getGraphUser(userInfo.userId);
-  console.log(JSON.stringify(graphUser, null, 2));
+  console.log(
+    "getUserProfilePropertiesFromGraph: GraphUser: " +
+      JSON.stringify(graphUser, null, 2)
+  );
 
   if (graphUser && graphUser.identityProvider) {
     const userLoginFromGraph: AddableUserLogin = {
