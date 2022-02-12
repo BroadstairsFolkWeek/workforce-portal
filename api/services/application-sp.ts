@@ -3,6 +3,7 @@ import {
   AddableApplicationListItem,
   PersistedApplicationListItem,
 } from "../interfaces/application-sp";
+import { OrderBySpec } from "../interfaces/sp-items";
 import { getWorkforcePortalConfig } from "./configuration-service";
 import {
   applyToItemsByFilter,
@@ -153,7 +154,8 @@ const addableApplicationToListItem = (
 };
 
 export const getApplicationsByFilters = async (
-  filter?: string
+  filter?: string,
+  orderBy?: OrderBySpec[]
 ): Promise<Application[]> => {
   return applyToItemsByFilter<PersistedApplicationListItem, Application>(
     workforceSiteUrl,
@@ -161,7 +163,8 @@ export const getApplicationsByFilters = async (
     (items: PersistedApplicationListItem[]) => {
       return Promise.resolve(items.map(listItemToApplication));
     },
-    filter
+    filter,
+    orderBy
   );
 };
 

@@ -20,3 +20,8 @@ export interface PersistedListItem extends AddableListItem {
   Created: string;
   Modified: string;
 }
+
+export interface OrderBySpec {
+  columnName: string;
+  direction: "ASC" | "DESC";
+}

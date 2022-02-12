@@ -1,6 +1,6 @@
 import { getUserInfo } from "@aaronpowell/static-web-apps-api-auth";
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
-import { sanitiseApplicationFromApiClient } from "../services/application-sanitise";
+import { sanitiseApplicationFromApiClient } from "../services/api-sanitise-service";
 import {
   isApplicationServiceError,
   saveApplication,

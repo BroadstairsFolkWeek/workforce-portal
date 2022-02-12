@@ -118,6 +118,16 @@ const teamsList: PopulateListDef = {
           linesForEditing: 5,
         },
       },
+      {
+        name: "DisplayOrder",
+        displayName: "Display Order",
+        description:
+          "The order that teams are displayed in the Workforce Portal",
+        index: true,
+        required: true,
+        enforceUniqueValues: false,
+        number: {},
+      },
     ]),
 };
 

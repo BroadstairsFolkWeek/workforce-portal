@@ -6,7 +6,7 @@ import { IItemAddResult, IItemUpdateResult } from "@pnp/sp-commonjs/items";
 import { IFolderInfo } from "@pnp/sp-commonjs/folders";
 import { SPFetchClient } from "@pnp/nodejs-commonjs";
 import { getWorkforcePortalConfig } from "./configuration-service";
-import { UpdatableListItem } from "../interfaces/sp-items";
+import { OrderBySpec, UpdatableListItem } from "../interfaces/sp-items";
 import {
   ACCEPTED_IMAGE_EXTENSIONS,
   ACCEPTED_IMAGE_MIME_TYPES,
@@ -62,12 +62,21 @@ export const deleteItem = async (
 export const getPagedItemsdByFilter = async <T>(
   site: string,
   listGuid: string,
-  filter?: string
+  filter?: string,
+  orderBy?: OrderBySpec[]
 ) => {
   const web = Web(site);
   let itemsQuery = web.lists.getById(listGuid).items;
   if (filter) {
     itemsQuery = itemsQuery.filter(filter);
+  }
+  if (orderBy) {
+    orderBy.forEach((orderBySpec) => {
+      itemsQuery = itemsQuery.orderBy(
+        orderBySpec.columnName,
+        orderBySpec.direction === "ASC"
+      );
+    });
   }
 
   return await itemsQuery.getPaged<T[]>();
@@ -78,10 +87,16 @@ export const applyToPagedItemsdByFilter = async <T, U = T[]>(
   listGuid: string,
   callback: (items: T[]) => Promise<U>,
   filter?: string,
+  orderBy?: OrderBySpec[],
   doPaging: boolean = true
 ): Promise<U> => {
   let retVal: U;
-  let pagedItems = await getPagedItemsdByFilter<T>(site, listGuid, filter);
+  let pagedItems = await getPagedItemsdByFilter<T>(
+    site,
+    listGuid,
+    filter,
+    orderBy
+  );
   retVal = await callback(pagedItems.results);
 
   while (doPaging && pagedItems.hasNext) {
@@ -95,9 +110,17 @@ export const applyToItemsByFilter = async <T, U = T>(
   site: string,
   listGuid: string,
   callback: (items: T[]) => Promise<U[]>,
-  filter?: string
+  filter?: string,
+  orderBy?: OrderBySpec[]
 ) => {
-  return applyToPagedItemsdByFilter(site, listGuid, callback, filter, false);
+  return applyToPagedItemsdByFilter(
+    site,
+    listGuid,
+    callback,
+    filter,
+    orderBy,
+    false
+  );
 };
 
 export const getLibraryAsList = async (

@@ -7,6 +7,7 @@ import {
 } from "../contexts/EditApplicationContext";
 import PageLayout from "../PageLayout";
 import { TextInput } from "./Fields";
+import { TeamPreferenceField } from "./TeamPreferenceField";
 
 const ApplicationForm: React.FC = () => {
   const navigate = useNavigate();
@@ -169,6 +170,28 @@ const ApplicationForm: React.FC = () => {
                       />
                     </div>
                   ) : null}
+                </div>
+
+                <div className="my-8">
+                  <span>
+                    Please select the teams you would prefer to work on. Most
+                    preferred team first.
+                  </span>
+                  <TeamPreferenceField
+                    name="teamPreference1"
+                    label="First team preference"
+                    placeholder="Select a team"
+                  />
+                  <TeamPreferenceField
+                    name="teamPreference2"
+                    label="Second team preference"
+                    placeholder="Select a team"
+                  />
+                  <TeamPreferenceField
+                    name="teamPreference3"
+                    label="Third team preference"
+                    placeholder="Select a team"
+                  />
                 </div>
 
                 <div className="my-8">
