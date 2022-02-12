@@ -57,6 +57,7 @@ export type AddableApplication = ApplicationDto & {
   identityProviderUserId: string;
   status:
     | "info-required"
+    | "profile-required"
     | "photo-required"
     | "documents-required"
     | "ready-to-submit"

@@ -336,6 +336,7 @@ const applicationsList: PopulateListDef = {
           allowTextEntry: false,
           choices: [
             "info-required",
+            "profile-required",
             "photo-required",
             "documents-required",
             "ready-to-submit",

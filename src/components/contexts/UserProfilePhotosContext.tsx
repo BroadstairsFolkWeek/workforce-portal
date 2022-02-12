@@ -3,6 +3,7 @@ import { useUserProfile } from "./UserProfileContext";
 
 export type IUserProfilePhotosContext = {
   loaded: boolean;
+  photoUploaded: boolean;
   profilePhotoDataSrc: string | null;
   previousPhotosDataSrc: Array<string | null>;
   reload: () => void;
@@ -20,6 +21,7 @@ const invalidFunction = () => {
 const UserProfilePhotosContext = React.createContext<IUserProfilePhotosContext>(
   {
     loaded: false,
+    photoUploaded: false,
     profilePhotoDataSrc: null,
     previousPhotosDataSrc: [],
     reload: invalidFunction,
@@ -36,6 +38,7 @@ const UserProfilePhotosContextProvider = ({
 }) => {
   const { loaded: userProfileLoaded } = useUserProfile();
   const [loaded, setLoaded] = useState(false);
+  const [photoUploaded, setPhotoUploaded] = useState(false);
   const [previousPhotosLoaded, setPreviousPhotosLoaded] = useState(false);
   const [profilePhotoDataSrc, setProfilePhotoDataSrc] = useState<string | null>(
     null
@@ -79,10 +82,12 @@ const UserProfilePhotosContextProvider = ({
 
   const reload = useCallback(async () => {
     setLoaded(false);
+    setPhotoUploaded(false);
     setProfilePhotoDataSrc(null);
     const urlObject = await fetchPhoto(0);
     if (urlObject) {
       setProfilePhotoDataSrc(urlObject);
+      setPhotoUploaded(true);
     }
     setLoaded(true);
   }, [fetchPhoto]);
@@ -119,6 +124,7 @@ const UserProfilePhotosContextProvider = ({
   const setProfilePhoto = useCallback(
     (urlObject: string) => {
       setProfilePhotoDataSrc(urlObject);
+      setPhotoUploaded(true);
       fetchPreviousPhotos();
     },
     [fetchPreviousPhotos]
@@ -134,6 +140,7 @@ const UserProfilePhotosContextProvider = ({
     <UserProfilePhotosContext.Provider
       value={{
         loaded,
+        photoUploaded,
         profilePhotoDataSrc,
         previousPhotosDataSrc,
         reload,

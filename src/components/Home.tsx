@@ -1,20 +1,49 @@
-// import { useCallback } from "react";
+import { useMemo } from "react";
+import { Link } from "react-router-dom";
 import ApplicationDisplayPanel from "./ApplicationDisplayPanel";
-// import { useNavigate } from "react-router-dom";
 import { useUserProfile } from "./contexts/UserProfileContext";
+import { useUserProfilePhotos } from "./contexts/UserProfilePhotosContext";
 import HomeLayout from "./HomeLayout";
 
 export interface WelcomeProps {}
 
 const Home: React.FC<WelcomeProps> = () => {
-  const { userProfile } = useUserProfile();
-  // const navigate = useNavigate();
+  const { userProfile, profileComplete } = useUserProfile();
+  const { loaded: photoContextLoaded, photoUploaded } = useUserProfilePhotos();
 
-  // const newApplicationHandler = useCallback(() => {}, []);
+  const profileReminder = useMemo(() => {
+    if (profileComplete) {
+      if (photoContextLoaded && photoUploaded) {
+        return null;
+      } else {
+        return (
+          <div className="m-4 p-4 bg-red-200 outline outline-4 outline-yellow-100 rounded-lg">
+            Please{" "}
+            <Link to="/profilePhoto" className="underline">
+              upload a profile photo
+            </Link>{" "}
+            as it forms part of your workforce application and will be used on
+            your ID badge.
+          </div>
+        );
+      }
+    } else {
+      return (
+        <div className="m-4 p-4 bg-red-200 outline outline-4 outline-yellow-100 rounded-lg">
+          Please{" "}
+          <Link to="/profile" className="underline">
+            fill in your profile
+          </Link>{" "}
+          as it forms part of your workforce application.
+        </div>
+      );
+    }
+  }, [profileComplete, photoContextLoaded, photoUploaded]);
 
   if (userProfile) {
     return (
       <HomeLayout>
+        {profileReminder}
         <div className="space-y-2 text-left">
           <h1 className="text-xl">Your application</h1>
           <ApplicationDisplayPanel />

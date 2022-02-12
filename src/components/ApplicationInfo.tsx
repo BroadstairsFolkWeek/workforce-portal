@@ -119,8 +119,6 @@ export const applicationTodoComponents = (
   requirements: Array<Team["requirements"]>
 ) => {
   const infoNeededFields: Array<keyof Application> = [
-    "address",
-    "telephone",
     "emergencyContactName",
     "emergencyContactTelephone",
     "tShirtSize",

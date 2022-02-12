@@ -38,9 +38,13 @@ export const getApplication = async (
   return application;
 };
 
-const isApplicationFieldMissing = (
-  addableApplication: AddableApplication,
-  field: keyof AddableApplication
+function propertyValueIsString(v: any): v is string {
+  return typeof v === "string";
+}
+
+const isPropertyValueMissing = <T>(
+  addableApplication: T,
+  field: keyof T
 ): boolean => {
   if (
     addableApplication[field] === undefined ||
@@ -49,10 +53,8 @@ const isApplicationFieldMissing = (
     return true;
   }
 
-  if (
-    typeof addableApplication[field] === "string" &&
-    addableApplication[field]?.toString().trim().length === 0
-  ) {
+  const v = addableApplication[field];
+  if (propertyValueIsString(v) && v?.toString().trim().length === 0) {
     return true;
   }
 
@@ -60,7 +62,8 @@ const isApplicationFieldMissing = (
 };
 
 const determineApplicationStatus = (
-  addableApplication: AddableApplication
+  addableApplication: AddableApplication,
+  userProfile: UserLogin
 ): AddableApplication["status"] => {
   logTrace(
     "determineApplicationStatus: addableApplication: " +
@@ -68,8 +71,6 @@ const determineApplicationStatus = (
   );
 
   const mandatoryFields: Array<keyof AddableApplication> = [
-    "telephone",
-    "address",
     "emergencyContactName",
     "emergencyContactTelephone",
     "ageGroup",
@@ -77,7 +78,7 @@ const determineApplicationStatus = (
   ];
   if (
     mandatoryFields.some((field) =>
-      isApplicationFieldMissing(addableApplication, field)
+      isPropertyValueMissing(addableApplication, field)
     )
   ) {
     return "info-required";
@@ -96,11 +97,28 @@ const determineApplicationStatus = (
     ];
     if (
       mandatoryChildrensTeamFields.some((field) =>
-        isApplicationFieldMissing(addableApplication, field)
+        isPropertyValueMissing(addableApplication, field)
       )
     ) {
       return "info-required";
     }
+  }
+
+  const mandatoryProfileFields: Array<keyof UserLogin> = [
+    "displayName",
+    "telephone",
+    "address",
+  ];
+  if (
+    mandatoryProfileFields.some((field) =>
+      isPropertyValueMissing(userProfile, field)
+    )
+  ) {
+    return "profile-required";
+  }
+
+  if (userProfile.photoRequired) {
+    return "photo-required";
   }
 
   return "ready-to-submit";
@@ -123,8 +141,10 @@ export const saveApplication = async (
         telephone: userProfile.telephone,
         version: existingApplication.version + 1,
       };
-      updatedApplication.status =
-        determineApplicationStatus(updatedApplication);
+      updatedApplication.status = determineApplicationStatus(
+        updatedApplication,
+        userProfile
+      );
       logTrace(
         "saveApplication: Determined application status: " +
           updatedApplication.status
@@ -151,7 +171,10 @@ export const saveApplication = async (
       version: 1,
     };
     addableApplicationWithProfileValuesAndVersion.status =
-      determineApplicationStatus(addableApplicationWithProfileValuesAndVersion);
+      determineApplicationStatus(
+        addableApplicationWithProfileValuesAndVersion,
+        userProfile
+      );
     logTrace(
       "saveApplication: Determined application status: " +
         addableApplicationWithProfileValuesAndVersion.status
@@ -166,22 +189,31 @@ export const updateApplicationFromProfile = async (
   existingApplication: Application,
   userProfile: UserLogin
 ): Promise<Application> => {
+  const updatedApplication: Application = {
+    ...existingApplication,
+    title: userProfile.displayName,
+    address: userProfile.address,
+    telephone: userProfile.telephone,
+    version: existingApplication.version + 1,
+  };
+
+  updatedApplication.status = determineApplicationStatus(
+    updatedApplication,
+    userProfile
+  );
+
+  logTrace(
+    "updateApplicationFromProfile: Determined application status: " +
+      updatedApplication.status
+  );
+
   // Only update the application if there are any changes.
   if (
-    existingApplication.title !== userProfile.displayName ||
-    existingApplication.address !== userProfile.address ||
-    existingApplication.telephone !== userProfile.telephone
+    existingApplication.title !== updatedApplication.title ||
+    existingApplication.address !== updatedApplication.address ||
+    existingApplication.telephone !== updatedApplication.telephone ||
+    existingApplication.status !== updatedApplication.status
   ) {
-    const updatedApplication: Application = {
-      ...existingApplication,
-      title: userProfile.displayName,
-      address: userProfile.address,
-      telephone: userProfile.telephone,
-      version: existingApplication.version + 1,
-    };
-
-    updatedApplication.status = determineApplicationStatus(updatedApplication);
-
     return updateApplicationListItem(updatedApplication);
   } else {
     return existingApplication;

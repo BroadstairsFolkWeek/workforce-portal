@@ -73,6 +73,7 @@ const listItemToStatus = (
 ): Application["status"] => {
   switch (item.Status) {
     case "info-required":
+    case "profile-required":
     case "photo-required":
     case "documents-required":
     case "ready-to-submit":

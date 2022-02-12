@@ -12,6 +12,9 @@ import { useUserProfilePhotos } from "./contexts/UserProfilePhotosContext";
 import hoodenHorse from "../images/hoodenHorse.jpg";
 import Spinner from "./Spinner";
 import PageLayout from "./PageLayout";
+import { useUserProfile } from "./contexts/UserProfileContext";
+import { UserLogin } from "../../api/interfaces/user-login";
+import { Application } from "../../api/interfaces/application";
 
 export interface PhotoPanelProps {}
 
@@ -24,6 +27,8 @@ const PhotoPage: React.FC<PhotoPanelProps> = () => {
     deletePhoto,
     setProfilePhoto,
   } = useUserProfilePhotos();
+
+  const { injectProfileAndApplication } = useUserProfile();
 
   const [deleting, setDeleting] = useState(false);
 
@@ -101,9 +106,16 @@ const PhotoPage: React.FC<PhotoPanelProps> = () => {
       if (result.successful.length) {
         const previewUrl = result.successful[0].preview as string;
         setProfilePhoto(previewUrl);
+        const responseBody = result.successful[0].response?.body;
+        if (responseBody) {
+          injectProfileAndApplication(
+            responseBody.profile as UserLogin,
+            responseBody.application as Application
+          );
+        }
       }
     },
-    [setProfilePhoto]
+    [setProfilePhoto, injectProfileAndApplication]
   );
 
   const uppy = useMemo(() => {

@@ -21,6 +21,7 @@ export interface Application {
   lastSaved: string;
   status:
     | "info-required"
+    | "profile-required"
     | "photo-required"
     | "documents-required"
     | "ready-to-submit"

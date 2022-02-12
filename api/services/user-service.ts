@@ -244,16 +244,24 @@ export const setProfilePicture = async (
   userInfo: UserInfo,
   fileExtension: ACCEPTED_IMAGE_EXTENSIONS,
   fileBuffer: Buffer
-): Promise<string> => {
+): Promise<UserLoginWithCurrentApplication> => {
   if (!userInfo || !userInfo.userId) {
     throw new UserServiceError("unauthenticated");
   }
 
-  const userProfile = await getUserLogin(userInfo.userId);
-  if (userProfile) {
+  const userProfileAndApplication = await getUserProfile(userInfo);
+
+  if (userProfileAndApplication) {
+    logTrace("setProfilePicture: Retrieved existing user profile");
+    const userProfile = userProfileAndApplication.profile;
+
     const strippedFileName =
       userProfile.displayName + " - " + userProfile.identityProviderUserId;
 
+    logTrace(
+      "setProfilePicture: Adding photo file with stripped filename: " +
+        strippedFileName
+    );
     const fileAddResult = await addProfilePhotoFileWithItem(
       strippedFileName,
       fileExtension,
@@ -264,9 +272,50 @@ export const setProfilePicture = async (
     );
 
     if (fileAddResult === "COULD_NOT_DETERMINE_NEW_FILENAME") {
+      logError(
+        "setProfilePicture: Error adding file. Couldn't find available filename."
+      );
       throw new UserServiceError("profile-photo-already-exists");
     } else {
-      return fileAddResult.data.Name;
+      logTrace("setProfilePicture: File added");
+
+      // Clear the photo required flag if present.
+      if (userProfile.photoRequired) {
+        logTrace(
+          "setProfilePicture: User profile currently flagged as photoRequired. Clearing flag"
+        );
+        const updatedProfile: UserLogin = {
+          ...userProfile,
+          photoRequired: false,
+          version: userProfile.version + 1,
+        };
+
+        const updatedUserProfile = await updateUserListItem(updatedProfile);
+        logTrace("setProfilePicture: User profile updated.");
+
+        const existingApplication = userProfileAndApplication?.application;
+        if (existingApplication) {
+          logTrace(
+            "setProfilePicture: Updating user's application is reponse to the profile change"
+          );
+          const updateApplication = await updateApplicationFromProfile(
+            existingApplication,
+            updatedUserProfile
+          );
+          logTrace("setProfilePicture: Application updated");
+
+          return {
+            profile: updatedUserProfile,
+            application: updateApplication,
+          };
+        } else {
+          return {
+            profile: updatedUserProfile,
+          };
+        }
+      } else {
+        return userProfileAndApplication;
+      }
     }
   } else {
     throw new UserServiceError("missing-user-profile");

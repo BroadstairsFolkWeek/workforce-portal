@@ -15,8 +15,13 @@ export type UserProfileUpdate = Pick<
 export type IUserProfileContext = {
   loaded: boolean;
   userProfile: UserProfile | null;
+  profileComplete: boolean;
   currentApplication: Application | null;
   saveUserProfile: (userProfile: UserProfileUpdate) => Promise<number>;
+  injectProfileAndApplication: (
+    userProfile: UserProfile,
+    application?: Application
+  ) => void;
 };
 
 const invalidFunction = () => {
@@ -28,8 +33,10 @@ const invalidFunction = () => {
 const UserProfileContext = React.createContext<IUserProfileContext>({
   loaded: false,
   userProfile: null,
+  profileComplete: false,
   currentApplication: null,
   saveUserProfile: invalidFunction,
+  injectProfileAndApplication: invalidFunction,
 });
 
 const UserProfileContextProvider = ({
@@ -38,6 +45,7 @@ const UserProfileContextProvider = ({
   children: JSX.Element;
 }) => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [profileComplete, setProfileComplete] = useState<boolean>(false);
   const [currentApplication, setCurrentApplication] =
     useState<Application | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -89,13 +97,44 @@ const UserProfileContextProvider = ({
     [userProfile]
   );
 
+  const injectProfileAndApplication = useCallback(
+    (injectedProfile: UserProfile, injectedApplication?: Application) => {
+      setUserProfile(injectedProfile);
+      if (injectedApplication) {
+        setCurrentApplication(injectedApplication);
+      }
+    },
+    []
+  );
+
   useEffect(() => {
     fetchProfile();
   }, [fetchProfile]);
 
+  useEffect(() => {
+    if (userProfile) {
+      setProfileComplete(
+        !!userProfile.displayName &&
+          !!userProfile.givenName &&
+          !!userProfile.surname &&
+          !!userProfile.address &&
+          !!userProfile.telephone
+      );
+    } else {
+      setProfileComplete(false);
+    }
+  }, [userProfile]);
+
   return (
     <UserProfileContext.Provider
-      value={{ loaded, userProfile, currentApplication, saveUserProfile }}
+      value={{
+        loaded,
+        userProfile,
+        profileComplete,
+        currentApplication,
+        saveUserProfile,
+        injectProfileAndApplication,
+      }}
     >
       {children}
     </UserProfileContext.Provider>

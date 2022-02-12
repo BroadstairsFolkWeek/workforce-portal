@@ -55,10 +55,16 @@ const handlePostProfilePhoto = async function (
   const imageFile = files[0];
   try {
     const [, fileExtension, fileBuffer] = sanitiseImageFromApiClient(imageFile);
-    await setProfilePicture(userInfo, fileExtension, fileBuffer);
+
+    const updatedProfile = await setProfilePicture(
+      userInfo,
+      fileExtension,
+      fileBuffer
+    );
 
     return {
       status: 200,
+      body: updatedProfile,
     };
   } catch (err) {
     if (isApiSanitiseServiceError(err) && err.error === "invalid-request") {
