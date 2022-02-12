@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ContextualMenuItemType,
@@ -11,7 +11,6 @@ import {
 } from "@fluentui/react";
 
 import { useUserProfile } from "./contexts/UserProfileContext";
-import PhotoPanel from "./PhotoPanel";
 import { useUserProfilePhotos } from "./contexts/UserProfilePhotosContext";
 
 import hoodenHorse from "../images/hoodenHorse.jpg";
@@ -35,7 +34,6 @@ const ProfileControl: React.FC = () => {
   const navigate = useNavigate();
   const { loaded, userProfile } = useUserProfile();
   const { profilePhotoDataSrc } = useUserProfilePhotos();
-  const [showPhotoPanel, setShowPhotoPanel] = useState<boolean>(false);
 
   const profileImage = useMemo(() => {
     return (
@@ -59,7 +57,7 @@ const ProfileControl: React.FC = () => {
         {
           key: "setPhoto",
           text: "Set photo",
-          onClick: () => setShowPhotoPanel(true),
+          onClick: () => navigate("/profilePhoto"),
         },
         { key: "divider_1", itemType: ContextualMenuItemType.Divider },
         { key: "signOut", text: "Sign out", href: "/api/logout" },
@@ -67,14 +65,6 @@ const ProfileControl: React.FC = () => {
     }),
     [navigate]
   );
-
-  const panel = useMemo(() => {
-    if (showPhotoPanel) {
-      return <PhotoPanel onDismiss={() => setShowPhotoPanel(false)} />;
-    } else {
-      return null;
-    }
-  }, [showPhotoPanel]);
 
   if (loaded) {
     if (userProfile) {
@@ -86,7 +76,6 @@ const ProfileControl: React.FC = () => {
             styles={buttonStyles}
           />
           {profileImage}
-          {panel}
         </div>
       );
     } else {

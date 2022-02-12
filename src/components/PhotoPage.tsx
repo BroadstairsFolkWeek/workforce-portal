@@ -4,8 +4,6 @@ import { Dashboard } from "@uppy/react";
 import XHRUpload from "@uppy/xhr-upload";
 import Webcam from "@uppy/webcam";
 
-import { Panel, PanelType } from "@fluentui/react";
-
 import "@uppy/core/dist/style.css";
 import "@uppy/dashboard/dist/style.css";
 import "@uppy/webcam/dist/style.css";
@@ -13,12 +11,11 @@ import { useUserProfilePhotos } from "./contexts/UserProfilePhotosContext";
 
 import hoodenHorse from "../images/hoodenHorse.jpg";
 import Spinner from "./Spinner";
+import PageLayout from "./PageLayout";
 
-export interface PhotoPanelProps {
-  onDismiss: () => void;
-}
+export interface PhotoPanelProps {}
 
-const PhotoPanel: React.FC<PhotoPanelProps> = ({ onDismiss }) => {
+const PhotoPage: React.FC<PhotoPanelProps> = () => {
   const {
     loaded,
     profilePhotoDataSrc,
@@ -145,19 +142,14 @@ const PhotoPanel: React.FC<PhotoPanelProps> = ({ onDismiss }) => {
   }, [loaded, loadPreviousPhotos]);
 
   return (
-    <Panel
-      headerText="Profile photo"
-      isOpen={true}
-      hasCloseButton={true}
-      type={PanelType.medium}
-      isLightDismiss
-      onDismiss={onDismiss}
-    >
+    <PageLayout>
+      <h1 className="text-2xl font-black">Profile photo</h1>
+
       {profileImage}
       {previousProfileImages}
       <Dashboard uppy={uppy} plugins={["Webcam"]} height={350} />
-    </Panel>
+    </PageLayout>
   );
 };
 
-export default PhotoPanel;
+export default PhotoPage;
