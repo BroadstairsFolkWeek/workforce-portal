@@ -68,9 +68,10 @@ const UserProfileContextProvider = ({
           });
 
           if (saveResponse.status === 200 || saveResponse.status === 409) {
-            const savedUserProfile: UserProfile = await saveResponse.json();
-            if (savedUserProfile) {
-              setUserProfile(savedUserProfile);
+            const profileAndApplication = await saveResponse.json();
+            setUserProfile(profileAndApplication.profile);
+            if (profileAndApplication.application) {
+              setCurrentApplication(profileAndApplication.application);
             }
           }
 
