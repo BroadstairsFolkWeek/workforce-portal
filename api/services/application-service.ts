@@ -32,14 +32,9 @@ export function isApplicationServiceError(
 
 export const getApplication = async (
   userInfo: UserInfo
-): Promise<Application> => {
+): Promise<Application | null> => {
   const application = await getUserApplication(userInfo.userId!);
-
-  if (application) {
-    return application;
-  } else {
-    throw new ApplicationServiceError("application-not-found");
-  }
+  return application;
 };
 
 const isApplicationFieldMissing = (
@@ -104,19 +99,18 @@ const determineApplicationStatus = (
 
 export const saveApplication = async (
   addableApplication: AddableApplication,
-  userProfile: UserLogin
+  userProfile: UserLogin,
+  existingApplication: Application | undefined
 ): Promise<Application> => {
-  // Retrieve any application the user may have already saved.
-  const existingApplication = await getUserApplication(
-    userProfile.identityProviderUserId
-  );
-
   if (existingApplication) {
     // If an application exists then we can update it as long as the version numbers match.
     if (existingApplication.version === addableApplication.version) {
       const updatedApplication: Application = {
         ...existingApplication,
         ...addableApplication,
+        title: userProfile.displayName,
+        address: userProfile.address,
+        telephone: userProfile.telephone,
         version: existingApplication.version + 1,
       };
       updatedApplication.status =
@@ -132,7 +126,45 @@ export const saveApplication = async (
       );
     }
   } else {
-    return createApplicationListItem({ ...addableApplication, version: 1 });
+    const addableApplicationWithProfileValuesAndVersion = {
+      ...addableApplication,
+      title: userProfile.displayName,
+      address: userProfile.address,
+      telephone: userProfile.telephone,
+      version: 1,
+    };
+    addableApplicationWithProfileValuesAndVersion.status =
+      determineApplicationStatus(addableApplicationWithProfileValuesAndVersion);
+
+    return createApplicationListItem(
+      addableApplicationWithProfileValuesAndVersion
+    );
+  }
+};
+
+export const updateApplicationFromProfile = async (
+  existingApplication: Application,
+  userProfile: UserLogin
+): Promise<Application> => {
+  // Only update the application if there are any changes.
+  if (
+    existingApplication.title !== userProfile.displayName ||
+    existingApplication.address !== userProfile.address ||
+    existingApplication.telephone !== userProfile.telephone
+  ) {
+    const updatedApplication: Application = {
+      ...existingApplication,
+      title: userProfile.displayName,
+      address: userProfile.address,
+      telephone: userProfile.telephone,
+      version: existingApplication.version + 1,
+    };
+
+    updatedApplication.status = determineApplicationStatus(updatedApplication);
+
+    return updateApplicationListItem(updatedApplication);
+  } else {
+    return existingApplication;
   }
 };
 

@@ -1,4 +1,5 @@
 import { Number, String, Record, Static, Optional } from "runtypes";
+import { Application } from "./application";
 
 // UserProfile Data Transfer Object for data posted to the API.
 export const UserProfileUpdateDtoRunType = Record({
@@ -27,4 +28,9 @@ export type UpdatableUserLogin = Partial<AddableUserLogin> & {
 
 export type UserLogin = AddableUserLogin & {
   dbId: number;
+};
+
+export type UserLoginWithCurrentApplication = {
+  profile: UserLogin;
+  application?: Application;
 };

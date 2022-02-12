@@ -21,29 +21,29 @@ const httpTrigger: AzureFunction = async function (
 
     try {
       const application = await getApplication(userInfo);
-      context.res = {
-        status: 200,
-        body: application,
-      };
+      if (application) {
+        context.res = {
+          status: 200,
+          body: application,
+        };
+      } else {
+        logTrace(`getApplication: Application not found for user.`);
+        context.res = {
+          status: 404,
+          body: "Application not found",
+        };
+      }
     } catch (err) {
       if (isApplicationServiceError(err)) {
-        if (err.error === "application-not-found") {
-          logTrace(`getApplication: Application not found for user.`);
-          context.res = {
-            status: 404,
-            body: "Application not found",
-          };
-        } else {
-          logError(
-            `getApplication: Unrecognised application error: ${
-              err.error
-            } - ${err.arg1?.toString()}`
-          );
-          context.res = {
-            status: 500,
-            body: "Unknown application service error",
-          };
-        }
+        logError(
+          `getApplication: Unrecognised application error: ${
+            err.error
+          } - ${err.arg1?.toString()}`
+        );
+        context.res = {
+          status: 500,
+          body: "Unknown application service error",
+        };
       } else {
         logError(`getApplication: Unknown error: ${err.message}`);
         throw err;

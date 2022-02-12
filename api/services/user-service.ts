@@ -5,8 +5,13 @@ import {
   AddableUserLogin,
   UpdatableUserLogin,
   UserLogin,
+  UserLoginWithCurrentApplication,
 } from "../interfaces/user-login";
 import { logError, logTrace } from "../utilties/logging";
+import {
+  getApplication,
+  updateApplicationFromProfile,
+} from "./application-service";
 import { getGraphUser } from "./users-graph";
 import {
   addProfilePhotoFileWithItem,
@@ -75,13 +80,15 @@ const getUserProfilePropertiesFromGraph = async (
 
 export const getUserProfile = async (
   userInfo: UserInfo
-): Promise<UserLogin | null> => {
+): Promise<UserLoginWithCurrentApplication | null> => {
   if (!userInfo || !userInfo.userId) {
     throw new UserServiceError("unauthenticated");
   }
 
   const userLogin = await getUserLogin(userInfo.userId);
   if (userLogin) {
+    const existingApplication = await getApplication(userInfo);
+
     // Check and populate any missing mandatory properties on the user profile.
     if (!userLogin.identityProvider || !userLogin.identityProviderUserDetails) {
       const graphUser = await getUserProfilePropertiesFromGraph(userInfo);
@@ -99,11 +106,29 @@ export const getUserProfile = async (
             graphUser.identityProviderUserDetails;
         }
 
-        return updateUserListItem(updatingUserLogin);
+        const updatedUserLogin = await updateUserListItem(updatingUserLogin);
+        if (existingApplication) {
+          const updateApplication = await updateApplicationFromProfile(
+            existingApplication,
+            updatedUserLogin
+          );
+
+          return {
+            profile: updatedUserLogin,
+            application: updateApplication,
+          };
+        } else {
+          return {
+            profile: updatedUserLogin,
+          };
+        }
       }
     }
 
-    return userLogin;
+    return {
+      profile: userLogin,
+      application: existingApplication ?? undefined,
+    };
   } else {
     logTrace(
       "getUserProfile: User profile does not exist. Creating based on data from Graph API."
@@ -126,7 +151,9 @@ export const getUserProfile = async (
         "getUserProfile: About to create user profile: " +
           JSON.stringify(newUserLogin)
       );
-      return createUserListItem(newUserLogin);
+      return {
+        profile: await createUserListItem(newUserLogin),
+      };
     } else {
       logError(
         "getUserProfile: Could not read information for user from Graph API. Profile not created."
@@ -139,12 +166,13 @@ export const getUserProfile = async (
 export const updateUserProfile = async (
   updatableProfile: UpdatableUserLogin,
   userInfo: UserInfo
-): Promise<UserLogin> => {
+): Promise<UserLoginWithCurrentApplication> => {
   // Retrieve the existing user profile
-  const existingProfile = await getUserProfile(userInfo);
+  const existingProfileAndApplication = await getUserProfile(userInfo);
+  const existingProfile = existingProfileAndApplication?.profile;
 
   if (existingProfile) {
-    // Update the user's profile it as long as the version numbers match.
+    // Update the user's profile if the version numbers match.
     if (existingProfile.version === updatableProfile.version) {
       const updatedProfile: UserLogin = {
         ...existingProfile,
@@ -152,7 +180,24 @@ export const updateUserProfile = async (
         version: existingProfile.version + 1,
       };
 
-      return updateUserListItem(updatedProfile);
+      const updatedUserProfile = await updateUserListItem(updatedProfile);
+
+      const existingApplication = existingProfileAndApplication?.application;
+      if (existingApplication) {
+        const updateApplication = await updateApplicationFromProfile(
+          existingApplication,
+          updatedUserProfile
+        );
+
+        return {
+          profile: updatedUserProfile,
+          application: updateApplication,
+        };
+      } else {
+        return {
+          profile: updatedUserProfile,
+        };
+      }
     } else {
       // The profile being saved has a different version number to the existing application. The user may
       // have saved the profile from another device.
@@ -200,7 +245,11 @@ export const setProfilePicture = async (
   fileExtension: ACCEPTED_IMAGE_EXTENSIONS,
   fileBuffer: Buffer
 ): Promise<string> => {
-  const userProfile = await getUserProfile(userInfo);
+  if (!userInfo || !userInfo.userId) {
+    throw new UserServiceError("unauthenticated");
+  }
+
+  const userProfile = await getUserLogin(userInfo.userId);
   if (userProfile) {
     const strippedFileName =
       userProfile.displayName + " - " + userProfile.identityProviderUserId;

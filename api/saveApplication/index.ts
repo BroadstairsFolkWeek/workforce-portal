@@ -27,15 +27,16 @@ const httpTrigger: AzureFunction = async function (
     );
 
     try {
-      const userProfile = await getUserProfile(userInfo);
-      if (userProfile) {
+      const userProfileWithCurrentApplication = await getUserProfile(userInfo);
+      if (userProfileWithCurrentApplication) {
         const application = sanitiseApplicationFromApiClient(
           req.body,
-          userProfile
+          userProfileWithCurrentApplication.profile
         );
         const savedApplication = await saveApplication(
           application,
-          userProfile
+          userProfileWithCurrentApplication.profile,
+          userProfileWithCurrentApplication.application
         );
         context.res = { status: 200, body: savedApplication };
       } else {

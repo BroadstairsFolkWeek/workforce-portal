@@ -1,4 +1,5 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
+import { Application } from "../../../api/interfaces/application";
 import { UserLogin } from "../../../api/interfaces/user-login";
 
 /**
@@ -14,6 +15,7 @@ export type UserProfileUpdate = Pick<
 export type IUserProfileContext = {
   loaded: boolean;
   userProfile: UserProfile | null;
+  currentApplication: Application | null;
   saveUserProfile: (userProfile: UserProfileUpdate) => Promise<number>;
 };
 
@@ -26,6 +28,7 @@ const invalidFunction = () => {
 const UserProfileContext = React.createContext<IUserProfileContext>({
   loaded: false,
   userProfile: null,
+  currentApplication: null,
   saveUserProfile: invalidFunction,
 });
 
@@ -35,13 +38,18 @@ const UserProfileContextProvider = ({
   children: JSX.Element;
 }) => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [currentApplication, setCurrentApplication] =
+    useState<Application | null>(null);
   const [loaded, setLoaded] = useState(false);
 
   const fetchProfile = useCallback(async () => {
     const fetchResponse = await fetch("/api/profile");
     if (fetchResponse.ok) {
-      const profile = await fetchResponse.json();
-      setUserProfile(profile);
+      const profileAndApplication = await fetchResponse.json();
+      setUserProfile(profileAndApplication.profile);
+      if (profileAndApplication.application) {
+        setCurrentApplication(profileAndApplication.application);
+      }
     }
     setLoaded(true);
   }, []);
@@ -86,7 +94,7 @@ const UserProfileContextProvider = ({
 
   return (
     <UserProfileContext.Provider
-      value={{ loaded, userProfile, saveUserProfile }}
+      value={{ loaded, userProfile, currentApplication, saveUserProfile }}
     >
       {children}
     </UserProfileContext.Provider>
