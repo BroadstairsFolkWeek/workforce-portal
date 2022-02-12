@@ -63,7 +63,7 @@ export const updateUserListItem = async (
 export const getUsersByFilters = async (
   filter?: string
 ): Promise<UserLogin[]> => {
-  return applyToItemsByFilter<PersistedUserLoginListItem, UserLogin[]>(
+  return applyToItemsByFilter<PersistedUserLoginListItem, UserLogin>(
     workforceSiteUrl,
     userLoginsListGuid,
     (items: PersistedUserLoginListItem[]) => {

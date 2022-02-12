@@ -91,10 +91,10 @@ export const applyToPagedItemsdByFilter = async <T, U = T[]>(
   return retVal;
 };
 
-export const applyToItemsByFilter = async <T, U>(
+export const applyToItemsByFilter = async <T, U = T>(
   site: string,
   listGuid: string,
-  callback: (items: T[]) => Promise<U>,
+  callback: (items: T[]) => Promise<U[]>,
   filter?: string
 ) => {
   return applyToPagedItemsdByFilter(site, listGuid, callback, filter, false);

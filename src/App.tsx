@@ -8,26 +8,29 @@ import Layout from "./components/Layout";
 import { ApplicationContextProvider } from "./components/contexts/ApplicationContext";
 import { EditApplicationContextProvider } from "./components/contexts/EditApplicationContext";
 import { UserProfilePhotosContextProvider } from "./components/contexts/UserProfilePhotosContext";
+import { TeamsContextProvider } from "./components/contexts/TeamsContext";
 
 initializeIcons();
 
 function App() {
   return (
-    <ClientPrincipalContextProvider>
-      <UserProfileContextProvider>
-        <UserProfilePhotosContextProvider>
-          <ApplicationContextProvider>
-            <EditApplicationContextProvider>
-              <BrowserRouter>
-                {/* <div className="App"> */}
-                <Layout />
-                {/* </div> */}
-              </BrowserRouter>
-            </EditApplicationContextProvider>
-          </ApplicationContextProvider>
-        </UserProfilePhotosContextProvider>
-      </UserProfileContextProvider>
-    </ClientPrincipalContextProvider>
+    <TeamsContextProvider>
+      <ClientPrincipalContextProvider>
+        <UserProfileContextProvider>
+          <UserProfilePhotosContextProvider>
+            <ApplicationContextProvider>
+              <EditApplicationContextProvider>
+                <BrowserRouter>
+                  {/* <div className="App"> */}
+                  <Layout />
+                  {/* </div> */}
+                </BrowserRouter>
+              </EditApplicationContextProvider>
+            </ApplicationContextProvider>
+          </UserProfilePhotosContextProvider>
+        </UserProfileContextProvider>
+      </ClientPrincipalContextProvider>
+    </TeamsContextProvider>
   );
 }
 

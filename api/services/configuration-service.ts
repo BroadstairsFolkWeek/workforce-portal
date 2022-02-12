@@ -4,6 +4,7 @@ export interface WorkforcePortalConfig {
   spClientSecret: string;
   spLoginsListGuid: string;
   spApplicationsListGuid: string;
+  spTeamsListGuid: string;
   spWorkforcePhotosServerRelativeUrl: string;
   spWorkforcePhotosLibraryTitle: string;
   maxProfilePhotosPerPerson: number;
@@ -33,6 +34,7 @@ const config: WorkforcePortalConfig = {
   spClientSecret: getEnvOrThrow("WORKFORCE_CLIENT_SECRET"),
   spLoginsListGuid: getEnvOrThrow("WORKFORCE_LOGINS_LIST_GUID"),
   spApplicationsListGuid: getEnvOrThrow("WORKFORCE_APPLICATIONS_LIST_GUID"),
+  spTeamsListGuid: getEnvOrThrow("WORKFORCE_TEAMS_LIST_GUID"),
   spWorkforcePhotosServerRelativeUrl: getEnvOrThrow(
     "WORKFORCE_PHOTOS_SERVER_RELATIVE_URL"
   ),

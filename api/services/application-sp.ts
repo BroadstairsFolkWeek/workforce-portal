@@ -155,7 +155,7 @@ const addableApplicationToListItem = (
 export const getApplicationsByFilters = async (
   filter?: string
 ): Promise<Application[]> => {
-  return applyToItemsByFilter<PersistedApplicationListItem, Application[]>(
+  return applyToItemsByFilter<PersistedApplicationListItem, Application>(
     workforceSiteUrl,
     applicationsListGuid,
     (items: PersistedApplicationListItem[]) => {
