@@ -95,6 +95,48 @@ const identityProviderFromGraphResponse = (graphResponse: any): string => {
   }
 };
 
+const displayNameFromGraphResponse = (graphResponse: any): string => {
+  const graphDisplayName: string = graphResponse.displayName;
+  if (graphDisplayName) {
+    return graphDisplayName;
+  } else {
+    return emailFromGraphResponse(graphResponse) ?? "Unknown";
+  }
+};
+
+const surnameFromGraphResponse = (graphResponse: any): string | undefined => {
+  const surname: string = graphResponse.surname;
+  if (surname) {
+    return surname;
+  } else {
+    const displayName = displayNameFromGraphResponse(graphResponse);
+    const displayNameWords = displayName.trim().split(/\s/);
+    if (displayNameWords.length >= 2) {
+      return displayNameWords[displayNameWords.length - 1];
+    } else {
+      return undefined;
+    }
+  }
+};
+
+const givenNameFromGraphResponse = (graphResponse: any): string | undefined => {
+  const graphGivenName: string = graphResponse.givenName;
+  if (graphGivenName) {
+    return graphGivenName;
+  } else {
+    const displayName = displayNameFromGraphResponse(graphResponse);
+    const displayNameWords = displayName.trim().split(/\s/);
+    if (displayNameWords.length > 0) {
+      if (displayNameWords.length >= 2) {
+        displayNameWords.pop();
+      }
+      return displayNameWords.join(" ");
+    } else {
+      return undefined;
+    }
+  }
+};
+
 export const getGraphUser = async (
   userId: string
 ): Promise<GraphUser | undefined> => {
@@ -109,9 +151,9 @@ export const getGraphUser = async (
     return {
       email,
       identityProvider,
-      displayName: graphUserInfo.displayName,
-      givenName: graphUserInfo.givenName,
-      surname: graphUserInfo.surname,
+      displayName: displayNameFromGraphResponse(graphUserInfo),
+      givenName: givenNameFromGraphResponse(graphUserInfo),
+      surname: surnameFromGraphResponse(graphUserInfo),
     };
   } else {
     return undefined;
