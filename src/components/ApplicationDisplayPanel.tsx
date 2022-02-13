@@ -97,41 +97,21 @@ const ApplicationDisplayPanel: React.FC = () => {
     setProcessing(false);
   }, []);
 
-  const editButtonClickedHandler: React.MouseEventHandler<HTMLButtonElement> =
-    useCallback(
-      (ev) => {
-        ev.stopPropagation();
-        editItemHandler();
-      },
-      [editItemHandler]
-    );
+  const editButtonClickedHandler = useCallback(() => {
+    editItemHandler();
+  }, [editItemHandler]);
 
-  const deleteButtonClickedHandler: React.MouseEventHandler<HTMLButtonElement> =
-    useCallback(
-      (ev) => {
-        ev.stopPropagation();
-        deleteItemHandler();
-      },
-      [deleteItemHandler]
-    );
+  const deleteButtonClickedHandler = useCallback(() => {
+    deleteItemHandler();
+  }, [deleteItemHandler]);
 
-  const uploadButtonClickedHandler: React.MouseEventHandler<HTMLButtonElement> =
-    useCallback(
-      (ev) => {
-        ev.stopPropagation();
-        uploadDocumentsHandler();
-      },
-      [uploadDocumentsHandler]
-    );
+  const uploadButtonClickedHandler = useCallback(() => {
+    uploadDocumentsHandler();
+  }, [uploadDocumentsHandler]);
 
-  const submitButtonClickedHandler: React.MouseEventHandler<HTMLButtonElement> =
-    useCallback(
-      (ev) => {
-        ev.stopPropagation();
-        submitItemHandler();
-      },
-      [submitItemHandler]
-    );
+  const submitButtonClickedHandler = useCallback(() => {
+    submitItemHandler();
+  }, [submitItemHandler]);
 
   const errorComponent = useMemo(() => {
     if (deleteErrorCode !== 204) {

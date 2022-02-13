@@ -1,12 +1,34 @@
+import {
+  DefaultButton,
+  Dialog,
+  DialogFooter,
+  DialogType,
+  PrimaryButton,
+} from "@fluentui/react";
+import { useCallback, useMemo, useState } from "react";
 import { Application } from "../interfaces/application";
 
 interface ApplicationControlsProps {
   application: Application;
-  editButtonClicked: React.MouseEventHandler<HTMLButtonElement>;
-  deleteButtonClicked: React.MouseEventHandler<HTMLButtonElement>;
-  uploadDocumentsButtonClicked: React.MouseEventHandler<HTMLButtonElement>;
-  applicationSubmitButtonClcked: React.MouseEventHandler<HTMLButtonElement>;
+  editButtonClicked: () => void;
+  deleteButtonClicked: () => void;
+  uploadDocumentsButtonClicked: () => void;
+  applicationSubmitButtonClcked: () => void;
 }
+
+const dialogContentProps = {
+  type: DialogType.normal,
+  title: "Delete this application?",
+  closeButtonAriaLabel: "Close",
+};
+
+const dialogStyles = { main: { maxWidth: 450 } };
+
+const modalProps = {
+  isBlocking: false,
+  styles: dialogStyles,
+  dragOptions: undefined,
+};
 
 const isEditable = (application: Application): boolean => {
   return application.status !== "complete";
@@ -27,13 +49,23 @@ const isSubmittable = (application: Application): boolean => {
 interface ControlsButtonProps {
   text: string;
   className: string;
-  buttonClickedHander: React.MouseEventHandler<HTMLButtonElement>;
+  onClicked: () => void;
 }
+
 const ControlsButton: React.FC<ControlsButtonProps> = ({
   text,
   className,
-  buttonClickedHander,
+  onClicked,
 }) => {
+  const buttonClickedHander: React.MouseEventHandler<HTMLButtonElement> =
+    useCallback(
+      (ev) => {
+        ev.stopPropagation();
+        onClicked();
+      },
+      [onClicked]
+    );
+
   return (
     <button
       onClick={buttonClickedHander}
@@ -51,45 +83,87 @@ const ApplicationControls = ({
   uploadDocumentsButtonClicked,
   applicationSubmitButtonClcked,
 }: ApplicationControlsProps) => {
-  const editComponent = isEditable(application) ? (
-    <ControlsButton
-      text="Edit"
-      className="bg-yellow-400"
-      buttonClickedHander={editButtonClicked}
-    />
-  ) : null;
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
-  const deleteComponent = isDeletable(application) ? (
-    <ControlsButton
-      text="Delete"
-      className="bg-red-400"
-      buttonClickedHander={deleteButtonClicked}
-    />
-  ) : null;
+  const editElement = useMemo(
+    () =>
+      isEditable(application) ? (
+        <ControlsButton
+          text="Edit"
+          className="bg-yellow-400"
+          onClicked={editButtonClicked}
+        />
+      ) : null,
+    [application, editButtonClicked]
+  );
 
-  const uploadComponent = isDocumentsUploadable(application) ? (
-    <ControlsButton
-      text="Upload Documents"
-      className="bg-green-400"
-      buttonClickedHander={uploadDocumentsButtonClicked}
-    />
-  ) : null;
+  const deleteElement = useMemo(
+    () =>
+      isDeletable(application) ? (
+        <ControlsButton
+          text="Delete"
+          className="bg-red-400"
+          onClicked={() => setConfirmDelete(true)}
+        />
+      ) : null,
+    [application]
+  );
 
-  const completeComponent = isSubmittable(application) ? (
-    <ControlsButton
-      text="Submit application"
-      className="bg-blue-300"
-      buttonClickedHander={applicationSubmitButtonClcked}
-    />
-  ) : null;
+  const uploadElement = useMemo(
+    () =>
+      isDocumentsUploadable(application) ? (
+        <ControlsButton
+          text="Upload Documents"
+          className="bg-green-400"
+          onClicked={uploadDocumentsButtonClicked}
+        />
+      ) : null,
+    [application, uploadDocumentsButtonClicked]
+  );
+
+  const completeElement = useMemo(
+    () =>
+      isSubmittable(application) ? (
+        <ControlsButton
+          text="Submit application"
+          className="bg-blue-300"
+          onClicked={applicationSubmitButtonClcked}
+        />
+      ) : null,
+    [application, applicationSubmitButtonClcked]
+  );
+
+  const messageBoxElement = useMemo(
+    () =>
+      confirmDelete ? (
+        <div>
+          <Dialog
+            hidden={false}
+            onDismiss={() => setConfirmDelete(false)}
+            dialogContentProps={dialogContentProps}
+            modalProps={modalProps}
+          >
+            <DialogFooter>
+              <PrimaryButton onClick={deleteButtonClicked} text="Delete" />
+              <DefaultButton
+                onClick={() => setConfirmDelete(false)}
+                text="Cancel"
+              />
+            </DialogFooter>
+          </Dialog>
+        </div>
+      ) : null,
+    [confirmDelete, deleteButtonClicked]
+  );
 
   return (
     <>
       <div className="flex flex-col gap-2 text-center">
-        {editComponent}
-        {deleteComponent}
-        {uploadComponent}
-        {completeComponent}
+        {editElement}
+        {deleteElement}
+        {uploadElement}
+        {completeElement}
+        {messageBoxElement}
       </div>
     </>
   );
