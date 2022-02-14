@@ -29,6 +29,7 @@ const handleGetProfilePhoto = async function (
         isRaw: true,
         headers: {
           "Content-Type": result.mimeType,
+          "Cache-Control": "public, max-age=604800",
         },
       };
     } else {
