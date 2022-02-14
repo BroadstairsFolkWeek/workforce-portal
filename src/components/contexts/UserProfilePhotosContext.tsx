@@ -36,7 +36,7 @@ const UserProfilePhotosContextProvider = ({
 }: {
   children: JSX.Element;
 }) => {
-  const { loaded: userProfileLoaded } = useUserProfile();
+  const { loaded: userProfileLoaded, userProfile } = useUserProfile();
   const [loaded, setLoaded] = useState(false);
   const [photoUploaded, setPhotoUploaded] = useState(false);
   const [previousPhotosLoaded, setPreviousPhotosLoaded] = useState(false);
@@ -47,8 +47,8 @@ const UserProfilePhotosContextProvider = ({
     Array<string | null>
   >([]);
 
-  const fetchPhoto = useCallback(async (index: number) => {
-    const fetchResponse = await fetch(`/api/profilePhoto?index=${index}`);
+  const fetchPhoto = useCallback(async (id: string) => {
+    const fetchResponse = await fetch(`/api/profilePhoto?id=${id}`);
     if (fetchResponse.ok) {
       const blob = await fetchResponse.blob();
       const url = URL.createObjectURL(blob);
@@ -58,39 +58,38 @@ const UserProfilePhotosContextProvider = ({
 
   const fetchPreviousPhotos = useCallback(async () => {
     setPreviousPhotosDataSrc([null]);
-    let index = 1;
-    while (index < 10) {
-      const urlOrbject = await fetchPhoto(index);
-      if (urlOrbject) {
-        setPreviousPhotosDataSrc((prev) => {
-          const newPreviousPhotos = [...prev];
-          newPreviousPhotos[newPreviousPhotos.length - 1] = urlOrbject;
-          newPreviousPhotos.push(null);
-          return newPreviousPhotos;
+    if (userProfile && userProfile.photoIds.length > 1) {
+      const prevPhotoIds = userProfile.photoIds.slice(1);
+      setPreviousPhotosDataSrc(Array(prevPhotoIds.length));
+      prevPhotoIds.forEach((prevPhotoId, index) => {
+        fetchPhoto(prevPhotoId).then((photoUrlObject) => {
+          setPreviousPhotosDataSrc((prev) => {
+            if (photoUrlObject) {
+              const newPreviousPhotos = [...prev];
+              newPreviousPhotos[index] = photoUrlObject;
+              return newPreviousPhotos;
+            } else {
+              return prev;
+            }
+          });
         });
-      } else {
-        setPreviousPhotosDataSrc((prev) => {
-          const newPreviousPhotos = [...prev];
-          newPreviousPhotos.pop();
-          return newPreviousPhotos;
-        });
-        break;
-      }
-      index++;
+      });
     }
-  }, [fetchPhoto]);
+  }, [userProfile, fetchPhoto]);
 
   const reload = useCallback(async () => {
-    setLoaded(false);
-    setPhotoUploaded(false);
-    setProfilePhotoDataSrc(null);
-    const urlObject = await fetchPhoto(0);
-    if (urlObject) {
-      setProfilePhotoDataSrc(urlObject);
-      setPhotoUploaded(true);
+    if (userProfile && userProfile.photoIds.length > 0) {
+      setLoaded(false);
+      setPhotoUploaded(false);
+      setProfilePhotoDataSrc(null);
+      const urlObject = await fetchPhoto(userProfile.photoIds[0]);
+      if (urlObject) {
+        setProfilePhotoDataSrc(urlObject);
+        setPhotoUploaded(true);
+      }
+      setLoaded(true);
     }
-    setLoaded(true);
-  }, [fetchPhoto]);
+  }, [userProfile, fetchPhoto]);
 
   const loadPreviousPhotos = useCallback(async () => {
     if (!previousPhotosLoaded) {
@@ -134,7 +133,7 @@ const UserProfilePhotosContextProvider = ({
     if (userProfileLoaded) {
       reload();
     }
-  }, [userProfileLoaded, reload]);
+  }, [userProfileLoaded, userProfile, reload]);
 
   return (
     <UserProfilePhotosContext.Provider

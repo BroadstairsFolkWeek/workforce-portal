@@ -1,4 +1,5 @@
 import { UserInfo } from "@aaronpowell/static-web-apps-api-auth";
+import { v4 as uuidv4 } from "uuid";
 import { FileContentWithInfo } from "../interfaces/file";
 import { ACCEPTED_IMAGE_EXTENSIONS } from "../interfaces/sp-files";
 import {
@@ -12,15 +13,20 @@ import {
   getApplication,
   updateApplicationFromProfile,
 } from "./application-service";
+import { getWorkforcePortalConfig } from "./configuration-service";
 import { getGraphUser } from "./users-graph";
 import {
   addProfilePhotoFileWithItem,
   createUserListItem,
+  deletePhotoByUniqueId,
   deleteProfilePhotoFile,
-  getProfilePhotoFile,
+  getProfilePhotoFileByUniqueId,
   getUserLogin,
   updateUserListItem,
 } from "./users-sp";
+
+const workforcePortalConfig = getWorkforcePortalConfig();
+const maxPhotosPerPerson = workforcePortalConfig.maxProfilePhotosPerPerson;
 
 const USER_SERVICE_ERROR_TYPE_VAL =
   "user-service-error-d992f06a-75df-478c-a169-ec4024b48092";
@@ -28,8 +34,7 @@ const USER_SERVICE_ERROR_TYPE_VAL =
 type UserServiceErrorType =
   | "unauthenticated"
   | "version-conflict"
-  | "missing-user-profile"
-  | "profile-photo-already-exists";
+  | "missing-user-profile";
 
 export class UserServiceError {
   private type: typeof USER_SERVICE_ERROR_TYPE_VAL =
@@ -69,7 +74,7 @@ const getUserProfilePropertiesFromGraph = async (
       surname: graphUser.surname,
       email: graphUser.email,
       identityProvider: graphUser.identityProvider,
-      photoRequired: true,
+      photoIds: [],
       version: 1,
     };
     return userLoginFromGraph;
@@ -143,7 +148,7 @@ export const getUserProfile = async (
         surname: graphUser.surname,
         email: graphUser.email,
         identityProvider: graphUser.identityProvider,
-        photoRequired: true,
+        photoIds: [],
         version: 1,
       };
 
@@ -209,14 +214,10 @@ export const updateUserProfile = async (
 };
 
 export const getProfilePicture = async (
-  userInfo: UserInfo,
-  index: number = 0
+  encodedPhotoId: string
 ): Promise<FileContentWithInfo | null> => {
-  if (!userInfo || !userInfo.userId) {
-    throw new UserServiceError("unauthenticated");
-  }
-
-  const getPhotoResult = await getProfilePhotoFile(userInfo.userId, index);
+  const [uniqueId] = encodedPhotoId.split(":");
+  const getPhotoResult = await getProfilePhotoFileByUniqueId(uniqueId);
   if (!getPhotoResult) {
     return null;
   }
@@ -255,8 +256,13 @@ export const setProfilePicture = async (
     logTrace("setProfilePicture: Retrieved existing user profile");
     const userProfile = userProfileAndApplication.profile;
 
-    const strippedFileName =
-      userProfile.displayName + " - " + userProfile.identityProviderUserId;
+    logTrace(
+      "setProfilePicture: Number of photos that already exist for user: " +
+        userProfile.photoIds.length
+    );
+
+    const photoId = uuidv4();
+    const strippedFileName = userProfile.displayName + " - " + photoId;
 
     logTrace(
       "setProfilePicture: Adding photo file with stripped filename: " +
@@ -268,55 +274,64 @@ export const setProfilePicture = async (
       fileBuffer,
       userProfile.identityProviderUserId,
       userProfile.givenName ?? "",
-      userProfile.surname ?? ""
+      userProfile.surname ?? "",
+      photoId
     );
 
-    if (fileAddResult === "COULD_NOT_DETERMINE_NEW_FILENAME") {
-      logError(
-        "setProfilePicture: Error adding file. Couldn't find available filename."
+    logTrace(
+      "setProfilePicture: File added. UniqueId: " +
+        fileAddResult.data.UniqueId +
+        ". Name: " +
+        fileAddResult.data.Name
+    );
+
+    const encodedPhotoId = fileAddResult.data.UniqueId + ":" + photoId;
+    const allPhotoIds = [encodedPhotoId, ...userProfile.photoIds];
+
+    const keepPhotoIds = allPhotoIds.slice(0, maxPhotosPerPerson);
+    const deletePhotoIds = allPhotoIds.slice(maxPhotosPerPerson);
+
+    // Delete any unused photos. No need to wait for this operation to complete as if it fails then
+    // we end up with a few unused files in the document library which can be cleaned by some other process.
+    deletePhotoIds.forEach((encodedDeletePhotoId) => {
+      const [uniqueId] = encodedDeletePhotoId.split(":");
+      logTrace("setProfilePicture: Deleting photo: " + uniqueId);
+      deletePhotoByUniqueId(uniqueId);
+    });
+
+    // Update the user profile to reflect the new photo id.
+    const updatedProfile: UserLogin = {
+      ...userProfile,
+      photoIds: keepPhotoIds,
+      version: userProfile.version + 1,
+    };
+
+    const updatedUserProfile = await updateUserListItem(updatedProfile);
+    logTrace("setProfilePicture: User profile updated.");
+
+    const existingApplication = userProfileAndApplication?.application;
+    if (existingApplication) {
+      logTrace(
+        "setProfilePicture: Updating user's application is reponse to the profile change"
       );
-      throw new UserServiceError("profile-photo-already-exists");
+      const updateApplication = await updateApplicationFromProfile(
+        existingApplication,
+        updatedUserProfile
+      );
+      logTrace("setProfilePicture: Application updated");
+
+      return {
+        profile: updatedUserProfile,
+        application: updateApplication,
+      };
     } else {
-      logTrace("setProfilePicture: File added");
-
-      // Clear the photo required flag if present.
-      if (userProfile.photoRequired) {
-        logTrace(
-          "setProfilePicture: User profile currently flagged as photoRequired. Clearing flag"
-        );
-        const updatedProfile: UserLogin = {
-          ...userProfile,
-          photoRequired: false,
-          version: userProfile.version + 1,
-        };
-
-        const updatedUserProfile = await updateUserListItem(updatedProfile);
-        logTrace("setProfilePicture: User profile updated.");
-
-        const existingApplication = userProfileAndApplication?.application;
-        if (existingApplication) {
-          logTrace(
-            "setProfilePicture: Updating user's application is reponse to the profile change"
-          );
-          const updateApplication = await updateApplicationFromProfile(
-            existingApplication,
-            updatedUserProfile
-          );
-          logTrace("setProfilePicture: Application updated");
-
-          return {
-            profile: updatedUserProfile,
-            application: updateApplication,
-          };
-        } else {
-          return {
-            profile: updatedUserProfile,
-          };
-        }
-      } else {
-        return userProfileAndApplication;
-      }
+      return {
+        profile: updatedUserProfile,
+      };
     }
+    // } else {
+    // return userProfileAndApplication;
+    // }
   } else {
     throw new UserServiceError("missing-user-profile");
   }

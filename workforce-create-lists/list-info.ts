@@ -67,14 +67,6 @@ const loginsList: PopulateListDef = {
         text: {},
       },
       {
-        name: "PhotoRequired",
-        displayName: "Photo Required",
-        indexed: true,
-        required: true,
-        enforceUniqueValues: false,
-        boolean: {},
-      },
-      {
         name: "Telephone",
         indexed: false,
         required: false,
@@ -89,6 +81,17 @@ const loginsList: PopulateListDef = {
         text: {
           allowMultipleLines: true,
           linesForEditing: 5,
+        },
+      },
+      {
+        name: "PhotoIds",
+        displayName: "Photo IDs",
+        indexed: false,
+        required: false,
+        enforceUniqueValues: false,
+        text: {
+          allowMultipleLines: true,
+          linesForEditing: 3,
         },
       },
       { name: "Version", index: false, required: true, number: {} },
@@ -375,6 +378,13 @@ const workforceProfilePhotos: PopulateListDef = {
         indexed: true,
         required: false,
         enforceUniqueValues: false,
+        text: {},
+      },
+      {
+        name: "PhotoId",
+        indexed: true,
+        required: false,
+        enforceUniqueValues: true,
         text: {},
       },
     ];

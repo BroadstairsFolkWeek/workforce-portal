@@ -232,20 +232,22 @@ export const getFileForListItem = async (
   return [fileInfo.Name, await file.getBuffer()];
 };
 
-export const getImageFileForListItem = async (
+export const getFileForUniqueId = async (
   site: string,
-  listId: string,
-  listItemId: number
-): Promise<
-  | [string, ArrayBuffer, ACCEPTED_IMAGE_EXTENSIONS, ACCEPTED_IMAGE_MIME_TYPES]
-  | null
-> => {
-  const getFileResult = await getFileForListItem(site, listId, listItemId);
-  if (!getFileResult) {
-    return null;
-  }
+  uniqueId: string
+): Promise<[string, ArrayBuffer] | null> => {
+  const web = Web(site);
+  const file = web.getFileById(uniqueId);
+  const fileInfo = await file.get();
+  return [fileInfo.Name, await file.getBuffer()];
+};
 
-  const [filename, content] = getFileResult;
+const fileResultToImageResult = (
+  filename: string,
+  content: ArrayBuffer
+):
+  | [string, ArrayBuffer, ACCEPTED_IMAGE_EXTENSIONS, ACCEPTED_IMAGE_MIME_TYPES]
+  | null => {
   const extensionWithDot = path.extname(filename);
   if (!extensionWithDot) {
     return null;
@@ -268,6 +270,37 @@ export const getImageFileForListItem = async (
   return null;
 };
 
+export const getImageFileForListItem = async (
+  site: string,
+  listId: string,
+  listItemId: number
+): Promise<
+  | [string, ArrayBuffer, ACCEPTED_IMAGE_EXTENSIONS, ACCEPTED_IMAGE_MIME_TYPES]
+  | null
+> => {
+  const getFileResult = await getFileForListItem(site, listId, listItemId);
+  if (!getFileResult) {
+    return null;
+  }
+
+  return fileResultToImageResult(getFileResult[0], getFileResult[1]);
+};
+
+export const getImageFileForUniqueId = async (
+  site: string,
+  uniqueId: string
+): Promise<
+  | [string, ArrayBuffer, ACCEPTED_IMAGE_EXTENSIONS, ACCEPTED_IMAGE_MIME_TYPES]
+  | null
+> => {
+  const getFileResult = await getFileForUniqueId(site, uniqueId);
+  if (!getFileResult) {
+    return null;
+  }
+
+  return fileResultToImageResult(getFileResult[0], getFileResult[1]);
+};
+
 export const deleteFileForListItem = async (
   site: string,
   listId: string,
@@ -278,4 +311,9 @@ export const deleteFileForListItem = async (
   const item = list.items.getById(listItemId);
   const file = item.file;
   return file.delete();
+};
+
+export const deleteFileByUniqueId = async (site: string, uniqueId: string) => {
+  const web = Web(site);
+  return web.getFileById(uniqueId).delete();
 };

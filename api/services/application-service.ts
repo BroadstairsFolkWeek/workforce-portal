@@ -117,7 +117,7 @@ const determineApplicationStatus = (
     return "profile-required";
   }
 
-  if (userProfile.photoRequired) {
+  if (userProfile.photoIds.length === 0) {
     return "photo-required";
   }
 

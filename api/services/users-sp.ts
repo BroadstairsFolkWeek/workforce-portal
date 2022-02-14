@@ -12,9 +12,10 @@ import {
   applyToItemsByFilter,
   applyToPagedItemsdByFilter,
   createItem,
+  deleteFileByUniqueId,
   deleteFileForListItem,
   deleteItem,
-  getImageFileForListItem,
+  getImageFileForUniqueId,
   getLibraryAsList,
   updateItem,
 } from "./sp-service";
@@ -26,7 +27,6 @@ const userPhotosServerRelativeUrl =
   workforcePortalConfig.spWorkforcePhotosServerRelativeUrl;
 const userPhotosDocumentLibraryTitle =
   workforcePortalConfig.spWorkforcePhotosLibraryTitle;
-const maxPhotosPerPerson = workforcePortalConfig.maxProfilePhotosPerPerson;
 
 export const getUserLogin = async (
   userId: string
@@ -73,6 +73,17 @@ export const getUsersByFilters = async (
   );
 };
 
+const listItemToPhotoIds = (
+  item: PersistedUserLoginListItem
+): UserLogin["photoIds"] => {
+  const photoIdsText = item.PhotoIds;
+  if (photoIdsText) {
+    return photoIdsText.split("\n").map((id) => id.trim());
+  } else {
+    return [];
+  }
+};
+
 const listItemToUserLogin = (item: PersistedUserLoginListItem): UserLogin => {
   return {
     email: item.Email,
@@ -81,7 +92,7 @@ const listItemToUserLogin = (item: PersistedUserLoginListItem): UserLogin => {
     surname: item.Surname,
     telephone: item.Telephone,
     address: item.Address,
-    photoRequired: item.PhotoRequired === undefined ? true : item.PhotoRequired,
+    photoIds: listItemToPhotoIds(item),
     identityProvider: item.IdentityProvider,
     identityProviderUserId: item.IdentityProviderUserId,
     identityProviderUserDetails: item.IdentityProviderUserDetails,
@@ -100,7 +111,7 @@ const addableUserLoginToListItem = (
     Surname: user.surname,
     Telephone: user.telephone,
     Address: user.address,
-    PhotoRequired: user.photoRequired,
+    PhotoIds: user.photoIds.join("\n"),
     IdentityProvider: user.identityProvider,
     IdentityProviderUserId: user.identityProviderUserId,
     IdentityProviderUserDetails: user.identityProviderUserDetails,
@@ -134,7 +145,9 @@ const getUserPhotosByUserId = async (
   );
 };
 
-const deletePhotoByListItemId = async (itemId: number): Promise<void> => {
+export const deletePhotoByListItemId = async (
+  itemId: number
+): Promise<void> => {
   const photosList = await getLibraryAsList(
     workforceSiteUrl,
     userPhotosDocumentLibraryTitle
@@ -143,120 +156,48 @@ const deletePhotoByListItemId = async (itemId: number): Promise<void> => {
   return deleteItem(workforceSiteUrl, photosList.Id, itemId);
 };
 
+export const deletePhotoByUniqueId = async (
+  uniqueId: string
+): Promise<void> => {
+  return deleteFileByUniqueId(workforceSiteUrl, uniqueId);
+};
+
 export const addProfilePhotoFileWithItem = async (
   fileBaseName: string,
   fileExtension: string,
   imageContent: Buffer,
   identityProviderUserId: string,
   givenName: string,
-  surname: string
-): Promise<IFileAddResult | "COULD_NOT_DETERMINE_NEW_FILENAME"> => {
-  const existingUserPhotoListItems = await getUserPhotosByUserId(
-    identityProviderUserId
+  surname: string,
+  photoId: string
+): Promise<IFileAddResult> => {
+  let newFilename = fileBaseName + "." + fileExtension;
+
+  logTrace("addProfilePhoto: Adding file: " + newFilename);
+  const addResult = await addFileToFolder(
+    workforceSiteUrl,
+    userPhotosServerRelativeUrl,
+    newFilename,
+    imageContent
   );
 
   logTrace(
-    "addProfilePhoto: Number of photos that already exist for user: " +
-      existingUserPhotoListItems.length
+    "addProfilePhoto: File added. Setting associated metadata (columns)."
   );
+  const associatedItem: IItem = await addResult.file.getItem();
+  await associatedItem.update({
+    Title: newFilename,
+    IdentityProviderUserId: identityProviderUserId,
+    PhotoId: photoId,
+    GivenName: givenName,
+    Surname: surname,
+  });
 
-  // Delete older photos if adding this new photo will breach the limit on the number of
-  // photos stored per user.
-  while (existingUserPhotoListItems.length >= maxPhotosPerPerson) {
-    const oldestPhotoListItem = existingUserPhotoListItems[0];
-    logTrace("addProfilePhoto: Deleting photo: " + oldestPhotoListItem.Title);
-    await deletePhotoByListItemId(oldestPhotoListItem.ID);
-    existingUserPhotoListItems.shift();
-  }
-
-  // Build the list of exiting filenames to check against when generating the filename
-  // for the new photo.
-  const existingFilenames = existingUserPhotoListItems.map(
-    (item) => item.Title
-  );
-  logTrace(
-    `addProfilePhoto: Existing photo filenames: [${existingFilenames.join(
-      ", "
-    )}]`
-  );
-
-  let newFilename;
-  let filenameSuffix = 0;
-  while (filenameSuffix < maxPhotosPerPerson) {
-    const candidateFilename =
-      fileBaseName +
-      (filenameSuffix ? "-" + filenameSuffix : "") +
-      "." +
-      fileExtension;
-
-    logTrace(
-      "addProfilePhoto: checking if candidate filename in use: " +
-        candidateFilename
-    );
-
-    const fileExists = existingFilenames.find((ef) => ef === candidateFilename);
-    if (!fileExists) {
-      newFilename = candidateFilename;
-      break;
-    }
-    filenameSuffix++;
-  }
-
-  if (newFilename) {
-    logTrace("addProfilePhoto: Adding file: " + newFilename);
-    const addResult = await addFileToFolder(
-      workforceSiteUrl,
-      userPhotosServerRelativeUrl,
-      newFilename,
-      imageContent
-    );
-
-    logTrace(
-      "addProfilePhoto: File added. Setting associated metadata (columns)."
-    );
-    const associatedItem: IItem = await addResult.file.getItem();
-    await associatedItem.update({
-      Title: newFilename,
-      IdentityProviderUserId: identityProviderUserId,
-      GivenName: givenName,
-      Surname: surname,
-    });
-
-    return addResult;
-  }
-
-  return "COULD_NOT_DETERMINE_NEW_FILENAME";
+  return addResult;
 };
 
-export const getProfilePhotoFile = async (
-  identityProviderUserId: string,
-  index: number
-) => {
-  const existingUserPhotoListItems = await getUserPhotosByUserId(
-    identityProviderUserId
-  );
-
-  if (
-    existingUserPhotoListItems &&
-    existingUserPhotoListItems.length &&
-    existingUserPhotoListItems.length > index
-  ) {
-    const selectedFile =
-      existingUserPhotoListItems[existingUserPhotoListItems.length - 1 - index];
-
-    const photosList = await getLibraryAsList(
-      workforceSiteUrl,
-      userPhotosDocumentLibraryTitle
-    );
-
-    return getImageFileForListItem(
-      workforceSiteUrl,
-      photosList.Id,
-      selectedFile.ID
-    );
-  } else {
-    return null;
-  }
+export const getProfilePhotoFileByUniqueId = async (uniqueId: string) => {
+  return getImageFileForUniqueId(workforceSiteUrl, uniqueId);
 };
 
 export const deleteProfilePhotoFile = async (

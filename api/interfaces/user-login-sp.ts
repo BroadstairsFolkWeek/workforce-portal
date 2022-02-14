@@ -11,7 +11,7 @@ interface UserLoginListItem {
   Surname?: string;
   Telephone?: string;
   Address?: string;
-  PhotoRequired: boolean;
+  PhotoIds?: string;
   IdentityProviderUserId: string;
   IdentityProviderUserDetails;
   IdentityProvider: string;

@@ -4,7 +4,6 @@ import parseMultipartFormData from "@anzp/azure-function-multipart";
 import {
   deleteProfilePicture,
   getProfilePicture,
-  isUserServiceError,
   setProfilePicture,
 } from "../services/user-service";
 import {
@@ -19,22 +18,28 @@ import {
 } from "../services/api-sanitise-service";
 
 const handleGetProfilePhoto = async function (
-  userInfo: UserInfo,
-  index: number
+  photoId: string
 ): Promise<Context["res"]> {
-  const result = await getProfilePicture(userInfo, index);
-  if (result) {
-    return {
-      status: 200,
-      body: new Uint8Array(result.content),
-      isRaw: true,
-      headers: {
-        "Content-Type": result.mimeType,
-      },
-    };
+  if (photoId) {
+    const result = await getProfilePicture(photoId);
+    if (result) {
+      return {
+        status: 200,
+        body: new Uint8Array(result.content),
+        isRaw: true,
+        headers: {
+          "Content-Type": result.mimeType,
+        },
+      };
+    } else {
+      return {
+        status: 404,
+      };
+    }
   } else {
     return {
-      status: 404,
+      status: 400,
+      body: "Missing id query parameter",
     };
   }
 };
@@ -75,14 +80,6 @@ const handlePostProfilePhoto = async function (
       return {
         status: 400,
         body: "Unsupported image file type",
-      };
-    } else if (
-      isUserServiceError(err) &&
-      err.error === "profile-photo-already-exists"
-    ) {
-      return {
-        status: 409,
-        body: "Profile photo already exists with that name. Please use a different file name.",
       };
     } else {
       logError("profilePhoto: Unknown error: " + err);
@@ -131,28 +128,28 @@ const httpTrigger: AzureFunction = async function (
     return;
   }
 
-  const userInfo = getUserInfo(req);
-
-  if (userInfo) {
-    logTrace(
-      `profilePhoto: User is authenticated. User ID: ${userInfo.userId}/${userInfo.identityProvider}`
-    );
-
-    if (req.method === "GET") {
-      const indexString = req.query.index ?? "0";
-      const index = Number.parseInt(indexString);
-      context.res = await handleGetProfilePhoto(userInfo, index);
-    } else if (req.method === "POST") {
-      context.res = await handlePostProfilePhoto(req, userInfo);
-    } else {
-      context.res = await handleDeleteProfilePhoto(userInfo);
-    }
+  if (req.method === "GET") {
+    const id = req.query.id;
+    context.res = await handleGetProfilePhoto(id);
   } else {
-    logTrace(`profilePhoto: User is not authenticated.`);
-    context.res = {
-      status: 401,
-      body: "Cannot profile photo when not authenticated.",
-    };
+    const userInfo = getUserInfo(req);
+    if (userInfo) {
+      logTrace(
+        `profilePhoto: User is authenticated. User ID: ${userInfo.userId}/${userInfo.identityProvider}`
+      );
+
+      if (req.method === "POST") {
+        context.res = await handlePostProfilePhoto(req, userInfo);
+      } else {
+        context.res = await handleDeleteProfilePhoto(userInfo);
+      }
+    } else {
+      logTrace(`profilePhoto: User is not authenticated.`);
+      context.res = {
+        status: 401,
+        body: "Cannot alter profile photo when not authenticated.",
+      };
+    }
   }
 };
 
