@@ -77,6 +77,7 @@ const listItemToStatus = (
     case "photo-required":
     case "documents-required":
     case "ready-to-submit":
+    case "submitted":
     case "complete":
       return item.Status;
     default:

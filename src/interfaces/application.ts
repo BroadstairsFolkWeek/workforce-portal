@@ -25,5 +25,6 @@ export interface Application {
     | "photo-required"
     | "documents-required"
     | "ready-to-submit"
+    | "submitted"
     | "complete";
 }

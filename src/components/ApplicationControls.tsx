@@ -3,6 +3,7 @@ import {
   Dialog,
   DialogFooter,
   DialogType,
+  IDialogContentProps,
   PrimaryButton,
 } from "@fluentui/react";
 import { useCallback, useMemo, useState } from "react";
@@ -14,11 +15,19 @@ interface ApplicationControlsProps {
   deleteButtonClicked: () => void;
   uploadDocumentsButtonClicked: () => void;
   applicationSubmitButtonClcked: () => void;
+  retractButtonClicked: () => void;
 }
 
-const dialogContentProps = {
+const deleteDialogContentProps: IDialogContentProps = {
   type: DialogType.normal,
   title: "Delete this application?",
+  closeButtonAriaLabel: "Close",
+};
+
+const retractDialogContentProps: IDialogContentProps = {
+  type: DialogType.normal,
+  isMultiline: true,
+  title: "Edit/Retract this application?",
   closeButtonAriaLabel: "Close",
 };
 
@@ -31,11 +40,15 @@ const modalProps = {
 };
 
 const isEditable = (application: Application): boolean => {
-  return application.status !== "complete";
+  return (
+    application.status !== "submitted" && application.status !== "complete"
+  );
 };
 
 const isDeletable = (application: Application): boolean => {
-  return application.status !== "complete";
+  return (
+    application.status !== "submitted" && application.status !== "complete"
+  );
 };
 
 const isDocumentsUploadable = (application: Application): boolean => {
@@ -44,6 +57,10 @@ const isDocumentsUploadable = (application: Application): boolean => {
 
 const isSubmittable = (application: Application): boolean => {
   return application.status === "ready-to-submit";
+};
+
+const isRetractable = (application: Application): boolean => {
+  return application.status === "submitted";
 };
 
 interface ControlsButtonProps {
@@ -82,8 +99,10 @@ const ApplicationControls = ({
   deleteButtonClicked,
   uploadDocumentsButtonClicked,
   applicationSubmitButtonClcked,
+  retractButtonClicked,
 }: ApplicationControlsProps) => {
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [confirmRetract, setConfirmRetract] = useState(false);
 
   const editElement = useMemo(
     () =>
@@ -121,7 +140,7 @@ const ApplicationControls = ({
     [application, uploadDocumentsButtonClicked]
   );
 
-  const completeElement = useMemo(
+  const submitElement = useMemo(
     () =>
       isSubmittable(application) ? (
         <ControlsButton
@@ -133,28 +152,71 @@ const ApplicationControls = ({
     [application, applicationSubmitButtonClcked]
   );
 
-  const messageBoxElement = useMemo(
+  const retractElement = useMemo(
     () =>
-      confirmDelete ? (
-        <div>
-          <Dialog
-            hidden={false}
-            onDismiss={() => setConfirmDelete(false)}
-            dialogContentProps={dialogContentProps}
-            modalProps={modalProps}
-          >
-            <DialogFooter>
-              <PrimaryButton onClick={deleteButtonClicked} text="Delete" />
-              <DefaultButton
-                onClick={() => setConfirmDelete(false)}
-                text="Cancel"
-              />
-            </DialogFooter>
-          </Dialog>
-        </div>
+      isRetractable(application) ? (
+        <ControlsButton
+          text="Edit/Retract application"
+          className="bg-yellow-400"
+          onClicked={() => setConfirmRetract(true)}
+        />
       ) : null,
-    [confirmDelete, deleteButtonClicked]
+    [application]
   );
+
+  const messageBoxElement = useMemo(() => {
+    if (confirmDelete) {
+      return (
+        <Dialog
+          hidden={false}
+          onDismiss={() => setConfirmDelete(false)}
+          dialogContentProps={deleteDialogContentProps}
+          modalProps={modalProps}
+        >
+          <DialogFooter>
+            <PrimaryButton onClick={deleteButtonClicked} text="Delete" />
+            <DefaultButton
+              onClick={() => setConfirmDelete(false)}
+              text="Cancel"
+            />
+          </DialogFooter>
+        </Dialog>
+      );
+    } else if (confirmRetract) {
+      return (
+        <Dialog
+          hidden={false}
+          onDismiss={() => setConfirmRetract(false)}
+          dialogContentProps={retractDialogContentProps}
+          modalProps={modalProps}
+        >
+          <p className="mb-4">
+            This will allow you to make changes to your application, or even
+            withdraw it completely.
+          </p>
+
+          <p>
+            Broadstairs Folk Week will not process your application until you
+            submit it again.
+          </p>
+          <DialogFooter>
+            <PrimaryButton onClick={retractButtonClicked} text="Edit/Retract" />
+            <DefaultButton
+              onClick={() => setConfirmRetract(false)}
+              text="Cancel"
+            />
+          </DialogFooter>
+        </Dialog>
+      );
+    } else {
+      return null;
+    }
+  }, [
+    confirmDelete,
+    confirmRetract,
+    deleteButtonClicked,
+    retractButtonClicked,
+  ]);
 
   return (
     <>
@@ -162,7 +224,8 @@ const ApplicationControls = ({
         {editElement}
         {deleteElement}
         {uploadElement}
-        {completeElement}
+        {submitElement}
+        {retractElement}
         {messageBoxElement}
       </div>
     </>

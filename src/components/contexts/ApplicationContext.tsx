@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Application } from "../../interfaces/application";
 import { useUserProfile } from "./UserProfileContext";
 
@@ -6,6 +6,8 @@ export type IApplicationContext = {
   loaded: boolean;
   application: Application | null;
   setApplication: (application: Application | null) => void;
+  submitApplication: () => Promise<number>;
+  retractApplication: () => Promise<number>;
 };
 
 const invalidFunction = () => {
@@ -18,6 +20,8 @@ const ApplicationContext = React.createContext<IApplicationContext>({
   loaded: false,
   application: null,
   setApplication: invalidFunction,
+  submitApplication: invalidFunction,
+  retractApplication: invalidFunction,
 });
 
 const ApplicationContextProvider = ({
@@ -29,6 +33,44 @@ const ApplicationContextProvider = ({
     useUserProfile();
   const [application, setApplication] = useState<Application | null>(null);
   const [loaded, setLoaded] = useState(false);
+
+  const submitApplication = useCallback(async () => {
+    const submitApplicationResponse = await fetch("/api/submitApplication", {
+      method: "POST",
+    });
+
+    if (
+      submitApplicationResponse.status === 200 ||
+      submitApplicationResponse.status === 409
+    ) {
+      const updatedApplication: Application =
+        await submitApplicationResponse.json();
+      if (updatedApplication) {
+        setApplication(updatedApplication);
+      }
+    }
+
+    return submitApplicationResponse.status;
+  }, []);
+
+  const retractApplication = useCallback(async () => {
+    const submitApplicationResponse = await fetch("/api/retractApplication", {
+      method: "POST",
+    });
+
+    if (
+      submitApplicationResponse.status === 200 ||
+      submitApplicationResponse.status === 409
+    ) {
+      const updatedApplication: Application =
+        await submitApplicationResponse.json();
+      if (updatedApplication) {
+        setApplication(updatedApplication);
+      }
+    }
+
+    return submitApplicationResponse.status;
+  }, []);
 
   useEffect(() => {
     if (userProfile) {
@@ -43,6 +85,8 @@ const ApplicationContextProvider = ({
         loaded,
         application,
         setApplication,
+        submitApplication,
+        retractApplication,
       }}
     >
       {children}

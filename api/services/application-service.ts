@@ -1,7 +1,7 @@
 import { UserInfo } from "@aaronpowell/static-web-apps-api-auth";
 import { AddableApplication, Application } from "../interfaces/application";
 import { UserLogin } from "../interfaces/user-login";
-import { logTrace, logWarn } from "../utilties/logging";
+import { logError, logTrace, logWarn } from "../utilties/logging";
 import {
   createApplicationListItem,
   deleteApplicationListItem,
@@ -12,7 +12,10 @@ import {
 const APPLICATION_SERVICE_ERROR_TYPE_VAL =
   "application-service-error-760bf8f3-6c06-4d4d-86ce-050884c8f50a";
 
-type ApplicationServiceErrorType = "version-conflict" | "application-not-found";
+type ApplicationServiceErrorType =
+  | "version-conflict"
+  | "application-not-found"
+  | "application-in-wrong-state";
 export class ApplicationServiceError {
   private type: typeof APPLICATION_SERVICE_ERROR_TYPE_VAL =
     APPLICATION_SERVICE_ERROR_TYPE_VAL;
@@ -121,7 +124,14 @@ const determineApplicationStatus = (
     return "photo-required";
   }
 
-  return "ready-to-submit";
+  if (
+    addableApplication.status === "submitted" ||
+    addableApplication.status === "complete"
+  ) {
+    return addableApplication.status;
+  } else {
+    return "ready-to-submit";
+  }
 };
 
 export const saveApplication = async (
@@ -133,6 +143,14 @@ export const saveApplication = async (
     logTrace("saveApplication: Application already exists. Updating");
     // If an application exists then we can update it as long as the version numbers match.
     if (existingApplication.version === addableApplication.version) {
+      // Check te existing application is in an editable state.
+      if (
+        existingApplication.status === "submitted" ||
+        existingApplication.status === "complete"
+      ) {
+        throw new ApplicationServiceError("application-in-wrong-state");
+      }
+
       const updatedApplication: Application = {
         ...existingApplication,
         ...addableApplication,
@@ -240,6 +258,80 @@ export const deleteApplication = async (
     await deleteApplicationListItem(existingApplication);
   } else {
     logWarn("deleteApplication: Application not found");
+    throw new ApplicationServiceError("application-not-found");
+  }
+};
+
+export const submitApplication = async (
+  userInfo: UserInfo
+): Promise<Application> => {
+  const application = await getUserApplication(userInfo.userId!);
+
+  if (application) {
+    logTrace(
+      "submitApplication: Found application. Current status: " +
+        application.status
+    );
+    if (application.status === "ready-to-submit") {
+      const updatedApplication: Application = {
+        ...application,
+        status: "submitted",
+        version: application.version + 1,
+      };
+      logTrace(
+        "submitApplication: Updating application to submitted status. Version: " +
+          updatedApplication.version
+      );
+      return updateApplicationListItem(updatedApplication);
+    } else {
+      logError(
+        "submitApplication: Application is not ready to submit. Current status: " +
+          application.status
+      );
+      throw new ApplicationServiceError(
+        "application-in-wrong-state",
+        application
+      );
+    }
+  } else {
+    logWarn("submitApplication: Application not found.");
+    throw new ApplicationServiceError("application-not-found");
+  }
+};
+
+export const retractApplication = async (
+  userInfo: UserInfo
+): Promise<Application> => {
+  const application = await getUserApplication(userInfo.userId!);
+
+  if (application) {
+    logTrace(
+      "retractApplication: Found application. Current status: " +
+        application.status
+    );
+    if (application.status === "submitted") {
+      const updatedApplication: Application = {
+        ...application,
+        status: "ready-to-submit",
+        version: application.version + 1,
+      };
+      logTrace(
+        "retractApplication: Updating application to ready-to-submit status. Version: " +
+          updatedApplication.version
+      );
+      return updateApplicationListItem(updatedApplication);
+    } else {
+      logError(
+        "retractApplication: Application is not retractable. Current status: " +
+          application.status
+      );
+      throw new ApplicationServiceError(
+        "application-in-wrong-state",
+        application
+      );
+    }
+  } else {
+    logWarn("retractApplication: Application not found.");
     throw new ApplicationServiceError("application-not-found");
   }
 };

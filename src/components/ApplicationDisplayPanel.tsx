@@ -60,7 +60,12 @@ const ApplicationDisplayPanel: React.FC = () => {
   const navigate = useNavigate();
   const { newApplication, editApplication, deleteApplication } =
     useEditApplication();
-  const { loaded: applicationLoaded, application } = useApplication();
+  const {
+    loaded: applicationLoaded,
+    application,
+    submitApplication,
+    retractApplication,
+  } = useApplication();
   const [processing, setProcessing] = useState(false);
   const [deleteErrorCode, setDeleteErrorCode] = useState(204);
 
@@ -92,10 +97,17 @@ const ApplicationDisplayPanel: React.FC = () => {
     setProcessing(false);
   }, []);
 
-  const submitItemHandler = useCallback(() => {
+  const submitItemHandler = useCallback(async () => {
     setProcessing(true);
+    await submitApplication();
     setProcessing(false);
-  }, []);
+  }, [submitApplication]);
+
+  const retractItem = useCallback(async () => {
+    setProcessing(true);
+    await retractApplication();
+    setProcessing(false);
+  }, [retractApplication]);
 
   const editButtonClickedHandler = useCallback(() => {
     editItemHandler();
@@ -112,6 +124,10 @@ const ApplicationDisplayPanel: React.FC = () => {
   const submitButtonClickedHandler = useCallback(() => {
     submitItemHandler();
   }, [submitItemHandler]);
+
+  const retractButtonClickedHandler = useCallback(() => {
+    retractItem();
+  }, [retractItem]);
 
   const errorComponent = useMemo(() => {
     if (deleteErrorCode !== 204) {
@@ -154,6 +170,7 @@ const ApplicationDisplayPanel: React.FC = () => {
               deleteButtonClicked={deleteButtonClickedHandler}
               uploadDocumentsButtonClicked={uploadButtonClickedHandler}
               applicationSubmitButtonClcked={submitButtonClickedHandler}
+              retractButtonClicked={retractButtonClickedHandler}
             />
           </div>
         );
@@ -193,12 +210,7 @@ const ApplicationDisplayPanel: React.FC = () => {
       }
 
       return (
-        <div
-          className="flex flex-col bg-yellow-100 rounded-lg overflow-hidden cursor-pointer"
-          onClick={() => {
-            editItemHandler();
-          }}
-        >
+        <div className="flex flex-col bg-yellow-100 rounded-lg overflow-hidden">
           <ApplicationHeader application={application}>
             {actionRequiredComponent}
           </ApplicationHeader>

@@ -55,7 +55,7 @@ const loginsList: PopulateListDef = {
         displayName: "Identity Provider User Details",
         indexed: true,
         required: true,
-        enforceUniqueValues: true,
+        enforceUniqueValues: false,
         text: {},
       },
       {
@@ -343,6 +343,7 @@ const applicationsList: PopulateListDef = {
             "photo-required",
             "documents-required",
             "ready-to-submit",
+            "submitted",
             "complete",
           ],
           displayAs: "dropDownMenu",

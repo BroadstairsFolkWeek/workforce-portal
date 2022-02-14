@@ -61,6 +61,7 @@ export type AddableApplication = ApplicationDto & {
     | "photo-required"
     | "documents-required"
     | "ready-to-submit"
+    | "submitted"
     | "complete";
 };
 
