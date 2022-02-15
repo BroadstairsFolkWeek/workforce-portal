@@ -14,6 +14,7 @@ const httpTrigger: AzureFunction = async function (
 ): Promise<void> {
   setLoggerFromContext(context);
   logTrace("profile: entry");
+  logTrace("headers: " + JSON.stringify(req.headers, null, 2));
 
   const userInfo = getUserInfo(req);
   if (userInfo) {
