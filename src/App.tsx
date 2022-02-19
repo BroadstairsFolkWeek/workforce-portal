@@ -1,5 +1,4 @@
 import React from "react";
-import { ClientPrincipalContextProvider } from "@aaronpowell/react-static-web-apps-auth";
 import { BrowserRouter } from "react-router-dom";
 import { initializeIcons } from "@fluentui/react";
 
@@ -15,21 +14,17 @@ initializeIcons();
 function App() {
   return (
     <TeamsContextProvider>
-      <ClientPrincipalContextProvider>
-        <UserProfileContextProvider>
-          <UserProfilePhotosContextProvider>
-            <ApplicationContextProvider>
-              <EditApplicationContextProvider>
-                <BrowserRouter>
-                  {/* <div className="App"> */}
-                  <Layout />
-                  {/* </div> */}
-                </BrowserRouter>
-              </EditApplicationContextProvider>
-            </ApplicationContextProvider>
-          </UserProfilePhotosContextProvider>
-        </UserProfileContextProvider>
-      </ClientPrincipalContextProvider>
+      <UserProfileContextProvider>
+        <UserProfilePhotosContextProvider>
+          <ApplicationContextProvider>
+            <EditApplicationContextProvider>
+              <BrowserRouter>
+                <Layout />
+              </BrowserRouter>
+            </EditApplicationContextProvider>
+          </ApplicationContextProvider>
+        </UserProfilePhotosContextProvider>
+      </UserProfileContextProvider>
     </TeamsContextProvider>
   );
 }

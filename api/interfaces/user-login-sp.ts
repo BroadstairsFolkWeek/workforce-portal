@@ -9,13 +9,10 @@ interface UserLoginListItem {
   Email?: string;
   GivenName?: string;
   Surname?: string;
-  Telephone?: string;
-  Address?: string;
-  PhotoIds?: string;
   IdentityProviderUserId: string;
-  IdentityProviderUserDetails;
+  IdentityProviderUserDetails: string;
   IdentityProvider: string;
-  Version: number;
+  ProfileId: string;
 }
 
 export type AddableUserLoginListItem = AddableListItem & UserLoginListItem;

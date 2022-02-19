@@ -16,14 +16,14 @@ const workforcePortalConfig = getWorkforcePortalConfig();
 const workforceSiteUrl = workforcePortalConfig.spSiteUrl;
 const applicationsListGuid = workforcePortalConfig.spApplicationsListGuid;
 
-export const getUserApplication = async (
-  userId: string
+export const getApplicationByProfileId = async (
+  profileId: string
 ): Promise<Application | null> => {
-  const users = await getApplicationsByFilters(
-    `IdentityProviderUserId eq '${userId}'`
+  const applications = await getApplicationsByFilters(
+    `ProfileId eq '${profileId}'`
   );
-  if (users?.length) {
-    return users[0];
+  if (applications?.length) {
+    return applications[0];
   } else {
     return null;
   }
@@ -111,7 +111,7 @@ const listItemToApplication = (
     teamPreference3: item.TeamPreference3 ?? undefined,
     personsPreference: item.PersonsPreference ?? undefined,
     version: item.Version,
-    identityProviderUserId: item.IdentityProviderUserId,
+    profileId: item.ProfileId,
     dbId: item.ID,
     lastSaved: item.Modified,
     status: listItemToStatus(item),
@@ -123,7 +123,7 @@ const addableApplicationToListItem = (
 ): AddableApplicationListItem => {
   const listItem: AddableApplicationListItem = {
     Title: application.title,
-    IdentityProviderUserId: application.identityProviderUserId,
+    ProfileId: application.profileId,
     Version: application.version,
     Status: application.status,
     Telephone: application.telephone,

@@ -1,11 +1,11 @@
 import { getUserInfo } from "@aaronpowell/static-web-apps-api-auth";
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
-import { UserLogin } from "../interfaces/user-login";
-import { sanitiseUserProfileUpdateFromApiClient } from "../services/user-sanitise";
+import { Profile } from "../interfaces/profile";
+import { sanitiseProfileUpdateFromApiClient } from "../services/api-sanitise-service";
 import {
-  isUserServiceError,
+  isProfileServiceError,
   updateUserProfile,
-} from "../services/user-service";
+} from "../services/profile-service";
 import {
   logError,
   logInfo,
@@ -26,7 +26,7 @@ const httpTrigger: AzureFunction = async function (
       `saveProfile: User is authenticated. User ID: ${userInfo.userId}/${userInfo.identityProvider}`
     );
 
-    const updatedUserProfile = sanitiseUserProfileUpdateFromApiClient(req.body);
+    const updatedUserProfile = sanitiseProfileUpdateFromApiClient(req.body);
 
     try {
       const savedProfile = await updateUserProfile(
@@ -35,7 +35,7 @@ const httpTrigger: AzureFunction = async function (
       );
       context.res = { status: 200, body: savedProfile };
     } catch (err) {
-      if (isUserServiceError(err)) {
+      if (isProfileServiceError(err)) {
         if (err.error === "missing-user-profile") {
           logError(
             `saveProfile: User profile does not exist for authenticated user. User ID: ${userInfo.userId}/${userInfo.identityProvider}`
@@ -45,7 +45,7 @@ const httpTrigger: AzureFunction = async function (
             body: "User Profile does not exist, cannot update profile.",
           };
         } else if (err.error === "version-conflict") {
-          const latestUserProfile: UserLogin = err.arg1;
+          const latestUserProfile: Profile = err.arg1;
           logInfo(
             `saveProfile: Version conflict: Attempted to make changes to version ${updatedUserProfile.version} when version ${latestUserProfile.version} already exists.`
           );

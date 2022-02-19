@@ -4,12 +4,16 @@ import {
   ApplicationDtoRunType,
 } from "../interfaces/application";
 import {
+  Profile,
+  ProfileUpdateDtoRunType,
+  UpdatableProfile,
+} from "../interfaces/profile";
+import {
   ACCEPTED_IMAGE_EXTENSIONS,
   ACCEPTED_IMAGE_MIME_TYPES,
   ACCEPTED_MIME_TYPE_FILE_EXTENSIONS_MAPPING,
   isAcceptedMimeType,
 } from "../interfaces/sp-files";
-import { UserLogin } from "../interfaces/user-login";
 
 const API_SANITISE_SERVICE_ERROR_TYPE_VAL =
   "sanitise-service-error-5285b9b9-b97e-4585-a0ee-bb4e8e311ea4";
@@ -67,7 +71,7 @@ export const sanitiseImageFromApiClient = (
 
 export const sanitiseApplicationFromApiClient = (
   maybeApplication: any,
-  userLogin: UserLogin
+  profile: Profile
 ): AddableApplication => {
   removeNullProperties(maybeApplication);
   const applicationDto = ApplicationDtoRunType.check(maybeApplication);
@@ -93,10 +97,27 @@ export const sanitiseApplicationFromApiClient = (
     personsPreference: applicationDto.personsPreference,
     version: applicationDto.version,
 
-    identityProviderUserId: userLogin.identityProviderUserId,
-    title: userLogin.displayName,
+    profileId: profile.profileId,
+    title: profile.displayName,
     status: "info-required",
   };
 
   return sanitisedApplication;
+};
+
+export const sanitiseProfileUpdateFromApiClient = (
+  maybeUserProfileUpdate: any
+): UpdatableProfile => {
+  const userProfileDto = ProfileUpdateDtoRunType.check(maybeUserProfileUpdate);
+
+  const sanitisedUserLogin: UpdatableProfile = {
+    displayName: userProfileDto.displayName,
+    givenName: userProfileDto.givenName,
+    surname: userProfileDto.surname,
+    telephone: userProfileDto.telephone,
+    address: userProfileDto.address,
+    version: userProfileDto.version,
+  };
+
+  return sanitisedUserLogin;
 };

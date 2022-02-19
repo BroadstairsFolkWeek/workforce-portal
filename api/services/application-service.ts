@@ -1,13 +1,14 @@
 import { UserInfo } from "@aaronpowell/static-web-apps-api-auth";
 import { AddableApplication, Application } from "../interfaces/application";
-import { UserLogin } from "../interfaces/user-login";
+import { Profile } from "../interfaces/profile";
 import { logError, logTrace, logWarn } from "../utilties/logging";
 import {
   createApplicationListItem,
   deleteApplicationListItem,
-  getUserApplication,
+  getApplicationByProfileId,
   updateApplicationListItem,
 } from "./application-sp";
+import { getProfileForAuthenticatedUser } from "./profile-service";
 
 const APPLICATION_SERVICE_ERROR_TYPE_VAL =
   "application-service-error-760bf8f3-6c06-4d4d-86ce-050884c8f50a";
@@ -34,10 +35,10 @@ export function isApplicationServiceError(
   return obj?.type === APPLICATION_SERVICE_ERROR_TYPE_VAL;
 }
 
-export const getApplication = async (
-  userInfo: UserInfo
+export const getApplicationByProfile = async (
+  profile: Profile
 ): Promise<Application | null> => {
-  const application = await getUserApplication(userInfo.userId!);
+  const application = await getApplicationByProfileId(profile.profileId);
   return application;
 };
 
@@ -66,7 +67,7 @@ const isPropertyValueMissing = <T>(
 
 const determineApplicationStatus = (
   addableApplication: AddableApplication,
-  userProfile: UserLogin
+  userProfile: Profile
 ): AddableApplication["status"] => {
   logTrace(
     "determineApplicationStatus: addableApplication: " +
@@ -107,7 +108,7 @@ const determineApplicationStatus = (
     }
   }
 
-  const mandatoryProfileFields: Array<keyof UserLogin> = [
+  const mandatoryProfileFields: Array<keyof Profile> = [
     "displayName",
     "telephone",
     "address",
@@ -136,7 +137,7 @@ const determineApplicationStatus = (
 
 export const saveApplication = async (
   addableApplication: AddableApplication,
-  userProfile: UserLogin,
+  userProfile: Profile,
   existingApplication: Application | undefined
 ): Promise<Application> => {
   if (existingApplication) {
@@ -203,21 +204,21 @@ export const saveApplication = async (
   }
 };
 
-export const updateApplicationFromProfile = async (
+export const updateApplicationFromProfileIfNeeded = async (
   existingApplication: Application,
-  userProfile: UserLogin
+  profile: Profile
 ): Promise<Application> => {
   const updatedApplication: Application = {
     ...existingApplication,
-    title: userProfile.displayName,
-    address: userProfile.address,
-    telephone: userProfile.telephone,
+    title: profile.displayName,
+    address: profile.address,
+    telephone: profile.telephone,
     version: existingApplication.version + 1,
   };
 
   updatedApplication.status = determineApplicationStatus(
     updatedApplication,
-    userProfile
+    profile
   );
 
   logTrace(
@@ -243,7 +244,8 @@ export const deleteApplication = async (
   applicationVersion: number
 ): Promise<void> => {
   // Retrieve any application the user may have already saved.
-  const existingApplication = await getUserApplication(userInfo.userId!);
+  const profileAndApplication = await getProfileForAuthenticatedUser(userInfo);
+  const existingApplication = profileAndApplication?.application;
   if (existingApplication) {
     logTrace(
       "deleteApplication: Retrieved existing application with version: " +
@@ -265,7 +267,8 @@ export const deleteApplication = async (
 export const submitApplication = async (
   userInfo: UserInfo
 ): Promise<Application> => {
-  const application = await getUserApplication(userInfo.userId!);
+  const profileAndApplication = await getProfileForAuthenticatedUser(userInfo);
+  const application = profileAndApplication?.application;
 
   if (application) {
     logTrace(
@@ -302,7 +305,8 @@ export const submitApplication = async (
 export const retractApplication = async (
   userInfo: UserInfo
 ): Promise<Application> => {
-  const application = await getUserApplication(userInfo.userId!);
+  const profileAndApplication = await getProfileForAuthenticatedUser(userInfo);
+  const application = profileAndApplication?.application;
 
   if (application) {
     logTrace(

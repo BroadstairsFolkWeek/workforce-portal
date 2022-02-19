@@ -5,7 +5,8 @@ import {
   isApplicationServiceError,
   saveApplication,
 } from "../services/application-service";
-import { getUserProfile, isUserServiceError } from "../services/user-service";
+import { getProfileForAuthenticatedUser } from "../services/profile-service";
+import { isUserServiceError } from "../services/user-service";
 import {
   logError,
   logInfo,
@@ -27,7 +28,8 @@ const httpTrigger: AzureFunction = async function (
     );
 
     try {
-      const userProfileWithCurrentApplication = await getUserProfile(userInfo);
+      const userProfileWithCurrentApplication =
+        await getProfileForAuthenticatedUser(userInfo);
       if (userProfileWithCurrentApplication) {
         const application = sanitiseApplicationFromApiClient(
           req.body,

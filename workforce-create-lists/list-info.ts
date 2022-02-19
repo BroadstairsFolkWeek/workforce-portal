@@ -7,6 +7,81 @@ export type PopulateListDef = {
   columns: () => Promise<ColumnDefinition[]>;
 };
 
+const profilesList: PopulateListDef = {
+  displayName: "Profiles",
+  template: "genericList",
+  description: "List of profiles used for the Workforce Portal.",
+  columns: () =>
+    Promise.resolve([
+      {
+        name: "Title",
+        indexed: true,
+        required: true,
+        enforceUniqueValues: false,
+        text: {},
+      },
+      {
+        name: "Email",
+        indexed: true,
+        required: false,
+        enforceUniqueValues: false,
+        text: {},
+      },
+      {
+        name: "ProfileId",
+        displayName: "Profile ID",
+        indexed: true,
+        required: true,
+        enforceUniqueValues: true,
+        text: {},
+      },
+      {
+        name: "GivenName",
+        displayName: "Given Name",
+        indexed: true,
+        required: false,
+        enforceUniqueValues: false,
+        text: {},
+      },
+      {
+        name: "Surname",
+        indexed: true,
+        required: false,
+        enforceUniqueValues: false,
+        text: {},
+      },
+      {
+        name: "Address",
+        indexed: false,
+        required: false,
+        enforceUniqueValues: false,
+        text: {
+          allowMultipleLines: true,
+          linesForEditing: 5,
+        },
+      },
+      {
+        name: "Telephone",
+        indexed: false,
+        required: false,
+        enforceUniqueValues: false,
+        text: {},
+      },
+      {
+        name: "PhotoIds",
+        displayName: "Photo IDs",
+        indexed: false,
+        required: false,
+        enforceUniqueValues: false,
+        text: {
+          allowMultipleLines: true,
+          linesForEditing: 3,
+        },
+      },
+      { name: "Version", index: false, required: true, number: {} },
+    ]),
+};
+
 const loginsList: PopulateListDef = {
   displayName: "Portal User Logins",
   template: "genericList",
@@ -67,34 +142,13 @@ const loginsList: PopulateListDef = {
         text: {},
       },
       {
-        name: "Telephone",
-        indexed: false,
-        required: false,
+        name: "ProfileId",
+        displayName: "Profile ID",
+        indexed: true,
+        required: true,
         enforceUniqueValues: false,
         text: {},
       },
-      {
-        name: "Address",
-        indexed: false,
-        required: false,
-        enforceUniqueValues: false,
-        text: {
-          allowMultipleLines: true,
-          linesForEditing: 5,
-        },
-      },
-      {
-        name: "PhotoIds",
-        displayName: "Photo IDs",
-        indexed: false,
-        required: false,
-        enforceUniqueValues: false,
-        text: {
-          allowMultipleLines: true,
-          linesForEditing: 3,
-        },
-      },
-      { name: "Version", index: false, required: true, number: {} },
     ]),
 };
 
@@ -150,6 +204,14 @@ const applicationsList: PopulateListDef = {
   description: "List of applications to join workforce for BFW 2022.",
   columns: () =>
     Promise.resolve([
+      {
+        name: "ApplicationId",
+        displayName: "Application ID",
+        index: true,
+        required: true,
+        enforceUniqueValues: true,
+        text: {},
+      },
       {
         name: "Telephone",
         indexed: false,
@@ -291,11 +353,11 @@ const applicationsList: PopulateListDef = {
         text: {},
       },
       {
-        name: "IdentityProviderUserId",
-        displayName: "Identity Provider User Id",
+        name: "ProfileId",
+        displayName: "Profile ID",
         indexed: true,
         required: true,
-        enforceUniqueValues: true,
+        enforceUniqueValues: false,
         text: {},
       },
       {
@@ -352,17 +414,25 @@ const applicationsList: PopulateListDef = {
     ]),
 };
 
-const workforceProfilePhotos: PopulateListDef = {
+const workforcePhotos: PopulateListDef = {
   displayName: "Workforce Photos",
   template: "documentLibrary",
   description: "Workforce profile and ID badge photos",
   columns: async () => {
-    const complianceReviewsColumns: ColumnDefinition[] = [
+    const workforcePhotosColumns: ColumnDefinition[] = [
       {
-        name: "IdentityProviderUserId",
-        displayName: "Identity Provider User Id",
+        name: "ProfileId",
+        displayName: "Profile ID",
         indexed: true,
-        required: true,
+        required: false,
+        enforceUniqueValues: false,
+        text: {},
+      },
+      {
+        name: "ApplicationId",
+        displayName: "Application ID",
+        indexed: true,
+        required: false,
         enforceUniqueValues: false,
         text: {},
       },
@@ -383,6 +453,7 @@ const workforceProfilePhotos: PopulateListDef = {
       },
       {
         name: "PhotoId",
+        displayName: "Photo ID",
         indexed: true,
         required: false,
         enforceUniqueValues: true,
@@ -390,15 +461,16 @@ const workforceProfilePhotos: PopulateListDef = {
       },
     ];
 
-    return Promise.resolve(complianceReviewsColumns);
+    return Promise.resolve(workforcePhotosColumns);
   },
 };
 
 const allLists: PopulateListDef[] = [
+  profilesList,
   loginsList,
   teamsList,
   applicationsList,
-  workforceProfilePhotos,
+  workforcePhotos,
 ];
 
 export default allLists;

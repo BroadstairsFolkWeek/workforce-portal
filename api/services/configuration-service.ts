@@ -3,6 +3,7 @@ export interface WorkforcePortalConfig {
   spClientId: string;
   spClientSecret: string;
   spLoginsListGuid: string;
+  spProfilesListGuid: string;
   spApplicationsListGuid: string;
   spTeamsListGuid: string;
   spWorkforcePhotosServerRelativeUrl: string;
@@ -33,6 +34,7 @@ const config: WorkforcePortalConfig = {
   spClientId: getEnvOrThrow("WORKFORCE_CLIENT_ID"),
   spClientSecret: getEnvOrThrow("WORKFORCE_CLIENT_SECRET"),
   spLoginsListGuid: getEnvOrThrow("WORKFORCE_LOGINS_LIST_GUID"),
+  spProfilesListGuid: getEnvOrThrow("WORKFORCE_PROFILES_LIST_GUID"),
   spApplicationsListGuid: getEnvOrThrow("WORKFORCE_APPLICATIONS_LIST_GUID"),
   spTeamsListGuid: getEnvOrThrow("WORKFORCE_TEAMS_LIST_GUID"),
   spWorkforcePhotosServerRelativeUrl: getEnvOrThrow(

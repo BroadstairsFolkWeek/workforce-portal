@@ -53,8 +53,7 @@ export type ApplicationDto = Static<typeof ApplicationDtoRunType>;
 
 export type AddableApplication = ApplicationDto & {
   title: string;
-  photoFileName?: string;
-  identityProviderUserId: string;
+  profileId: string;
   status:
     | "info-required"
     | "profile-required"

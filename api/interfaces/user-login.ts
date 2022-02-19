@@ -1,35 +1,16 @@
-import { Number, String, Record, Static, Optional } from "runtypes";
-import { Application } from "./application";
-
-// UserProfile Data Transfer Object for data posted to the API.
-export const UserProfileUpdateDtoRunType = Record({
-  displayName: String,
-  givenName: Optional(String),
-  surname: Optional(String),
-  telephone: Optional(String),
-  address: Optional(String),
-  version: Number,
-});
-
-export type UserProfileDtd = Static<typeof UserProfileUpdateDtoRunType>;
-
-export type AddableUserLogin = UserProfileDtd & {
+export type AddableUserLogin = {
+  displayName: string;
+  givenName?: string;
+  surname?: string;
   email?: string;
-  photoIds: string[];
   identityProvider: string;
   identityProviderUserId: string;
   identityProviderUserDetails: string;
+  profileId: string;
 };
 
-export type UpdatableUserLogin = Partial<AddableUserLogin> & {
-  version: number;
-};
+export type UpdatableUserLogin = Partial<AddableUserLogin> & {};
 
 export type UserLogin = AddableUserLogin & {
   dbId: number;
-};
-
-export type UserLoginWithCurrentApplication = {
-  profile: UserLogin;
-  application?: Application;
 };

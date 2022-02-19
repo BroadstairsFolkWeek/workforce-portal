@@ -26,7 +26,7 @@ interface ApplicationListItem {
   PersonsPreference?: string;
   Version: number;
   Status: string;
-  IdentityProviderUserId: string;
+  ProfileId: string;
 }
 
 export type AddableApplicationListItem = AddableListItem & ApplicationListItem;

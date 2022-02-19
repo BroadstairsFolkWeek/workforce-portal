@@ -13,8 +13,8 @@ import hoodenHorse from "../images/hoodenHorse.jpg";
 import Spinner from "./Spinner";
 import PageLayout from "./PageLayout";
 import { useUserProfile } from "./contexts/UserProfileContext";
-import { UserLogin } from "../../api/interfaces/user-login";
 import { Application } from "../../api/interfaces/application";
+import { Profile } from "../../api/interfaces/profile";
 
 export interface PhotoPanelProps {}
 
@@ -109,7 +109,7 @@ const PhotoPage: React.FC<PhotoPanelProps> = () => {
         const responseBody = result.successful[0].response?.body;
         if (responseBody) {
           injectProfileAndApplication(
-            responseBody.profile as UserLogin,
+            responseBody.profile as Profile,
             responseBody.application as Application
           );
         }

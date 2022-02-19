@@ -1,12 +1,12 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Application } from "../../../api/interfaces/application";
-import { UserLogin } from "../../../api/interfaces/user-login";
+import { Profile } from "../../../api/interfaces/profile";
 
 /**
  * Provides the user profile for the application by retrieving it from the server api. The API will return profile
  * information according to the currently authenticated user.
  */
-export type UserProfile = UserLogin;
+export type UserProfile = Profile;
 export type UserProfileUpdate = Pick<
   UserProfile,
   "displayName" | "givenName" | "surname" | "telephone" | "address"

@@ -2,11 +2,6 @@ import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import { getUserInfo, UserInfo } from "@aaronpowell/static-web-apps-api-auth";
 import parseMultipartFormData from "@anzp/azure-function-multipart";
 import {
-  deleteProfilePicture,
-  getProfilePicture,
-  setProfilePicture,
-} from "../services/user-service";
-import {
   logError,
   logTrace,
   logWarn,
@@ -16,6 +11,12 @@ import {
   isApiSanitiseServiceError,
   sanitiseImageFromApiClient,
 } from "../services/api-sanitise-service";
+import {
+  deleteProfilePicture,
+  getProfilePicture,
+  isProfileServiceError,
+  setProfilePicture,
+} from "../services/profile-service";
 
 const handleGetProfilePhoto = async function (
   photoId: string
@@ -95,15 +96,28 @@ const handlePostProfilePhoto = async function (
 const handleDeleteProfilePhoto = async function (
   userInfo: UserInfo
 ): Promise<Context["res"]> {
-  const result = await deleteProfilePicture(userInfo);
-  if (result) {
+  try {
+    const result = await deleteProfilePicture(userInfo);
     return {
       status: 200,
+      body: result,
     };
-  } else {
-    return {
-      status: 404,
-    };
+  } catch (err) {
+    if (isProfileServiceError(err)) {
+      if (err.error === "unauthenticated") {
+        logTrace(`profilePhoto: User is not authenticated.`);
+        return {
+          status: 401,
+          body: "Cannot alter profile photo when not authenticated.",
+        };
+      } else if (err.error === "missing-user-profile") {
+        logTrace(`profilePhoto: User profile does not exist.`);
+        return {
+          status: 404,
+          body: "Cannot delete profile picture. User profile does not exist.",
+        };
+      }
+    }
   }
 };
 

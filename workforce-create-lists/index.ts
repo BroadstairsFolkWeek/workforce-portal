@@ -5,9 +5,10 @@ import { getClient, getSiteBaseApi } from "./services/site-api";
 import { createList, getListByDisplayName } from "./services/list-api";
 
 import lists, { PopulateListDef } from "./list-info";
+import { exit } from "process";
 
 // Create a list if it doesn't exist, but don't create any columns.
-// Colums will be added or updated in the updateList function.
+// Columns will be added or updated in the updateList function.
 async function ensureList(
   applicationsList: PopulateListDef
 ): Promise<[string, ColumnDefinition[]]> {
@@ -63,6 +64,7 @@ async function createLists() {
       await updateList(listId, existingColumns, list);
     } catch (err) {
       console.error(JSON.stringify(err));
+      exit(1);
     }
   }
 }
