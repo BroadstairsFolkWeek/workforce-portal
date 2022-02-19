@@ -33,10 +33,7 @@ const maxPhotosPerPerson = workforcePortalConfig.maxProfilePhotosPerPerson;
 const PROFILE_SERVICE_ERROR_TYPE_VAL =
   "profile-service-error-b2facf8d-038c-449b-8e24-d6cfe6680bd4";
 
-type ProfileServiceErrorType =
-  | "unauthenticated"
-  | "version-conflict"
-  | "missing-user-profile";
+type ProfileServiceErrorType = "version-conflict" | "missing-user-profile";
 
 export class ProfileServiceError {
   private type: typeof PROFILE_SERVICE_ERROR_TYPE_VAL =
@@ -56,7 +53,7 @@ export function isProfileServiceError(obj: any): obj is ProfileServiceError {
 
 export const getProfileForAuthenticatedUser = async (
   userInfo: UserInfo
-): Promise<ProfileWithCurrentApplication | null> => {
+): Promise<ProfileWithCurrentApplication> => {
   const userLogin = await getUserLogin(userInfo);
 
   if (!userLogin) {
@@ -181,10 +178,6 @@ export const getProfilePicture = async (
 export const deleteProfilePicture = async (
   userInfo: UserInfo
 ): Promise<ProfileWithCurrentApplication> => {
-  if (!userInfo || !userInfo.userId) {
-    throw new ProfileServiceError("unauthenticated");
-  }
-
   const userProfileAndApplication = await getProfileForAuthenticatedUser(
     userInfo
   );
@@ -229,10 +222,6 @@ export const setProfilePicture = async (
   fileExtension: ACCEPTED_IMAGE_EXTENSIONS,
   fileBuffer: Buffer
 ): Promise<ProfileWithCurrentApplication> => {
-  if (!userInfo || !userInfo.userId) {
-    throw new ProfileServiceError("unauthenticated");
-  }
-
   const userProfileAndApplication = await getProfileForAuthenticatedUser(
     userInfo
   );

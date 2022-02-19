@@ -17,6 +17,7 @@ import {
   isProfileServiceError,
   setProfilePicture,
 } from "../services/profile-service";
+import { isUserServiceError } from "../services/user-service";
 
 const handleGetProfilePhoto = async function (
   photoId: string
@@ -104,17 +105,31 @@ const handleDeleteProfilePhoto = async function (
     };
   } catch (err) {
     if (isProfileServiceError(err)) {
+      if (err.error === "missing-user-profile") {
+        logTrace(`profilePhoto: User profile does not exist.`);
+        return {
+          status: 404,
+          body: "Cannot delete profile picture. User profile does not exist.",
+        };
+      } else {
+        logTrace(`profilePhoto: Unknown user service error.`);
+        return {
+          status: 500,
+          body: "Unknown user service error.",
+        };
+      }
+    } else if (isUserServiceError(err)) {
       if (err.error === "unauthenticated") {
         logTrace(`profilePhoto: User is not authenticated.`);
         return {
           status: 401,
           body: "Cannot alter profile photo when not authenticated.",
         };
-      } else if (err.error === "missing-user-profile") {
-        logTrace(`profilePhoto: User profile does not exist.`);
+      } else {
+        logTrace(`profilePhoto: Unknown user service error.`);
         return {
-          status: 404,
-          body: "Cannot delete profile picture. User profile does not exist.",
+          status: 500,
+          body: "Unknown user service error.",
         };
       }
     }

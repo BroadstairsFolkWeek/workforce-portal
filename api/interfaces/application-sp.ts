@@ -5,6 +5,7 @@ import {
 } from "./sp-items";
 
 interface ApplicationListItem {
+  ApplicationId: string;
   Telephone?: string;
   Address?: string;
   EmergencyContactName?: string;

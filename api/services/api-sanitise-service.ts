@@ -1,10 +1,9 @@
 import { ParsedFile } from "@anzp/azure-function-multipart/dist/types/parsed-file.type";
 import {
-  AddableApplication,
+  ApplicationDto,
   ApplicationDtoRunType,
 } from "../interfaces/application";
 import {
-  Profile,
   ProfileUpdateDtoRunType,
   UpdatableProfile,
 } from "../interfaces/profile";
@@ -70,13 +69,12 @@ export const sanitiseImageFromApiClient = (
 };
 
 export const sanitiseApplicationFromApiClient = (
-  maybeApplication: any,
-  profile: Profile
-): AddableApplication => {
-  removeNullProperties(maybeApplication);
-  const applicationDto = ApplicationDtoRunType.check(maybeApplication);
+  maybeApplicationDto: any
+): ApplicationDto => {
+  removeNullProperties(maybeApplicationDto);
+  const applicationDto = ApplicationDtoRunType.check(maybeApplicationDto);
 
-  const sanitisedApplication: AddableApplication = {
+  const sanitisedApplicationDto: ApplicationDto = {
     telephone: applicationDto.telephone,
     address: applicationDto.address,
     emergencyContactName: applicationDto.emergencyContactName,
@@ -96,13 +94,9 @@ export const sanitiseApplicationFromApiClient = (
     teamPreference3: applicationDto.teamPreference3,
     personsPreference: applicationDto.personsPreference,
     version: applicationDto.version,
-
-    profileId: profile.profileId,
-    title: profile.displayName,
-    status: "info-required",
   };
 
-  return sanitisedApplication;
+  return sanitisedApplicationDto;
 };
 
 export const sanitiseProfileUpdateFromApiClient = (

@@ -5,7 +5,7 @@ import {
   isApplicationServiceError,
   saveApplication,
 } from "../services/application-service";
-import { getProfileForAuthenticatedUser } from "../services/profile-service";
+import { isProfileServiceError } from "../services/profile-service";
 import { isUserServiceError } from "../services/user-service";
 import {
   logError,
@@ -28,30 +28,31 @@ const httpTrigger: AzureFunction = async function (
     );
 
     try {
-      const userProfileWithCurrentApplication =
-        await getProfileForAuthenticatedUser(userInfo);
-      if (userProfileWithCurrentApplication) {
-        const application = sanitiseApplicationFromApiClient(
-          req.body,
-          userProfileWithCurrentApplication.profile
-        );
-        const savedApplication = await saveApplication(
-          application,
-          userProfileWithCurrentApplication.profile,
-          userProfileWithCurrentApplication.application
-        );
-        context.res = { status: 200, body: savedApplication };
-      } else {
-        logError(
-          `saveApplication: User profile does not exist for authenticated user. User ID: ${userInfo.userId}/${userInfo.identityProvider}`
-        );
-        context.res = {
-          status: 404,
-          body: "User Profile does not exist, cannot save application.",
-        };
-      }
+      const application = sanitiseApplicationFromApiClient(req.body);
+      const savedApplication = await saveApplication(application, userInfo);
+      context.res = { status: 200, body: savedApplication };
     } catch (err) {
-      if (isUserServiceError(err)) {
+      if (isProfileServiceError(err)) {
+        if (err.error === "missing-user-profile") {
+          logError(
+            `saveApplication: User profile does not exist for authenticated user. User ID: ${userInfo.userId}/${userInfo.identityProvider}`
+          );
+          context.res = {
+            status: 404,
+            body: "User Profile does not exist, cannot save application.",
+          };
+        } else {
+          logError(
+            `saveApplication: Unrecognised profile service error: ${
+              err.error
+            } - ${err.arg1?.toString()}`
+          );
+          context.res = {
+            status: 500,
+            body: "Unknown profile service error",
+          };
+        }
+      } else if (isUserServiceError(err)) {
         if (err.error === "unauthenticated") {
           logTrace(`saveApplication: User is not authenticated.`);
           context.res = {

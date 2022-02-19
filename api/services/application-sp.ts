@@ -91,6 +91,7 @@ const listItemToApplication = (
   item: PersistedApplicationListItem
 ): Application => {
   return {
+    applicationId: item.ApplicationId,
     title: item.Title,
     telephone: item.Telephone ?? undefined,
     address: item.Address ?? undefined,
@@ -122,6 +123,7 @@ const addableApplicationToListItem = (
   application: AddableApplication
 ): AddableApplicationListItem => {
   const listItem: AddableApplicationListItem = {
+    ApplicationId: application.applicationId,
     Title: application.title,
     ProfileId: application.profileId,
     Version: application.version,

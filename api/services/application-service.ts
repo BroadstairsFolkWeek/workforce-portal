@@ -1,5 +1,10 @@
 import { UserInfo } from "@aaronpowell/static-web-apps-api-auth";
-import { AddableApplication, Application } from "../interfaces/application";
+import { v4 as uuidv4 } from "uuid";
+import {
+  AddableApplication,
+  Application,
+  ApplicationDto,
+} from "../interfaces/application";
 import { Profile } from "../interfaces/profile";
 import { logError, logTrace, logWarn } from "../utilties/logging";
 import {
@@ -136,14 +141,19 @@ const determineApplicationStatus = (
 };
 
 export const saveApplication = async (
-  addableApplication: AddableApplication,
-  userProfile: Profile,
-  existingApplication: Application | undefined
+  applicationDto: ApplicationDto,
+  userInfo: UserInfo
 ): Promise<Application> => {
+  const userProfileWithCurrentApplication =
+    await getProfileForAuthenticatedUser(userInfo);
+
+  const userProfile = userProfileWithCurrentApplication.profile;
+  const existingApplication = userProfileWithCurrentApplication.application;
+
   if (existingApplication) {
     logTrace("saveApplication: Application already exists. Updating");
     // If an application exists then we can update it as long as the version numbers match.
-    if (existingApplication.version === addableApplication.version) {
+    if (existingApplication.version === applicationDto.version) {
       // Check te existing application is in an editable state.
       if (
         existingApplication.status === "submitted" ||
@@ -154,7 +164,7 @@ export const saveApplication = async (
 
       const updatedApplication: Application = {
         ...existingApplication,
-        ...addableApplication,
+        ...applicationDto,
         title: userProfile.displayName,
         address: userProfile.address,
         telephone: userProfile.telephone,
@@ -175,18 +185,24 @@ export const saveApplication = async (
       // have saved the application from another device.
       throw new ApplicationServiceError(
         "version-conflict",
-        `Existing version: ${existingApplication.version}. Saving version: ${addableApplication.version}.`
+        `Existing version: ${existingApplication.version}. Saving version: ${applicationDto.version}.`
       );
     }
   } else {
+    const applicationId = uuidv4();
+
     logTrace(
-      "saveApplication: Application does not exist. Creating new application."
+      "saveApplication: Application does not exist. Creating new application. Application ID: " +
+        applicationId
     );
-    const addableApplicationWithProfileValuesAndVersion = {
-      ...addableApplication,
+    const addableApplicationWithProfileValuesAndVersion: AddableApplication = {
+      ...applicationDto,
+      applicationId,
+      profileId: userProfile.profileId,
       title: userProfile.displayName,
       address: userProfile.address,
       telephone: userProfile.telephone,
+      status: "info-required",
       version: 1,
     };
     addableApplicationWithProfileValuesAndVersion.status =

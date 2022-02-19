@@ -53,6 +53,7 @@ export type ApplicationDto = Static<typeof ApplicationDtoRunType>;
 
 export type AddableApplication = ApplicationDto & {
   title: string;
+  applicationId: string;
   profileId: string;
   status:
     | "info-required"
