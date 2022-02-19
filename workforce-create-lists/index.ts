@@ -12,18 +12,22 @@ import { exit } from "process";
 async function ensureList(
   applicationsList: PopulateListDef
 ): Promise<[string, ColumnDefinition[]]> {
+  console.log("Ensuring list exists: " + applicationsList.displayName);
   const existingListInfo = await getListByDisplayName(
     applicationsList.displayName
   );
   if (existingListInfo) {
+    console.log("List exists with ID: " + existingListInfo[0]);
     return existingListInfo;
   }
 
+  console.log("List does not exist. Creating...");
   await createList(
     applicationsList.displayName,
     applicationsList.description,
     applicationsList.template
   );
+  console.log("List has been creating. Ensuring...");
   return ensureList(applicationsList);
 }
 
@@ -32,12 +36,16 @@ async function updateList(
   existingColumns: ColumnDefinition[],
   list: PopulateListDef
 ) {
+  console.log("Updating list: " + list.displayName + ". ID: " + listId);
   const siteBaseApi = await getSiteBaseApi();
   const listBaseApi: string = siteBaseApi + "/lists/" + listId;
 
+  console.log("Generating column definitions");
   const columns = await list.columns();
+  console.log("Got column definitions");
 
   for (const fieldDef of columns) {
+    console.log("Processing column definition: " + fieldDef.name);
     const existingColumn = existingColumns.find(
       (existingColumn) => existingColumn.name === fieldDef.name
     );
