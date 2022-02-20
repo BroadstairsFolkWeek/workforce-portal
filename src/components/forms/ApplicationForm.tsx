@@ -339,7 +339,7 @@ const ApplicationForm: React.FC = () => {
                 ) : null}
 
                 <div className="flex flex-row justify-between items-center my-8">
-                  <span>Do you want to register for camping?</span>
+                  <span>Do you want to register for free camping?</span>
                   <Field type="checkbox" name="camping" className="mr-2" />
                 </div>
 
