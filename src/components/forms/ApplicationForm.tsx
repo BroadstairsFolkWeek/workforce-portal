@@ -227,19 +227,6 @@ const ApplicationForm: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="mb-8">
-                  <TextInput
-                    name="emergencyContactName"
-                    label="Emergency contact name"
-                    type="text"
-                  />
-                  <TextInput
-                    name="emergencyContactTelephone"
-                    label="Emergency contact telephone"
-                    type="text"
-                  />
-                </div>
-
                 <div className="flex flex-row justify-between items-center my-8">
                   <span>Age group</span>
                   <Field name="ageGroup" as="select">
@@ -365,6 +352,19 @@ const ApplicationForm: React.FC = () => {
                     <option>XL</option>
                     <option>XXL</option>
                   </Field>
+                </div>
+
+                <div className="mb-8">
+                  <TextInput
+                    name="emergencyContactName"
+                    label="Emergency contact name"
+                    type="text"
+                  />
+                  <TextInput
+                    name="emergencyContactTelephone"
+                    label="Emergency contact telephone"
+                    type="text"
+                  />
                 </div>
 
                 <div className="my-8">
