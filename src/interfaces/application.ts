@@ -25,6 +25,7 @@ export interface Application {
   availableWednesday: boolean;
   availableThursday: boolean;
   availableLastFriday: boolean;
+  constraints?: string;
   version: number;
   lastSaved: string;
   status:

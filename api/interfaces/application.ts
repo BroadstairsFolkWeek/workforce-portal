@@ -54,6 +54,7 @@ export const ApplicationDtoRunType = Record({
   availableWednesday: Boolean,
   availableThursday: Boolean,
   availableLastFriday: Boolean,
+  constraints: Optional(String),
   version: Number,
 });
 

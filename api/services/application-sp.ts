@@ -120,6 +120,7 @@ const listItemToApplication = (
     availableWednesday: item.AvailableWednesday,
     availableThursday: item.AvailableThursday,
     availableLastFriday: item.AvailableLastFriday,
+    constraints: item.Constraints,
     version: item.Version,
     profileId: item.ProfileId,
     dbId: item.ID,
@@ -163,6 +164,7 @@ const addableApplicationToListItem = (
     AvailableWednesday: application.availableWednesday,
     AvailableThursday: application.availableThursday,
     AvailableLastFriday: application.availableLastFriday,
+    Constraints: application.constraints,
     PhotoId: application.photoId,
   };
 

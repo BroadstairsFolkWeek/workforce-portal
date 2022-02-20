@@ -44,6 +44,7 @@ const ApplicationForm: React.FC = () => {
         availableWednesday: application.availableWednesday,
         availableThursday: application.availableThursday,
         availableLastFriday: application.availableLastFriday,
+        constraints: application.constraints ?? "",
       } as ApplicationUpdate;
     } else {
       return {
@@ -71,6 +72,7 @@ const ApplicationForm: React.FC = () => {
         availableWednesday: true,
         availableThursday: true,
         availableLastFriday: true,
+        constraints: "",
       } as ApplicationUpdate;
     }
   }, [application]);
@@ -297,6 +299,14 @@ const ApplicationForm: React.FC = () => {
 
                 <div className="my-8">
                   <TextInput
+                    name="constraints"
+                    label="Please let us know if you would be unable to perform certain aspects of a role or if you would need extra support."
+                    type="text"
+                  />
+                </div>
+
+                <div className="my-8">
+                  <TextInput
                     name="personsPreference"
                     label="Are there any people you would like to work with? If so, please provide their names."
                     type="text"
@@ -355,6 +365,14 @@ const ApplicationForm: React.FC = () => {
                     <option>XL</option>
                     <option>XXL</option>
                   </Field>
+                </div>
+
+                <div className="my-8">
+                  <TextInput
+                    name="otherInformation"
+                    label="Any other information you would like to tell us?"
+                    type="text"
+                  />
                 </div>
 
                 <button

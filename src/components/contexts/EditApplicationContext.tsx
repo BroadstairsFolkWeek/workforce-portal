@@ -28,6 +28,7 @@ export type ApplicationUpdate = Pick<
   | "availableWednesday"
   | "availableThursday"
   | "availableLastFriday"
+  | "constraints"
 >;
 
 export type IEditApplicationContext = {

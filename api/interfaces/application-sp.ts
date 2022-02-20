@@ -32,6 +32,7 @@ interface ApplicationListItem {
   AvailableWednesday: boolean;
   AvailableThursday: boolean;
   AvailableLastFriday: boolean;
+  Constraints?: string;
   PhotoId?: string;
   Version: number;
   Status: string;

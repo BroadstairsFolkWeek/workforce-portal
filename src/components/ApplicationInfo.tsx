@@ -32,6 +32,7 @@ const formFieldDescriptions: Required<{ [x in keyof Application]: string }> = {
   availableWednesday: "Available Wednesday 10th August",
   availableThursday: "Available Thursday 11th August",
   availableLastFriday: "Available Friday 12th August",
+  constraints: "Constraints/Support needed",
 };
 
 const isDraftApplication = (application: Application) => {
