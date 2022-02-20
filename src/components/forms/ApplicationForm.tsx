@@ -304,7 +304,7 @@ const ApplicationForm: React.FC = () => {
                 </div>
 
                 <div className="flex flex-row justify-between items-center my-8">
-                  <span>Do you have a first aid certificate?</span>
+                  <span>Do you have a current first aid certificate?</span>
                   <Field
                     type="checkbox"
                     name="firstAidCertificate"
