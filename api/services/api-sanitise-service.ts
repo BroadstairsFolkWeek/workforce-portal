@@ -93,6 +93,14 @@ export const sanitiseApplicationFromApiClient = (
     teamPreference2: applicationDto.teamPreference2,
     teamPreference3: applicationDto.teamPreference3,
     personsPreference: applicationDto.personsPreference,
+    availableFirstFriday: applicationDto.availableFirstFriday,
+    availableSaturday: applicationDto.availableSaturday,
+    availableSunday: applicationDto.availableSunday,
+    availableMonday: applicationDto.availableMonday,
+    availableTuesday: applicationDto.availableTuesday,
+    availableWednesday: applicationDto.availableWednesday,
+    availableThursday: applicationDto.availableThursday,
+    availableLastFriday: applicationDto.availableLastFriday,
     version: applicationDto.version,
   };
 

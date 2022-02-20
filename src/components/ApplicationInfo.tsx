@@ -24,6 +24,14 @@ const formFieldDescriptions: Required<{ [x in keyof Application]: string }> = {
   lastSaved: "Last saved",
   version: "Version",
   status: "Status",
+  availableFirstFriday: "Available Friday 5th August",
+  availableSaturday: "Available Saturday 6th August",
+  availableSunday: "Available Sunday 7th August",
+  availableMonday: "Available Monday 8th August",
+  availableTuesday: "Available Tuesday 9th August",
+  availableWednesday: "Available Wednesday 10th August",
+  availableThursday: "Available Thursday 11th August",
+  availableLastFriday: "Available Friday 12th August",
 };
 
 const isDraftApplication = (application: Application) => {

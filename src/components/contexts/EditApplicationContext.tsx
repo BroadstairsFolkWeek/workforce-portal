@@ -20,6 +20,14 @@ export type ApplicationUpdate = Pick<
   | "teamPreference2"
   | "teamPreference3"
   | "personsPreference"
+  | "availableFirstFriday"
+  | "availableSaturday"
+  | "availableSunday"
+  | "availableMonday"
+  | "availableTuesday"
+  | "availableWednesday"
+  | "availableThursday"
+  | "availableLastFriday"
 >;
 
 export type IEditApplicationContext = {
@@ -69,6 +77,14 @@ const EditApplicationContextProvider = ({
       version: 0,
       lastSaved: "",
       status: "info-required",
+      availableFirstFriday: true,
+      availableSaturday: true,
+      availableSunday: true,
+      availableMonday: true,
+      availableTuesday: true,
+      availableWednesday: true,
+      availableThursday: true,
+      availableLastFriday: true,
     });
   }, []);
 

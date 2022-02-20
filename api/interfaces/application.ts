@@ -46,6 +46,14 @@ export const ApplicationDtoRunType = Record({
   teamPreference2: Optional(String),
   teamPreference3: Optional(String),
   personsPreference: Optional(String),
+  availableFirstFriday: Boolean,
+  availableSaturday: Boolean,
+  availableSunday: Boolean,
+  availableMonday: Boolean,
+  availableTuesday: Boolean,
+  availableWednesday: Boolean,
+  availableThursday: Boolean,
+  availableLastFriday: Boolean,
   version: Number,
 });
 

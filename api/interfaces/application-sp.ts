@@ -24,6 +24,14 @@ interface ApplicationListItem {
   TeamPreference2?: string;
   TeamPreference3?: string;
   PersonsPreference?: string;
+  AvailableFirstFriday: boolean;
+  AvailableSaturday: boolean;
+  AvailableSunday: boolean;
+  AvailableMonday: boolean;
+  AvailableTuesday: boolean;
+  AvailableWednesday: boolean;
+  AvailableThursday: boolean;
+  AvailableLastFriday: boolean;
   PhotoId?: string;
   Version: number;
   Status: string;

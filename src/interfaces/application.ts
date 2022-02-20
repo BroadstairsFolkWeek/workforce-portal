@@ -17,6 +17,14 @@ export interface Application {
   teamPreference2?: string;
   teamPreference3?: string;
   personsPreference?: string;
+  availableFirstFriday: boolean;
+  availableSaturday: boolean;
+  availableSunday: boolean;
+  availableMonday: boolean;
+  availableTuesday: boolean;
+  availableWednesday: boolean;
+  availableThursday: boolean;
+  availableLastFriday: boolean;
   version: number;
   lastSaved: string;
   status:

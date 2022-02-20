@@ -36,6 +36,14 @@ const ApplicationForm: React.FC = () => {
         teamPreference2: application.teamPreference2 ?? "",
         teamPreference3: application.teamPreference3 ?? "",
         personsPreference: application.personsPreference ?? "",
+        availableFirstFriday: application.availableFirstFriday,
+        availableSaturday: application.availableSaturday,
+        availableSunday: application.availableSunday,
+        availableMonday: application.availableMonday,
+        availableTuesday: application.availableTuesday,
+        availableWednesday: application.availableWednesday,
+        availableThursday: application.availableThursday,
+        availableLastFriday: application.availableLastFriday,
       } as ApplicationUpdate;
     } else {
       return {
@@ -55,6 +63,14 @@ const ApplicationForm: React.FC = () => {
         teamPreference2: "",
         teamPreference3: "",
         personsPreference: "",
+        availableFirstFriday: true,
+        availableSaturday: true,
+        availableSunday: true,
+        availableMonday: true,
+        availableTuesday: true,
+        availableWednesday: true,
+        availableThursday: true,
+        availableLastFriday: true,
       } as ApplicationUpdate;
     }
   }, [application]);
@@ -135,6 +151,80 @@ const ApplicationForm: React.FC = () => {
             <>
               {errorComponent}
               <form className="text-left" onSubmit={formik.handleSubmit}>
+                <div className="my-8">
+                  <p className="my-2">
+                    What is your availability throughout folkweek?
+                  </p>
+                  <p className="my-2">
+                    Please mark checkboxes for the days that you are available.
+                    Clear checkboxes for days you are not available.
+                  </p>
+                  <div className="flex flex-row justify-end gap-4 items-center">
+                    <span>Friday 5th August</span>
+                    <Field
+                      type="checkbox"
+                      name="availableFirstFriday"
+                      className="mr-2"
+                    />
+                  </div>
+                  <div className="flex flex-row justify-end gap-4 items-center">
+                    <span>Saturday 6th August</span>
+                    <Field
+                      type="checkbox"
+                      name="availableSaturday"
+                      className="mr-2"
+                    />
+                  </div>
+                  <div className="flex flex-row justify-end gap-4 items-center">
+                    <span>Sunday 7th August</span>
+                    <Field
+                      type="checkbox"
+                      name="availableSunday"
+                      className="mr-2"
+                    />
+                  </div>
+                  <div className="flex flex-row justify-end gap-4 items-center">
+                    <span>Monday 8th August</span>
+                    <Field
+                      type="checkbox"
+                      name="availableMonday"
+                      className="mr-2"
+                    />
+                  </div>
+                  <div className="flex flex-row justify-end gap-4 items-center">
+                    <span>Tuesday 9th August</span>
+                    <Field
+                      type="checkbox"
+                      name="availableTuesday"
+                      className="mr-2"
+                    />
+                  </div>
+                  <div className="flex flex-row justify-end gap-4 items-center">
+                    <span>Wednesday 10th August</span>
+                    <Field
+                      type="checkbox"
+                      name="availableWednesday"
+                      className="mr-2"
+                    />
+                  </div>
+                  <div className="flex flex-row justify-end gap-4 items-center">
+                    <span>Thursday 11th August</span>
+                    <Field
+                      type="checkbox"
+                      name="availableThursday"
+                      className="mr-2"
+                    />
+                  </div>
+                  <div className="flex flex-row justify-end gap-4 items-center">
+                    <span>Friday 12th August</span>
+                    <Field
+                      type="checkbox"
+                      name="availableLastFriday"
+                      className="mr-2"
+                    />
+                  </div>
+                </div>
+
                 <div className="mb-8">
                   <TextInput
                     name="emergencyContactName"
