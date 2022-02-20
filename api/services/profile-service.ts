@@ -15,6 +15,7 @@ import {
   updateApplicationFromProfileIfNeeded,
 } from "./application-service";
 import { getWorkforcePortalConfig } from "./configuration-service";
+import { clearProfileIdForPhoto } from "./photo-service";
 import {
   addProfilePhotoFileWithItem,
   deletePhotoByUniqueId,
@@ -190,8 +191,10 @@ export const deleteProfilePicture = async (
     if (photoIds.length > 0) {
       const encodedDeletePhotoId = photoIds[0];
       const [uniqueId] = encodedDeletePhotoId.split(":");
-      logTrace("deleteProfilePicture: Deleting photo: " + uniqueId);
-      deletePhotoByUniqueId(uniqueId);
+      logTrace(
+        "deleteProfilePicture: Clearing Profile ID on photo: " + uniqueId
+      );
+      const clearPhotoPromise = clearProfileIdForPhoto(uniqueId);
 
       const remainingPhotoIds = photoIds.slice(1);
 
@@ -202,7 +205,10 @@ export const deleteProfilePicture = async (
         version: userProfile.version + 1,
       };
 
-      const updatedUserProfile = await updateProfileListItem(updatedProfile);
+      const updateProfilePromise = updateProfileListItem(updatedProfile);
+      await Promise.all([clearPhotoPromise, updateProfilePromise]);
+
+      const updatedUserProfile = await updateProfilePromise;
       logTrace("deleteProfilePicture: User profile updated.");
 
       return {
