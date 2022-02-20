@@ -55,6 +55,7 @@ export type AddableApplication = ApplicationDto & {
   title: string;
   applicationId: string;
   profileId: string;
+  photoId?: string;
   status:
     | "info-required"
     | "profile-required"

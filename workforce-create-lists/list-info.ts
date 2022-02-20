@@ -345,8 +345,8 @@ const applicationsList: PopulateListDef = {
         },
       },
       {
-        name: "PhotoFileName",
-        displayName: "Photo File Name",
+        name: "PhotoId",
+        displayName: "Photo ID",
         indexed: false,
         required: false,
         enforceUniqueValues: false,

@@ -14,7 +14,6 @@ import {
   createItem,
   deleteFileByUniqueId,
   deleteItem,
-  getImageFileForUniqueId,
   getLibraryAsList,
   updateItem,
 } from "./sp-service";
@@ -179,8 +178,4 @@ export const addProfilePhotoFileWithItem = async (
   });
 
   return addResult;
-};
-
-export const getProfilePhotoFileByUniqueId = async (uniqueId: string) => {
-  return getImageFileForUniqueId(workforceSiteUrl, uniqueId);
 };

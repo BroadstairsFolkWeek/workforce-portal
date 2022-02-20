@@ -111,6 +111,7 @@ const listItemToApplication = (
     teamPreference2: item.TeamPreference2 ?? undefined,
     teamPreference3: item.TeamPreference3 ?? undefined,
     personsPreference: item.PersonsPreference ?? undefined,
+    photoId: item.PhotoId ?? undefined,
     version: item.Version,
     profileId: item.ProfileId,
     dbId: item.ID,
@@ -146,6 +147,7 @@ const addableApplicationToListItem = (
     TeamPreference2: application.teamPreference2,
     TeamPreference3: application.teamPreference3,
     PersonsPreference: application.personsPreference,
+    PhotoId: application.photoId,
   };
 
   if (listItem.DbsDisclosureDate !== undefined) {

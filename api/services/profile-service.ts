@@ -188,7 +188,7 @@ export const deleteProfilePicture = async (
 
     const photoIds = userProfile.photoIds;
     if (photoIds.length > 0) {
-      const encodedDeletePhotoId = photoIds.length[0];
+      const encodedDeletePhotoId = photoIds[0];
       const [uniqueId] = encodedDeletePhotoId.split(":");
       logTrace("deleteProfilePicture: Deleting photo: " + uniqueId);
       deletePhotoByUniqueId(uniqueId);

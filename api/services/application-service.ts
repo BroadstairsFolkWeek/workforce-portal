@@ -13,6 +13,10 @@ import {
   getApplicationByProfileId,
   updateApplicationListItem,
 } from "./application-sp";
+import {
+  clearApplicationIdForPhoto,
+  setApplicationIdForPhoto,
+} from "./photo-service";
 import { getProfileForAuthenticatedUser } from "./profile-service";
 
 const APPLICATION_SERVICE_ERROR_TYPE_VAL =
@@ -292,15 +296,31 @@ export const submitApplication = async (
         application.status
     );
     if (application.status === "ready-to-submit") {
+      const profilePhotoId = profileAndApplication.profile.photoIds[0];
+      const currentApplicationPhotoId = application.photoId;
+
       const updatedApplication: Application = {
         ...application,
         status: "submitted",
         version: application.version + 1,
       };
+
+      if (profilePhotoId !== currentApplicationPhotoId) {
+        updatedApplication.photoId = profilePhotoId;
+        await setApplicationIdForPhoto(
+          profilePhotoId,
+          application.applicationId
+        );
+        if (currentApplicationPhotoId) {
+          await clearApplicationIdForPhoto(currentApplicationPhotoId);
+        }
+      }
+
       logTrace(
         "submitApplication: Updating application to submitted status. Version: " +
           updatedApplication.version
       );
+
       return updateApplicationListItem(updatedApplication);
     } else {
       logError(

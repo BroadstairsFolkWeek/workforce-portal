@@ -20,11 +20,11 @@ interface ApplicationListItem {
   TShirtSize?: string;
   AgeGroup?: string;
   OtherInformation?: string;
-  PhotoFileName?: string;
   TeamPreference1?: string;
   TeamPreference2?: string;
   TeamPreference3?: string;
   PersonsPreference?: string;
+  PhotoId?: string;
   Version: number;
   Status: string;
   ProfileId: string;

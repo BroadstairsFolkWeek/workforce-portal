@@ -1,19 +1,16 @@
-import {
-  AddableListItem,
-  PersistedListItem,
-  UpdatableListItem,
-} from "./sp-items";
+import { AddableListItem, MakeUpdatable, PersistedListItem } from "./sp-items";
 
 interface UserPhotoListItem {
   Title: string;
   GivenName?: string;
   Surname?: string;
-  IdentityProviderUserId: string;
+  ProfileId?: string;
+  ApplicationId?: string;
 }
 
 export type AddableUserPhotoListItem = AddableListItem & UserPhotoListItem;
 
-export type UpdatableUserPhotoListItem = UpdatableListItem &
-  Partial<AddableUserPhotoListItem>;
+export type UpdatableUserPhotoListItem =
+  MakeUpdatable<AddableUserPhotoListItem>;
 
 export type PersistedUserPhotoListItem = PersistedListItem & UserPhotoListItem;

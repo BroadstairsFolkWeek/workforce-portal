@@ -13,7 +13,7 @@ export interface AddableListItem {
     | undefined;
 }
 
-export interface UpdatableListItem extends Partial<AddableListItem> {}
+export interface UpdatableListItem extends MakeUpdatable<AddableListItem> {}
 
 export interface PersistedListItem extends AddableListItem {
   ID: number;
@@ -25,3 +25,7 @@ export interface OrderBySpec {
   columnName: string;
   direction: "ASC" | "DESC";
 }
+
+export type MakeUpdatable<T> = {
+  [P in keyof T]: T[P] | null;
+};

@@ -2,7 +2,11 @@ import * as path from "path";
 import { sp } from "@pnp/sp-commonjs/presets/all";
 import { Web } from "@pnp/sp-commonjs/webs";
 import { IListInfo } from "@pnp/sp-commonjs/lists";
-import { IItemAddResult, IItemUpdateResult } from "@pnp/sp-commonjs/items";
+import {
+  IItem,
+  IItemAddResult,
+  IItemUpdateResult,
+} from "@pnp/sp-commonjs/items";
 import { IFolderInfo } from "@pnp/sp-commonjs/folders";
 import { SPFetchClient } from "@pnp/nodejs-commonjs";
 import { getWorkforcePortalConfig } from "./configuration-service";
@@ -47,6 +51,15 @@ export const updateItem = async <T extends UpdatableListItem>(
   const web = Web(site);
   const list = web.lists.getById(listGuid);
   return list.items.getById(itemId).update(item);
+};
+
+export const updateItemForUniqueFileId = async <T extends UpdatableListItem>(
+  site: string,
+  uniqueId: string,
+  item: T
+): Promise<IItemUpdateResult> => {
+  const itemRef = await getItemRefForUniqueFileId(site, uniqueId);
+  return itemRef.update(item);
 };
 
 export const deleteItem = async (
@@ -204,17 +217,23 @@ export const ensureFolder = async (
   }
 };
 
-export const addFileToFolder = async (
+export const addFileToFolder = async <T extends UpdatableListItem>(
   site: string,
   folderServerRelativePath: string,
   fileName: string,
-  content: Buffer
+  content: Buffer,
+  item?: T
 ) => {
   const web = Web(site);
 
   const fileAddResult = await web
     .getFolderByServerRelativeUrl(folderServerRelativePath)
     .files.add(fileName, content, false);
+
+  if (item) {
+    const associatedItem: IItem = await fileAddResult.file.getItem();
+    await associatedItem.update(item);
+  }
 
   return fileAddResult;
 };
@@ -237,9 +256,18 @@ export const getFileForUniqueId = async (
   uniqueId: string
 ): Promise<[string, ArrayBuffer] | null> => {
   const web = Web(site);
-  const file = web.getFileById(uniqueId);
+  const file = web.usingCaching().getFileById(uniqueId);
   const fileInfo = await file.get();
   return [fileInfo.Name, await file.getBuffer()];
+};
+
+export const getItemRefForUniqueFileId = async (
+  site: string,
+  uniqueId: string
+): Promise<IItem> => {
+  const web = Web(site);
+  const file = web.usingCaching().getFileById(uniqueId);
+  return file.getItem();
 };
 
 const fileResultToImageResult = (
