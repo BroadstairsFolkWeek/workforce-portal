@@ -1,30 +1,14 @@
-import { IFileAddResult, IItem } from "@pnp/sp-commonjs";
 import { AddableProfile, Profile } from "../interfaces/profile";
 import {
   AddableProfileListItem,
   PersistedProfileListItem,
 } from "../interfaces/profile-sp";
-import { PersistedUserPhotoListItem } from "../interfaces/photo-sp";
-import { logTrace } from "../utilties/logging";
 import { getWorkforcePortalConfig } from "./configuration-service";
-import {
-  addFileToFolder,
-  applyToItemsByFilter,
-  applyToPagedItemsdByFilter,
-  createItem,
-  deleteFileByUniqueId,
-  deleteItem,
-  getLibraryAsList,
-  updateItem,
-} from "./sp-service";
+import { applyToItemsByFilter, createItem, updateItem } from "./sp-service";
 
 const workforcePortalConfig = getWorkforcePortalConfig();
 const workforceSiteUrl = workforcePortalConfig.spSiteUrl;
 const profilesListGuid = workforcePortalConfig.spProfilesListGuid;
-const userPhotosServerRelativeUrl =
-  workforcePortalConfig.spWorkforcePhotosServerRelativeUrl;
-const userPhotosDocumentLibraryTitle =
-  workforcePortalConfig.spWorkforcePhotosLibraryTitle;
 
 export const getProfileByProfileId = async (
   profileId: string
@@ -109,73 +93,4 @@ const addableProfileToListItem = (
     PhotoIds: addableProfile.photoIds.join("\n"),
     Version: addableProfile.version,
   };
-};
-
-export const getUserPhotosListItemsByFilters = async (
-  filter?: string
-): Promise<PersistedUserPhotoListItem[]> => {
-  const photosList = await getLibraryAsList(
-    workforceSiteUrl,
-    userPhotosDocumentLibraryTitle
-  );
-
-  const appliedFunction = (listItems: PersistedUserPhotoListItem[]) =>
-    Promise.resolve(listItems);
-  return applyToPagedItemsdByFilter<PersistedUserPhotoListItem>(
-    workforceSiteUrl,
-    photosList.Id,
-    appliedFunction,
-    filter
-  );
-};
-
-export const deletePhotoByListItemId = async (
-  itemId: number
-): Promise<void> => {
-  const photosList = await getLibraryAsList(
-    workforceSiteUrl,
-    userPhotosDocumentLibraryTitle
-  );
-
-  return deleteItem(workforceSiteUrl, photosList.Id, itemId);
-};
-
-export const deletePhotoByUniqueId = async (
-  uniqueId: string
-): Promise<void> => {
-  return deleteFileByUniqueId(workforceSiteUrl, uniqueId);
-};
-
-export const addProfilePhotoFileWithItem = async (
-  fileBaseName: string,
-  fileExtension: string,
-  imageContent: Buffer,
-  identityProviderUserId: string,
-  givenName: string,
-  surname: string,
-  photoId: string
-): Promise<IFileAddResult> => {
-  let newFilename = fileBaseName + "." + fileExtension;
-
-  logTrace("addProfilePhoto: Adding file: " + newFilename);
-  const addResult = await addFileToFolder(
-    workforceSiteUrl,
-    userPhotosServerRelativeUrl,
-    newFilename,
-    imageContent
-  );
-
-  logTrace(
-    "addProfilePhoto: File added. Setting associated metadata (columns)."
-  );
-  const associatedItem: IItem = await addResult.file.getItem();
-  await associatedItem.update({
-    Title: newFilename,
-    IdentityProviderUserId: identityProviderUserId,
-    PhotoId: photoId,
-    GivenName: givenName,
-    Surname: surname,
-  });
-
-  return addResult;
 };
