@@ -7,5 +7,5 @@ image:
 
 tasks:
   - before: npm install -g @azure/static-web-apps-cli azure-functions-core-tools@3 --unsafe-perm true
-    init: npm install && cd api && npm run build
+    init: npm install && cd api && npm install
     command: npm run start
