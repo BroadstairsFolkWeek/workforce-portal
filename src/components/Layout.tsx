@@ -5,6 +5,7 @@ import ApplicationForm from "./forms/ApplicationForm";
 import ProfileForm from "./forms/ProfileForm";
 import Home from "./Home";
 import PhotoPage from "./PhotoPage";
+import PrivacyPolicy from "./PrivacyPolicy";
 import Spinner from "./Spinner";
 
 const ScrollToTop = () => {
@@ -38,6 +39,7 @@ const Layout: React.FC = () => {
         <Route path="/application" element={<ApplicationForm />} />
         <Route path="/profile" element={<ProfileForm />} />
         <Route path="/profilePhoto" element={<PhotoPage />} />
+        <Route path="/privacyPolicy" element={<PrivacyPolicy />} />
       </Routes>
     </>
   );

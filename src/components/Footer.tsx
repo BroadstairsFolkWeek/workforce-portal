@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useUserProfile } from "./contexts/UserProfileContext";
 
 const Footer: React.FC = () => {
@@ -14,8 +15,8 @@ const Footer: React.FC = () => {
           </span>
         </div>
       )}
-      <div className="px-2 h-8 bg-black text-white text-left">
-        <span className="inline-block mr-2 h-full align-middle">
+      <div className="px-2 h-12 flex flex-row justify-between items-center bg-black text-white text-left">
+        <div className="h-10 flex flex-row items-center gap-2">
           <a
             href="https://watfordconsulting.com"
             target="_blank"
@@ -23,16 +24,18 @@ const Footer: React.FC = () => {
           >
             Built by
           </a>
-        </span>
-        <span className="inline-block h-full">
           <a
             href="https://watfordconsulting.com"
             target="_blank"
             rel="noreferrer"
+            className="h-full w-32 bg-watford-consulting-logo-white bg-contain bg-no-repeat bg-left"
           >
-            <span className="inline-block h-8 w-20 bg-red bg-watford-consulting-logo-white bg-contain bg-no-repeat bg-left"></span>
+            {""}
           </a>
-        </span>
+        </div>
+        <Link to="/privacyPolicy" className="inline ">
+          <span className="align-bottom">Privacy Policy</span>
+        </Link>
       </div>
     </>
   );
