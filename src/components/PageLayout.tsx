@@ -2,7 +2,14 @@ import { Link } from "react-router-dom";
 import Footer from "./Footer";
 import Header from "./Header";
 
-const PageLayout: React.FC = ({ children }) => {
+export interface PageLayoutProps {
+  preFooterRender?: () => JSX.Element;
+}
+
+const PageLayout: React.FC<PageLayoutProps> = ({
+  children,
+  preFooterRender,
+}) => {
   return (
     <div className="h-screen flex flex-col gap-1">
       <div>
@@ -13,6 +20,7 @@ const PageLayout: React.FC = ({ children }) => {
       </Link>
       <div className="flex-grow m-auto px-2 w-full max-w-lg">{children}</div>
       <div>
+        {preFooterRender ? preFooterRender() : null}
         <Footer />
       </div>
     </div>

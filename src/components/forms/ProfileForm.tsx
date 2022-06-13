@@ -1,7 +1,16 @@
-import { MessageBar, MessageBarType } from "@fluentui/react";
+import {
+  DefaultButton,
+  Dialog,
+  DialogFooter,
+  DialogType,
+  IDialogContentProps,
+  MessageBar,
+  MessageBarType,
+  PrimaryButton,
+} from "@fluentui/react";
 import { Formik } from "formik";
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ErrorRenderer } from "../../interfaces/error-renderer";
 import {
   UserProfileUpdate,
@@ -13,10 +22,26 @@ import { TextArea, TextInput } from "./Fields";
 
 export interface ProfileFormProps {}
 
+const deleteDialogContentProps: IDialogContentProps = {
+  type: DialogType.normal,
+  title: "Delete your profile?",
+  closeButtonAriaLabel: "Close",
+};
+
+const dialogStyles = { main: { maxWidth: 450 } };
+
+const modalProps = {
+  isBlocking: false,
+  styles: dialogStyles,
+  dragOptions: undefined,
+};
+
 const ProfileForm: React.FC<ProfileFormProps> = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { userProfile, saveUserProfile } = useUserProfile();
   const [error, setError] = useState<ErrorRenderer | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const initialValues: UserProfileUpdate = useMemo(() => {
     if (userProfile) {
@@ -55,12 +80,66 @@ const ProfileForm: React.FC<ProfileFormProps> = () => {
     }
   }, [error]);
 
+  const messageBoxElement = useMemo(() => {
+    if (confirmDelete) {
+      return (
+        <Dialog
+          hidden={false}
+          onDismiss={() => setConfirmDelete(false)}
+          dialogContentProps={deleteDialogContentProps}
+          modalProps={modalProps}
+        >
+          <p className="mb-4">
+            This will remove all your information from the workforce portal.
+          </p>
+
+          <p className="mb-4">
+            Additionaly, if you have already submitted an application to
+            Broadstairs Folk Week and would like to withdraw your application,
+            please contact the Broadstairs Folk Week office directly.
+          </p>
+
+          <p>
+            Would you like to delete your information from the workforce portal?
+          </p>
+          <DialogFooter>
+            <PrimaryButton
+              onClick={() => (window.location.pathname = "/api/deleteUser")}
+              text="Delete"
+            />
+            <DefaultButton
+              onClick={() => setConfirmDelete(false)}
+              text="Cancel"
+            />
+          </DialogFooter>
+        </Dialog>
+      );
+    } else {
+      return null;
+    }
+  }, [confirmDelete]);
+
+  const preFooter = useMemo(
+    () => (
+      <div className="px-2 text-right">
+        <button
+          onClick={() => setConfirmDelete(true)}
+          disabled={confirmDelete}
+          className="m-1 p-4 bg-red-300 hover:bg-red-500 rounded text-lg text-menu-text "
+        >
+          Delete my information
+        </button>
+      </div>
+    ),
+    [confirmDelete]
+  );
+
   if (!userProfile) {
     return <h1>Not signed in</h1>;
   }
 
   return (
-    <PageLayout>
+    <PageLayout preFooterRender={() => preFooter}>
       <h1 className="text-2xl font-black">Modify your profile</h1>
       <Formik
         initialValues={initialValues}
@@ -137,6 +216,7 @@ const ProfileForm: React.FC<ProfileFormProps> = () => {
           );
         }}
       </Formik>
+      {messageBoxElement}
     </PageLayout>
   );
 };

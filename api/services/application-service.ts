@@ -277,6 +277,10 @@ export const deleteApplication = async (
       throw new ApplicationServiceError("version-conflict");
     }
 
+    if (existingApplication.photoId) {
+      await clearApplicationIdForPhoto(existingApplication.photoId);
+    }
+
     await deleteApplicationListItem(existingApplication);
   } else {
     logWarn("deleteApplication: Application not found");

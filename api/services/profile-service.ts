@@ -23,10 +23,15 @@ import {
 } from "./photos-sp";
 import {
   createProfileListItem,
+  deleteProfileListItem,
   getProfileByProfileId,
   updateProfileListItem,
 } from "./profile-sp";
-import { createUserLogin, getUserLogin } from "./user-service";
+import {
+  createUserLogin,
+  deleteUserLoginsByProfileId,
+  getUserLogin,
+} from "./user-service";
 
 const workforcePortalConfig = getWorkforcePortalConfig();
 const maxPhotosPerPerson = workforcePortalConfig.maxProfilePhotosPerPerson;
@@ -174,6 +179,30 @@ export const getProfilePicture = async (
     extension,
     mimeType,
   };
+};
+
+const deleteAllPicturesForProfile = async (profile: Profile): Promise<void> => {
+  const photoIds = profile.photoIds;
+
+  const deletePhotoPromises = photoIds.map((encodedPhotoId) => {
+    const [uniqueId] = encodedPhotoId.split(":");
+    logTrace(
+      "deleteAllPicturesForProfile: Clearing Profile ID on photo: " + uniqueId
+    );
+    return clearProfileIdForPhoto(uniqueId);
+  });
+
+  await Promise.all(deletePhotoPromises);
+
+  logTrace(
+    "deleteAllPicturesForProfile: Photos deleted and user profile updated."
+  );
+};
+
+export const deleteUserProfile = async (profile: Profile) => {
+  await deleteAllPicturesForProfile(profile);
+  await deleteUserLoginsByProfileId(profile.profileId);
+  await deleteProfileListItem(profile);
 };
 
 export const deleteProfilePicture = async (

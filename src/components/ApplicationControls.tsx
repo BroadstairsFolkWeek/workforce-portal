@@ -46,9 +46,7 @@ const isEditable = (application: Application): boolean => {
 };
 
 const isDeletable = (application: Application): boolean => {
-  return (
-    application.status !== "submitted" && application.status !== "complete"
-  );
+  return true;
 };
 
 const isDocumentsUploadable = (application: Application): boolean => {

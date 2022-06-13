@@ -3,8 +3,14 @@ import {
   AddableUserLoginListItem,
   PersistedUserLoginListItem,
 } from "../interfaces/user-login-sp";
+import { logTrace } from "../utilties/logging";
 import { getWorkforcePortalConfig } from "./configuration-service";
-import { applyToItemsByFilter, createItem, updateItem } from "./sp-service";
+import {
+  applyToItemsByFilter,
+  createItem,
+  deleteItem,
+  updateItem,
+} from "./sp-service";
 
 const workforcePortalConfig = getWorkforcePortalConfig();
 const workforceSiteUrl = workforcePortalConfig.spSiteUrl;
@@ -21,6 +27,16 @@ export const getUserLoginByIdentityProviderUserId = async (
   } else {
     return null;
   }
+};
+
+export const getUserLoginsByProfileId = async (profileId: string) => {
+  return await getUserLoginsByFilters(`ProfileId eq '${profileId}'`);
+};
+
+export const deleteUserLogin = async (userLogin: UserLogin) => {
+  logTrace(`deleteUserLogin: Deleting login with DB ID: ${userLogin.dbId}`);
+
+  await deleteItem(workforceSiteUrl, userLoginsListGuid, userLogin.dbId);
 };
 
 export const createUserLoginListItem = async (

@@ -8,7 +8,9 @@ import { logError, logTrace } from "../utilties/logging";
 import { getGraphUser } from "./users-graph";
 import {
   createUserLoginListItem,
+  deleteUserLogin,
   getUserLoginByIdentityProviderUserId,
+  getUserLoginsByProfileId,
   updateUserLoginListItem,
 } from "./users-sp";
 
@@ -128,4 +130,20 @@ export const updateUserLogin = async (
   } else {
     throw new UserServiceError("missing-user-login");
   }
+};
+
+export const deleteUserLoginsByProfileId = async (profileId: string) => {
+  logTrace(
+    `deleteUserLoginsByProfileId: Retrieving logins for profile ID: ${profileId}`
+  );
+  const userLogins = await getUserLoginsByProfileId(profileId);
+  logTrace(
+    `deleteUserLoginsByProfileId: Retrieved ${userLogins.length} logins`
+  );
+
+  const userLoginDeletePromises = userLogins.map((login) =>
+    deleteUserLogin(login)
+  );
+
+  await Promise.all(userLoginDeletePromises);
 };

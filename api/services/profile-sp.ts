@@ -4,7 +4,12 @@ import {
   PersistedProfileListItem,
 } from "../interfaces/profile-sp";
 import { getWorkforcePortalConfig } from "./configuration-service";
-import { applyToItemsByFilter, createItem, updateItem } from "./sp-service";
+import {
+  applyToItemsByFilter,
+  createItem,
+  deleteItem,
+  updateItem,
+} from "./sp-service";
 
 const workforcePortalConfig = getWorkforcePortalConfig();
 const workforceSiteUrl = workforcePortalConfig.spSiteUrl;
@@ -93,4 +98,10 @@ const addableProfileToListItem = (
     PhotoIds: addableProfile.photoIds.join("\n"),
     Version: addableProfile.version,
   };
+};
+
+export const deleteProfileListItem = async (
+  profile: Profile
+): Promise<void> => {
+  await deleteItem(workforceSiteUrl, profilesListGuid, profile.dbId);
 };

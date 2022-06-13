@@ -27,16 +27,25 @@ export const clearProfileIdForPhoto = async (
   encodedPhotoId: string
 ): Promise<void> => {
   const [uniqueId] = encodedPhotoId.split(":");
-  const photo = await getProfilePhotoByUniqueFileIdId(uniqueId);
+  try {
+    const photo = await getProfilePhotoByUniqueFileIdId(uniqueId);
 
-  // If both Profile ID and Application ID will be clear after this update then the photo should be deleted instead.
-  if (!photo.applicationId) {
-    await deletePhotoByUniqueId(uniqueId);
-  } else {
-    await updateProfilePhotoByUniqueFileId(uniqueId, {
-      ...photo,
-      profileId: null,
-    });
+    // If both Profile ID and Application ID will be clear after this update then the photo should be deleted instead.
+    if (!photo.applicationId) {
+      await deletePhotoByUniqueId(uniqueId);
+    } else {
+      await updateProfilePhotoByUniqueFileId(uniqueId, {
+        ...photo,
+        profileId: null,
+      });
+    }
+  } catch (err) {
+    if (err.status === 404) {
+      // Photo was not found. Assume that it was already deleted.
+    } else {
+      console.error("Error getting photo: ", err);
+      throw err;
+    }
   }
 };
 
