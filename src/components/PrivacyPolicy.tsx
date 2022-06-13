@@ -344,7 +344,7 @@ const PrivacyPolicy: React.FC = () => {
         information.
       </p>
 
-      <h1 className="mt-4 text-2xl font-black">
+      <h1 id="howtodelete" className="mt-4 text-2xl font-black">
         How a user can delete their information from the workforce portal
       </h1>
       <p className="my-2">
