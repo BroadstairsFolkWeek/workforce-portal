@@ -3,7 +3,7 @@ import PageLayout from "./PageLayout";
 const PrivacyPolicy: React.FC = () => {
   return (
     <PageLayout>
-      <h1 className="mt-4 text-2xl font-black">Profile Policy</h1>
+      <h1 className="mt-4 text-2xl font-black">Privacy Policy</h1>
       <p className="my-2">
         This version of our privacy policy was last updated on 10th June 2022
         and applies to the Broadstairs Folk Week Workforce Portal and the
