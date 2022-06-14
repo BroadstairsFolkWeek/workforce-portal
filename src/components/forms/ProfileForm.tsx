@@ -10,7 +10,7 @@ import {
 } from "@fluentui/react";
 import { Formik } from "formik";
 import { useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ErrorRenderer } from "../../interfaces/error-renderer";
 import {
   UserProfileUpdate,
@@ -38,7 +38,6 @@ const modalProps = {
 
 const ProfileForm: React.FC<ProfileFormProps> = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { userProfile, saveUserProfile } = useUserProfile();
   const [error, setError] = useState<ErrorRenderer | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
