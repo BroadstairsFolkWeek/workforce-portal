@@ -478,6 +478,13 @@ const applicationsList: PopulateListDef = {
         required: false,
         boolean: {},
       },
+      {
+        name: "AcceptedTermsAndConditions",
+        displayName: "Do you accept the Workforce Terms and Conditions?",
+        indexed: false,
+        required: false,
+        boolean: {},
+      },
       { name: "Version", index: false, required: true, number: {} },
       {
         name: "Status",
