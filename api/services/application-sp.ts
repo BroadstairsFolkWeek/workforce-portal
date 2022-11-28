@@ -122,6 +122,7 @@ const listItemToApplication = (
     availableLastFriday: item.AvailableLastFriday,
     constraints: item.Constraints,
     whatsApp: item.WhatsApp,
+    acceptedTermsAndConditions: item.AcceptedTermsAndConditions ?? false,
     version: item.Version,
     profileId: item.ProfileId,
     dbId: item.ID,
@@ -167,6 +168,7 @@ const addableApplicationToListItem = (
     AvailableLastFriday: application.availableLastFriday,
     Constraints: application.constraints,
     WhatsApp: application.whatsApp,
+    AcceptedTermsAndConditions: application.acceptedTermsAndConditions,
     PhotoId: application.photoId,
   };
 

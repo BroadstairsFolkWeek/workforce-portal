@@ -134,6 +134,10 @@ const determineApplicationStatus = (
     return "photo-required";
   }
 
+  if (!addableApplication.acceptedTermsAndConditions) {
+    return "info-required";
+  }
+
   if (
     addableApplication.status === "submitted" ||
     addableApplication.status === "complete"
