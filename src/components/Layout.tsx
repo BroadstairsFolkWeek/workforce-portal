@@ -7,6 +7,7 @@ import Home from "./Home";
 import PhotoPage from "./PhotoPage";
 import PrivacyPolicy from "./PrivacyPolicy";
 import Spinner from "./Spinner";
+import TermsAndConditions from "./TermsAndConditions";
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -40,6 +41,7 @@ const Layout: React.FC = () => {
         <Route path="/profile" element={<ProfileForm />} />
         <Route path="/profilePhoto" element={<PhotoPage />} />
         <Route path="/privacyPolicy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsAndConditions />} />
       </Routes>
     </>
   );
