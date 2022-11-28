@@ -121,6 +121,7 @@ const listItemToApplication = (
     availableThursday: item.AvailableThursday,
     availableLastFriday: item.AvailableLastFriday,
     constraints: item.Constraints,
+    whatsApp: item.WhatsApp,
     version: item.Version,
     profileId: item.ProfileId,
     dbId: item.ID,
@@ -165,6 +166,7 @@ const addableApplicationToListItem = (
     AvailableThursday: application.availableThursday,
     AvailableLastFriday: application.availableLastFriday,
     Constraints: application.constraints,
+    WhatsApp: application.whatsApp,
     PhotoId: application.photoId,
   };
 

@@ -231,8 +231,8 @@ export const updateApplicationFromProfileIfNeeded = async (
   const updatedApplication: Application = {
     ...existingApplication,
     title: profile.displayName,
-    address: profile.address,
-    telephone: profile.telephone,
+    address: profile.address ?? undefined,
+    telephone: profile.telephone ?? undefined,
     version: existingApplication.version + 1,
   };
 

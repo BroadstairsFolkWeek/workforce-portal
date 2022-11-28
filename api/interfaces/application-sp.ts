@@ -33,6 +33,7 @@ interface ApplicationListItem {
   AvailableThursday: boolean;
   AvailableLastFriday: boolean;
   Constraints?: string;
+  WhatsApp: boolean;
   PhotoId?: string;
   Version: number;
   Status: string;

@@ -55,6 +55,7 @@ export const ApplicationDtoRunType = Record({
   availableThursday: Boolean,
   availableLastFriday: Boolean,
   constraints: Optional(String),
+  whatsApp: Boolean,
   version: Number,
 });
 

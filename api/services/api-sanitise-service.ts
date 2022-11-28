@@ -102,6 +102,7 @@ export const sanitiseApplicationFromApiClient = (
     availableThursday: applicationDto.availableThursday,
     availableLastFriday: applicationDto.availableLastFriday,
     constraints: applicationDto.constraints,
+    whatsApp: applicationDto.whatsApp ?? false,
     version: applicationDto.version,
   };
 
