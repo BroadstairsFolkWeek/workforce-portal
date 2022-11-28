@@ -29,6 +29,8 @@ export type ApplicationUpdate = Pick<
   | "availableThursday"
   | "availableLastFriday"
   | "constraints"
+  | "whatsApp"
+  | "acceptedTermsAndConditions"
 >;
 
 export type IEditApplicationContext = {
@@ -86,6 +88,8 @@ const EditApplicationContextProvider = ({
       availableWednesday: true,
       availableThursday: true,
       availableLastFriday: true,
+      whatsApp: true,
+      acceptedTermsAndConditions: false,
     });
   }, []);
 

@@ -34,6 +34,7 @@ const formFieldDescriptions: Required<{ [x in keyof Application]: string }> = {
   availableLastFriday: "Available Friday 12th August",
   constraints: "Constraints/Support needed",
   whatsApp: "Join WhatsApp group",
+  acceptedTermsAndConditions: "Accept the terms and conditions",
 };
 
 const isDraftApplication = (application: Application) => {
@@ -153,6 +154,15 @@ export const applicationTodoComponents = (
       <span className="block" key={retArray.length}>
         Please edit this application and add:{" "}
         {infoNeededDescriptions.join(", ")}
+      </span>
+    );
+  }
+
+  if (!application.acceptedTermsAndConditions) {
+    retArray.push(
+      <span className="block" key="TsAndCs">
+        Please edit this application and accept the workforce terms and
+        conditions.
       </span>
     );
   }

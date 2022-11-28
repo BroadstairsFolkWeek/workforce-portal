@@ -27,6 +27,7 @@ export interface Application {
   availableLastFriday: boolean;
   constraints?: string;
   whatsApp?: boolean;
+  acceptedTermsAndConditions?: boolean;
   version: number;
   lastSaved: string;
   status:

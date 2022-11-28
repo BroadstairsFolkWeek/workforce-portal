@@ -46,6 +46,8 @@ const ApplicationForm: React.FC = () => {
         availableLastFriday: application.availableLastFriday,
         constraints: application.constraints ?? "",
         whatsApp: application.whatsApp ?? false,
+        acceptedTermsAndConditions:
+          application.acceptedTermsAndConditions ?? false,
       } as ApplicationUpdate;
     } else {
       return {
@@ -75,6 +77,7 @@ const ApplicationForm: React.FC = () => {
         availableLastFriday: true,
         constraints: "",
         whatsApp: true,
+        acceptedTermsAndConditions: false,
       } as ApplicationUpdate;
     }
   }, [application]);
@@ -380,6 +383,25 @@ const ApplicationForm: React.FC = () => {
                     label="Any other information you would like to tell us?"
                     type="text"
                   />
+                </div>
+
+                <div className="my-8">
+                  <div className="flex flex-row justify-between items-center ">
+                    <span>
+                      Do you accept the Workforce Terms and Conditions?
+                    </span>
+                    <Field
+                      type="checkbox"
+                      name="acceptedTermsAndConditions"
+                      className="mr-2"
+                    />
+                  </div>
+                  <div className="ml-4">
+                    <a href="/terms" target="_blank">
+                      Click here to View workforce terms and conditions (opens
+                      in new tab)
+                    </a>
+                  </div>
                 </div>
 
                 <button
