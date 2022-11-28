@@ -45,6 +45,7 @@ const ApplicationForm: React.FC = () => {
         availableThursday: application.availableThursday,
         availableLastFriday: application.availableLastFriday,
         constraints: application.constraints ?? "",
+        whatsApp: application.whatsApp ?? false,
       } as ApplicationUpdate;
     } else {
       return {
@@ -73,6 +74,7 @@ const ApplicationForm: React.FC = () => {
         availableThursday: true,
         availableLastFriday: true,
         constraints: "",
+        whatsApp: true,
       } as ApplicationUpdate;
     }
   }, [application]);
@@ -352,6 +354,11 @@ const ApplicationForm: React.FC = () => {
                     <option>XL</option>
                     <option>XXL</option>
                   </Field>
+                </div>
+
+                <div className="flex flex-row justify-between items-center my-8">
+                  <span>Can we add you to the workforce WhatsApp group?</span>
+                  <Field type="checkbox" name="whatsApp" className="mr-2" />
                 </div>
 
                 <div className="mb-8">
