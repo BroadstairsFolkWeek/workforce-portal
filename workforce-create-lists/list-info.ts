@@ -471,6 +471,13 @@ const applicationsList: PopulateListDef = {
         boolean: {},
         default: { value: "No" },
       },
+      {
+        name: "WhatsApp",
+        displayName: "Join WhatsApp Group",
+        indexed: false,
+        required: false,
+        boolean: {},
+      },
       { name: "Version", index: false, required: true, number: {} },
       {
         name: "Status",
