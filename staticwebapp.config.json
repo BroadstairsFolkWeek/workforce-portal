@@ -5,9 +5,6 @@
   "navigationFallback": {
     "rewrite": "/"
   },
-  "forwardingGateway": {
-    "allowedForwardedHosts": ["wf2.broadstairsfolkweek.org.uk"]
-  },
   "auth": {
     "identityProviders": {
       "customOpenIdConnectProviders": {
