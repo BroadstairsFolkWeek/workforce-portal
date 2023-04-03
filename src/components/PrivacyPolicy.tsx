@@ -29,8 +29,8 @@ const PrivacyPolicy: React.FC = () => {
         </a>
       </p>
       <p className="my-2">
-        Our address is: Broadstairs Folk Week Pierremont Hall Broadstairs, Kent
-        CT10 1JX
+        Our address is: Broadstairs Folk Week, Kent Innovation Centre,
+        Millennium Way, Broadstairs, Kent. CT10 2QQ
       </p>
       <p className="my-2">
         Our other contact details are: <br />
