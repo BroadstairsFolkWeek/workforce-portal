@@ -103,7 +103,7 @@ const getAuthErrorUrl = (req: HttpRequest): URL => {
 
   for (const queryKey in errorQuery) {
     const queryVal = errorQuery[queryKey];
-    authErrorUrl.searchParams.append(queryKey, queryVal);
+    authErrorUrl.searchParams.append(queryKey, queryVal ?? "");
   }
   return authErrorUrl;
 };

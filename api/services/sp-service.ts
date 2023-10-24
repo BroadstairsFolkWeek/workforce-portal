@@ -10,7 +10,11 @@ import {
 import { IFolderInfo } from "@pnp/sp-commonjs/folders";
 import { SPFetchClient } from "@pnp/nodejs-commonjs";
 import { getWorkforcePortalConfig } from "./configuration-service";
-import { OrderBySpec, UpdatableListItem } from "../interfaces/sp-items";
+import {
+  OrderBySpec,
+  UpdatableListItem,
+  AddableListItem,
+} from "../interfaces/sp-items";
 import {
   ACCEPTED_IMAGE_EXTENSIONS,
   ACCEPTED_IMAGE_MIME_TYPES,
@@ -32,7 +36,7 @@ sp.setup({
   },
 });
 
-export const createItem = async <T>(
+export const createItem = async <T extends AddableListItem>(
   site: string,
   listGuid: string,
   item: T
