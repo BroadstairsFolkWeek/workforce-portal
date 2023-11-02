@@ -318,7 +318,7 @@ const PrivacyPolicy: React.FC = () => {
         their contact information shared with a third-party for marketing
         purposes. Answering YES - for example, by checking a checkbox - to these
         types of questions shall be taken as consent by the user to share their
-        contact information with the third-party to which the question relate.
+        contact information with the third-party to which the question relates.
       </p>
 
       <h1 className="mt-4 text-2xl font-black">
