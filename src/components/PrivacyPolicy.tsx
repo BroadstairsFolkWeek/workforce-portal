@@ -5,13 +5,13 @@ const PrivacyPolicy: React.FC = () => {
     <PageLayout>
       <h1 className="mt-4 text-2xl font-black">Privacy Policy</h1>
       <p className="my-2">
-        This version of our privacy policy was last updated on 10th June 2022
+        This version of our privacy policy was last updated on 2nd November 2023
         and applies to the Broadstairs Folk Week Workforce Portal and the
-        information user provide using the portal.
+        information users provide using the portal.
       </p>
 
       <p>
-        This policy is an extension of Broadstairs Folk Week’s general privacy
+        This policy is an extension of Broadstairs Folk Week's general privacy
         policy which can be viewed at
         <a href="https://broadstairsfolkweek.org.uk/privacy-policy/">
           https://broadstairsfolkweek.org.uk/privacy-policy/
@@ -35,14 +35,12 @@ const PrivacyPolicy: React.FC = () => {
       <p className="my-2">
         Our other contact details are: <br />
         Telephone: 01843 604080 <br />
-        Fax: 01843 866422
-        <br />
         Email: info@broadstairsfolkweek.org.uk
       </p>
 
       <h1 className="mt-4 text-2xl font-black">About the workforce portal</h1>
       <p className="my-2">
-        The workforce portal is a web application intended to mange the
+        The workforce portal is a web application intended to manage the
         relationship between Broadstairs Folk Week and members of its volunteer
         workforce.
       </p>
@@ -94,22 +92,14 @@ const PrivacyPolicy: React.FC = () => {
       </p>
       <p className="my-2">
         The portal allows users to sign in with an email and password that they
-        register with the portal, or to sign in with Identity Providers such as
-        Facebook and Twitter.
+        register with the portal.
       </p>
       <p className="my-2">
-        If the user registers an email address and password, they will also be
-        prompted to provide a Display Name. This is the name they want to appear
-        as in the workforce portal.
+        During registration, users will be prompted to provide a Display Name.
+        This is the name they want to appear as in the workforce portal.
       </p>
       <p className="my-2">
-        If the user signs in with an Identity Provider, their display name will
-        be read from the Identity Provider. In this case, the first time the
-        user signs in with the identity provider, they will be prompted to
-        provide and validate their email address.
-      </p>
-      <p className="my-2">
-        The user’s email address is collected to ensure Broadstairs Folk Week
+        The user's email address is collected to ensure Broadstairs Folk Week
         have a consistent method of communicating with their volunteer workforce
         applicants.
       </p>
@@ -119,10 +109,6 @@ const PrivacyPolicy: React.FC = () => {
         <ul className="ml-8 list-disc">
           <li>Email address</li>
           <li>Display name</li>
-          <li>
-            If using an Identity Provider such as Facebook or Twitter, the
-            user’s account name on that service.
-          </li>
         </ul>
       </p>
 
@@ -151,7 +137,7 @@ const PrivacyPolicy: React.FC = () => {
       <p className="my-2">
         Users can amend and save profile information at any time, including
         blanking out individual pieces of profile information. Saved changes to
-        the profile will be updated in the portal’s data storage immediately.
+        the profile will be updated in the portal's data storage immediately.
       </p>
 
       <h2 className="mt-2 text-xl font-black">Profile photo stage</h2>
@@ -165,12 +151,12 @@ const PrivacyPolicy: React.FC = () => {
       </p>
       <p className="my-2">
         Photos can be uploaded as a file or can be captured using the camera on
-        the user’s device (computer/tablet/phone/etc).
+        the user's device (computer/tablet/phone/etc).
       </p>
       <p className="my-2">Multiple photos can be uploaded.</p>
       <p className="my-2">
         Users can delete photos using the workforce portal. Photos will be
-        removed immediately from the portal’s data storage immediately.
+        removed immediately from the portal's data storage immediately.
       </p>
 
       <h2 className="mt-2 text-xl font-black">Application stage</h2>
@@ -200,14 +186,14 @@ const PrivacyPolicy: React.FC = () => {
         </ul>
       </p>
       <p className="my-2">
-        Users can amend and save the application’s information at any time,
+        Users can amend and save the application's information at any time,
         including blanking out individual pieces of information. Saved changes
-        to an application will be updated in the portal’s data storage
+        to an application will be updated in the portal's data storage
         immediately.
       </p>
       <p className="my-2">
         Users can delete the entire application, immediately removing it from
-        the portal’s data storage.
+        the portal's data storage.
       </p>
 
       <h1 className="mt-4 text-2xl font-black">
@@ -293,7 +279,7 @@ const PrivacyPolicy: React.FC = () => {
         The workforce portal is a web application hosted in Microsoft Azure.
       </p>
       <p className="my-2">
-        Broadstairs Folk Week’s Microsoft 365 tenant is used as the data store
+        Broadstairs Folk Week's Microsoft 365 tenant is used as the data store
         for the portal. Access to data within the Microsoft 365 tenant is
         restricted to Broadstairs Folk Week staff and to the portal developers.
       </p>
@@ -301,7 +287,7 @@ const PrivacyPolicy: React.FC = () => {
       <h1 className="mt-4 text-2xl font-black">How information is protected</h1>
       <p className="my-2">
         Information collected by the workforce portal is stored within
-        Broadstairs Folk Week’s Microsoft 365 tenant.
+        Broadstairs Folk Week's Microsoft 365 tenant.
       </p>
       <p className="my-2">
         Access to this information is restricted to authorised Microsoft 365
@@ -325,7 +311,14 @@ const PrivacyPolicy: React.FC = () => {
       </p>
       <p className="my-2">
         No other information collected by the workforce portal is shared with
-        third parties.
+        third parties without the consent of the user.
+      </p>
+      <p className="my-2">
+        Application forms may include questions asking users to opt-in to having
+        their contact information shared with a third-party for marketing
+        purposes. Answering YES - for example, by checking a checkbox - to these
+        types of questions shall be taken as consent by the user to share their
+        contact information with the third-party to which the question relate.
       </p>
 
       <h1 className="mt-4 text-2xl font-black">
@@ -334,14 +327,6 @@ const PrivacyPolicy: React.FC = () => {
       <p className="my-2">
         Cookies are used to enable authentication with the workforce portal. No
         tracking or marketing cookies are used by the workforce portal.
-      </p>
-      <p className="my-2">
-        Identity providers such as Facebook and Twitter, if used for
-        authentication with the workforce portal, will likely store cookies on
-        your device to enable the authentication process. These are third-party
-        services which may also store other types of cookies on your device. See
-        the privacy and cookie policies for these other services for more
-        information.
       </p>
 
       <h1 id="howtodelete" className="mt-4 text-2xl font-black">
