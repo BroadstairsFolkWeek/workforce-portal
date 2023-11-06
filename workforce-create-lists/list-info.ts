@@ -485,6 +485,13 @@ const applicationsList: PopulateListDef = {
         required: false,
         boolean: {},
       },
+      {
+        name: "ConsentNewlifeWills",
+        displayName: "Consent to contact by Newlife Wills?",
+        indexed: false,
+        required: false,
+        boolean: {},
+      },
       { name: "Version", index: false, required: true, number: {} },
       {
         name: "Status",
