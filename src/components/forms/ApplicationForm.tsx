@@ -46,6 +46,7 @@ const ApplicationForm: React.FC = () => {
         availableLastFriday: application.availableLastFriday,
         constraints: application.constraints ?? "",
         whatsApp: application.whatsApp ?? false,
+        consentNewlifeWills: application.consentNewlifeWills ?? false,
         acceptedTermsAndConditions:
           application.acceptedTermsAndConditions ?? false,
       } as ApplicationUpdate;
@@ -77,6 +78,7 @@ const ApplicationForm: React.FC = () => {
         availableLastFriday: true,
         constraints: "",
         whatsApp: true,
+        consentNewlifeWills: false,
         acceptedTermsAndConditions: false,
       } as ApplicationUpdate;
     }
@@ -400,6 +402,32 @@ const ApplicationForm: React.FC = () => {
                     <a href="/terms" target="_blank">
                       Click here to View workforce terms and conditions (opens
                       in new tab)
+                    </a>
+                  </div>
+                </div>
+
+                <div className="my-8">
+                  <div className="flex flex-row justify-between items-center ">
+                    <span>
+                      NewLife Wills is a sponsor of Broadstairs Folk Week and
+                      would like to book a free consultation with you about
+                      their services. Please tick here if you are interested and
+                      are happy for them to contact you.
+                    </span>
+                    <Field
+                      type="checkbox"
+                      name="consentNewlifeWills"
+                      className="mr-2"
+                    />
+                  </div>
+                  <div className="ml-4">
+                    <a
+                      href="https://www.newlifewills.co.uk/"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Click here for the Newlife Wills website (opens in new
+                      tab)
                     </a>
                   </div>
                 </div>

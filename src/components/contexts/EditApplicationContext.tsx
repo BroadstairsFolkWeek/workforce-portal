@@ -89,6 +89,7 @@ const EditApplicationContextProvider = ({
       availableThursday: true,
       availableLastFriday: true,
       whatsApp: true,
+      consentNewlifeWills: false,
       acceptedTermsAndConditions: false,
     });
   }, []);
