@@ -3,7 +3,7 @@ import PageLayout from "./PageLayout";
 const TermsAndConditions: React.FC = () => {
   return (
     <PageLayout>
-      <h1 className="mt-4 text-2xl font-black">2023 Workforce Information</h1>
+      <h1 className="mt-4 text-2xl font-black">2024 Workforce Information</h1>
       <p className="my-2">
         We need around 250 fabulous people to volunteer for us each year -
         without you we cannot run the festival. You will be part of a great and
