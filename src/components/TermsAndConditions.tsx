@@ -20,14 +20,13 @@ const TermsAndConditions: React.FC = () => {
       <p className="my-2 font-black">
         New and Returning volunteers need to return their form as soon as
         possible to increase your chances of getting into your chosen team,
-        preferably by 1st May please.
+        preferably by 1st April please.
       </p>
 
-      <p className="my-2 font-black">
-        We will continue to ensure the safety of everyone and will be
-        implementing hand sanitization facilities and social distancing,
-        according to the relevant government guidelines. We will keep you
-        updated.
+      <p className="my-2">
+        New volunteers should send a photo for their identity pass. (This can be
+        a smiley photo as long as we can see that it is you) All volunteers will
+        be notified of their teams and duties in July.
       </p>
 
       <h1 className="mt-4 text-2xl font-black">Duties</h1>
@@ -57,7 +56,9 @@ const TermsAndConditions: React.FC = () => {
           <li>
             All workforce t-shirts, ID badges, rotas etc must be collected from
             the campsite Admin/Check-in at Dane Court School, before your duty
-            begins. (the campsite is open from 10am on Friday 11th Aug).
+            begins (except during set up, yours will be given to you on
+            arrival), the campsite office is open Thurs 8th 4pm-6pm & daily
+            Friday 9th from 10am.
           </li>
         </ul>
       </p>
@@ -67,18 +68,16 @@ const TermsAndConditions: React.FC = () => {
         <ul className="ml-8 list-disc">
           <li>
             Volunteers should be aged 18 and over; some exceptions may be made
-            for 17-year olds – please contact us for details.
+            for 17-year olds - please contact us for details.
           </li>
           <li>
             It is vital you contact your line manager if you are going to miss a
-            shift. If you let your team down without a valid reason you may have
-            your festival pass taken away, and future applications to join our
-            workforce not be accepted.
+            shift. We must ensure we have appropriate numbers of stewards at
+            events for Safety.
           </li>
           <li>
-            If you have children with you, it is not possible to fulfil your
-            duties and look after them at the same time; you must arrange for a
-            carer. Children and carers must pay for tickets at the full rate.{" "}
+            We are a family festival and children are very welcome, but please
+            ensure you have care arranged for them when you are on duty.
           </li>
           <li>
             Please inform us of any disabilities or medical conditions which may
