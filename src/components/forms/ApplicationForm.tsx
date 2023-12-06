@@ -169,7 +169,7 @@ const ApplicationForm: React.FC = () => {
                     Clear checkboxes for days you are not available.
                   </p>
                   <div className="flex flex-row justify-end gap-4 items-center">
-                    <span>Friday 11th August</span>
+                    <span>Friday 9th August</span>
                     <Field
                       type="checkbox"
                       name="availableFirstFriday"
@@ -177,7 +177,7 @@ const ApplicationForm: React.FC = () => {
                     />
                   </div>
                   <div className="flex flex-row justify-end gap-4 items-center">
-                    <span>Saturday 12th August</span>
+                    <span>Saturday 10th August</span>
                     <Field
                       type="checkbox"
                       name="availableSaturday"
@@ -185,7 +185,7 @@ const ApplicationForm: React.FC = () => {
                     />
                   </div>
                   <div className="flex flex-row justify-end gap-4 items-center">
-                    <span>Sunday 13th August</span>
+                    <span>Sunday 11th August</span>
                     <Field
                       type="checkbox"
                       name="availableSunday"
@@ -193,7 +193,7 @@ const ApplicationForm: React.FC = () => {
                     />
                   </div>
                   <div className="flex flex-row justify-end gap-4 items-center">
-                    <span>Monday 14th August</span>
+                    <span>Monday 12th August</span>
                     <Field
                       type="checkbox"
                       name="availableMonday"
@@ -201,7 +201,7 @@ const ApplicationForm: React.FC = () => {
                     />
                   </div>
                   <div className="flex flex-row justify-end gap-4 items-center">
-                    <span>Tuesday 15th August</span>
+                    <span>Tuesday 13th August</span>
                     <Field
                       type="checkbox"
                       name="availableTuesday"
@@ -209,7 +209,7 @@ const ApplicationForm: React.FC = () => {
                     />
                   </div>
                   <div className="flex flex-row justify-end gap-4 items-center">
-                    <span>Wednesday 16th August</span>
+                    <span>Wednesday 14th August</span>
                     <Field
                       type="checkbox"
                       name="availableWednesday"
@@ -217,7 +217,7 @@ const ApplicationForm: React.FC = () => {
                     />
                   </div>
                   <div className="flex flex-row justify-end gap-4 items-center">
-                    <span>Thursday 17th August</span>
+                    <span>Thursday 15th August</span>
                     <Field
                       type="checkbox"
                       name="availableThursday"
@@ -225,7 +225,7 @@ const ApplicationForm: React.FC = () => {
                     />
                   </div>
                   <div className="flex flex-row justify-end gap-4 items-center">
-                    <span>Friday 18th August</span>
+                    <span>Friday 16th August</span>
                     <Field
                       type="checkbox"
                       name="availableLastFriday"
