@@ -104,6 +104,9 @@ export const sanitiseApplicationFromApiClient = (
     constraints: applicationDto.constraints,
     whatsApp: applicationDto.whatsApp ?? false,
     consentNewlifeWills: applicationDto.consentNewlifeWills ?? false,
+    newlifeHaveWillInPlace: applicationDto.newlifeHaveWillInPlace ?? false,
+    newlifeHavePoaInPlace: applicationDto.newlifeHavePoaInPlace ?? false,
+    newlifeWantFreeReview: applicationDto.newlifeWantFreeReview ?? false,
     acceptedTermsAndConditions:
       applicationDto.acceptedTermsAndConditions ?? false,
     version: applicationDto.version,

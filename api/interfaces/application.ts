@@ -57,6 +57,9 @@ export const ApplicationDtoRunType = Record({
   constraints: Optional(String),
   whatsApp: Boolean,
   consentNewlifeWills: Boolean,
+  newlifeHaveWillInPlace: Boolean,
+  newlifeHavePoaInPlace: Boolean,
+  newlifeWantFreeReview: Boolean,
   acceptedTermsAndConditions: Boolean,
   version: Number,
 });

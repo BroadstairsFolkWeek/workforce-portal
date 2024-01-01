@@ -28,6 +28,9 @@ export interface Application {
   constraints?: string;
   whatsApp?: boolean;
   consentNewlifeWills: boolean;
+  newlifeHaveWillInPlace: boolean;
+  newlifeHavePoaInPlace: boolean;
+  newlifeWantFreeReview: boolean;
   acceptedTermsAndConditions?: boolean;
   version: number;
   lastSaved: string;

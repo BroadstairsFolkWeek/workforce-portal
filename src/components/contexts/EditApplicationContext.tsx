@@ -30,6 +30,10 @@ export type ApplicationUpdate = Pick<
   | "availableLastFriday"
   | "constraints"
   | "whatsApp"
+  | "consentNewlifeWills"
+  | "newlifeHaveWillInPlace"
+  | "newlifeHavePoaInPlace"
+  | "newlifeWantFreeReview"
   | "acceptedTermsAndConditions"
 >;
 
@@ -90,6 +94,9 @@ const EditApplicationContextProvider = ({
       availableLastFriday: true,
       whatsApp: true,
       consentNewlifeWills: false,
+      newlifeHaveWillInPlace: false,
+      newlifeHavePoaInPlace: false,
+      newlifeWantFreeReview: false,
       acceptedTermsAndConditions: false,
     });
   }, []);

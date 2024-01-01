@@ -47,6 +47,9 @@ const ApplicationForm: React.FC = () => {
         constraints: application.constraints ?? "",
         whatsApp: application.whatsApp ?? false,
         consentNewlifeWills: application.consentNewlifeWills ?? false,
+        newlifeHaveWillInPlace: application.newlifeHaveWillInPlace ?? false,
+        newlifeHavePoaInPlace: application.newlifeHavePoaInPlace ?? false,
+        newlifeWantFreeReview: application.newlifeWantFreeReview ?? false,
         acceptedTermsAndConditions:
           application.acceptedTermsAndConditions ?? false,
       } as ApplicationUpdate;
@@ -79,6 +82,9 @@ const ApplicationForm: React.FC = () => {
         constraints: "",
         whatsApp: true,
         consentNewlifeWills: false,
+        newlifeHaveWillInPlace: false,
+        newlifeHavePoaInPlace: false,
+        newlifeWantFreeReview: false,
         acceptedTermsAndConditions: false,
       } as ApplicationUpdate;
     }
@@ -409,10 +415,9 @@ const ApplicationForm: React.FC = () => {
                 <div className="my-8">
                   <div className="flex flex-row justify-between items-center ">
                     <span>
-                      NewLife Wills is a sponsor of Broadstairs Folk Week and
-                      would like to book a free consultation with you about
-                      their services. Please tick here if you are interested and
-                      are happy for them to contact you.
+                      NewLife Wills is a sponsor of Broadstairs Folk Week. Would
+                      you be happy for Newlife Wills to get in touch with you to
+                      arrange your FREE consultation?
                     </span>
                     <Field
                       type="checkbox"
@@ -430,6 +435,40 @@ const ApplicationForm: React.FC = () => {
                       tab)
                     </a>
                   </div>
+                  {formik.values.consentNewlifeWills ? (
+                    <div className="ml-4">
+                      <div className="my-4 flex flex-row justify-between items-center ">
+                        <span>Do you have a Will currently in place?</span>
+                        <Field
+                          type="checkbox"
+                          name="newlifeHaveWillInPlace"
+                          className="mr-2"
+                        />
+                      </div>
+                      <div className="my-4 flex flex-row justify-between items-center ">
+                        <span>
+                          Do you have Lasting Power of Attorney’s currently in
+                          place?
+                        </span>
+                        <Field
+                          type="checkbox"
+                          name="newlifeHavePoaInPlace"
+                          className="mr-2"
+                        />
+                      </div>
+                      <div className="my-4 flex flex-row justify-between items-center ">
+                        <span>
+                          If YES, would you like a FREE review to check
+                          everything is up to date?
+                        </span>
+                        <Field
+                          type="checkbox"
+                          name="newlifeWantFreeReview"
+                          className="mr-2"
+                        />
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
 
                 <button
