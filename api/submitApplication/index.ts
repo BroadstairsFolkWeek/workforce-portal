@@ -65,7 +65,7 @@ const httpTrigger: AzureFunction = async function (
           };
         }
       } else {
-        logError(`submitApplication: Unknown error: ${err.message}`);
+        logError(`submitApplication: Unknown error: ${err}`);
         throw err;
       }
     }

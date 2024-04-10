@@ -11,5 +11,5 @@ export const ACCEPTED_MIME_TYPE_FILE_EXTENSIONS_MAPPING: {
 export const isAcceptedMimeType = (
   candidate: string
 ): candidate is ACCEPTED_IMAGE_MIME_TYPES => {
-  return ACCEPTED_MIME_TYPE_FILE_EXTENSIONS_MAPPING[candidate];
+  return candidate in ACCEPTED_MIME_TYPE_FILE_EXTENSIONS_MAPPING;
 };

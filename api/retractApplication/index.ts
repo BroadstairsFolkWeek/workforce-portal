@@ -65,7 +65,7 @@ const httpTrigger: AzureFunction = async function (
           };
         }
       } else {
-        logError(`retractApplication: Unknown error: ${err.message}`);
+        logError(`retractApplication: Unknown error: ${err}`);
         throw err;
       }
     }

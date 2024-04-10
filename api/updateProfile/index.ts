@@ -65,7 +65,7 @@ const httpTrigger: AzureFunction = async function (
           };
         }
       } else {
-        logError(`saveProfile: Unknown error: ${err.message}`);
+        logError(`saveProfile: Unknown error: ${err}`);
         throw err;
       }
     }

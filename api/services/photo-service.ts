@@ -40,7 +40,12 @@ export const clearProfileIdForPhoto = async (
       });
     }
   } catch (err) {
-    if (err.status === 404) {
+    if (
+      typeof err === "object" &&
+      err &&
+      "status" in err &&
+      err.status === 404
+    ) {
       // Photo was not found. Assume that it was already deleted.
     } else {
       console.error("Error getting photo: ", err);

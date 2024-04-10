@@ -93,7 +93,7 @@ const httpTrigger: AzureFunction = async function (
           };
         }
       } else {
-        logError(`saveApplication: Unknown error: ${err.message}`);
+        logError(`saveApplication: Unknown error: ${err}`);
         throw err;
       }
     }

@@ -49,23 +49,22 @@ const removeNullProperties = <T>(obj: T) => {
 export const sanitiseImageFromApiClient = (
   parsedFile: ParsedFile
 ): [string, ACCEPTED_IMAGE_EXTENSIONS, Buffer, ACCEPTED_IMAGE_MIME_TYPES] => {
-  const mimeType = parsedFile.mimeType;
-  if (!isAcceptedMimeType(mimeType)) {
+  if (isAcceptedMimeType(parsedFile.mimeType)) {
+    const acceptedExtension =
+      ACCEPTED_MIME_TYPE_FILE_EXTENSIONS_MAPPING[parsedFile.mimeType];
+
+    return [
+      parsedFile.filename,
+      acceptedExtension,
+      parsedFile.bufferFile,
+      parsedFile.mimeType,
+    ];
+  } else {
     throw new ApiSantiiseServiceError(
       "invalid-request",
       "Non-permitted image format"
     );
   }
-
-  const acceptedExtension =
-    ACCEPTED_MIME_TYPE_FILE_EXTENSIONS_MAPPING[parsedFile.mimeType];
-
-  return [
-    parsedFile.filename,
-    acceptedExtension,
-    parsedFile.bufferFile,
-    mimeType,
-  ];
 };
 
 export const sanitiseApplicationFromApiClient = (

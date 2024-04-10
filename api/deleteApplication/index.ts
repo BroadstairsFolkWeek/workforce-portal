@@ -62,7 +62,7 @@ const httpTrigger: AzureFunction = async function (
             };
           }
         } else {
-          logError(`deleteApplication: Unknown error: ${err.message}`);
+          logError(`deleteApplication: Unknown error: ${err}`);
           throw err;
         }
       }
