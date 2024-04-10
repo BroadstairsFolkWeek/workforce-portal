@@ -48,7 +48,8 @@ const getCurrentFunctionsUrl = (req: HttpRequest): URL => {
   // If URL is http, replace with https unless it is addressing the localhost.
   if (
     currentFunctionsUrl.protocol === "http:" &&
-    currentFunctionsUrl.hostname !== "localhost"
+    currentFunctionsUrl.hostname !== "localhost" &&
+    currentFunctionsUrl.hostname !== "127.0.0.1"
   ) {
     currentFunctionsUrl.protocol = "https:";
   }
