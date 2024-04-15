@@ -26,6 +26,13 @@
       "request": "attach",
       "port": 9229,
       "preLaunchTask": "func: host start"
+    },
+    {
+      "type": "node-terminal",
+      "name": "API Exploratory Tests",
+      "request": "launch",
+      "command": "npm run test:exploratory",
+      "cwd": "${workspaceFolder}/api"
     }
   ],
   "compounds": [
