@@ -8,6 +8,7 @@
     "strict": true,
     "strictNullChecks": true,
     "skipLibCheck": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "exactOptionalPropertyTypes": true
   }
 }

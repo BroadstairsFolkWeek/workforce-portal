@@ -19,9 +19,7 @@ import {
 } from "../services/profile-service";
 import { isUserServiceError } from "../services/user-service";
 
-const handleGetProfilePhoto = async function (
-  photoId: string
-): Promise<Context["res"]> {
+const handleGetProfilePhoto = async function (photoId: string) {
   if (photoId) {
     const result = await getProfilePicture(photoId);
     if (result) {
@@ -50,7 +48,7 @@ const handleGetProfilePhoto = async function (
 const handlePostProfilePhoto = async function (
   req: HttpRequest,
   userInfo: UserInfo
-): Promise<Context["res"]> {
+) {
   const { files } = await parseMultipartFormData(req);
   if (files.length === 0) {
     logWarn("profilePhoto: No files included in request");
@@ -94,9 +92,7 @@ const handlePostProfilePhoto = async function (
   }
 };
 
-const handleDeleteProfilePhoto = async function (
-  userInfo: UserInfo
-): Promise<Context["res"]> {
+const handleDeleteProfilePhoto = async function (userInfo: UserInfo) {
   try {
     const result = await deleteProfilePicture(userInfo);
     return {
@@ -132,6 +128,12 @@ const handleDeleteProfilePhoto = async function (
           body: "Unknown user service error.",
         };
       }
+    } else {
+      logTrace(`profilePhoto: Unknown service error.`);
+      return {
+        status: 500,
+        body: "Unknown service error.",
+      };
     }
   }
 };

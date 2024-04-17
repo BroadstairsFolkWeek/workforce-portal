@@ -70,7 +70,7 @@ export type AddableApplication = ApplicationDto & {
   title: string;
   applicationId: string;
   profileId: string;
-  photoId?: string;
+  photoId?: string | undefined;
   status:
     | "info-required"
     | "profile-required"

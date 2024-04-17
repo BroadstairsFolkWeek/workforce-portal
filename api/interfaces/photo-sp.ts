@@ -2,10 +2,10 @@ import { AddableListItem, MakeUpdatable, PersistedListItem } from "./sp-items";
 
 interface UserPhotoListItem {
   Title: string;
-  GivenName?: string;
-  Surname?: string;
-  ProfileId?: string;
-  ApplicationId?: string;
+  GivenName?: string | undefined;
+  Surname?: string | undefined;
+  ProfileId?: string | undefined;
+  ApplicationId?: string | undefined;
 }
 
 export type AddableUserPhotoListItem = AddableListItem & UserPhotoListItem;

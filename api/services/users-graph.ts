@@ -12,9 +12,9 @@ const config = getWorkforcePortalConfig();
 
 export interface GraphUser {
   email: string;
-  surname?: string;
-  givenName?: string;
-  displayName?: string;
+  surname?: string | undefined;
+  givenName?: string | undefined;
+  displayName?: string | undefined;
   identityProvider: string;
 }
 

@@ -6,9 +6,9 @@ import {
 
 interface UserLoginListItem {
   Title: string;
-  Email?: string;
-  GivenName?: string;
-  Surname?: string;
+  Email?: string | undefined;
+  GivenName?: string | undefined;
+  Surname?: string | undefined;
   IdentityProviderUserId: string;
   IdentityProviderUserDetails: string;
   IdentityProvider: string;

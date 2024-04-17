@@ -2,10 +2,10 @@ import { MakeUpdatable } from "./sp-items";
 
 export type AddablePhoto = {
   title: string;
-  givenName?: string;
-  surname?: string;
-  profileId?: string;
-  applicationId?: string;
+  givenName?: string | undefined;
+  surname?: string | undefined;
+  profileId?: string | undefined;
+  applicationId?: string | undefined;
 };
 
 export type UpdatablePhoto = MakeUpdatable<AddablePhoto> & {};

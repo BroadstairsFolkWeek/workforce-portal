@@ -3,5 +3,5 @@ export type Team = {
   team: string;
   description: string;
   displayOrder: number;
-  requirements?: "DBS" | "Drivers License";
+  requirements?: "DBS" | "Drivers License" | undefined;
 };

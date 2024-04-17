@@ -15,7 +15,7 @@ export type ProfileDto = Static<typeof ProfileUpdateDtoRunType>;
 
 export type AddableProfile = ProfileDto & {
   profileId: string;
-  email?: string;
+  email?: string | undefined;
   photoIds: string[];
 };
 
@@ -29,5 +29,5 @@ export type Profile = AddableProfile & {
 
 export type ProfileWithCurrentApplication = {
   profile: Profile;
-  application?: Application;
+  application?: Application | undefined;
 };

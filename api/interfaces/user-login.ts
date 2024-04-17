@@ -1,8 +1,8 @@
 export type AddableUserLogin = {
   displayName: string;
-  givenName?: string;
-  surname?: string;
-  email?: string;
+  givenName?: string | undefined;
+  surname?: string | undefined;
+  email?: string | undefined;
   identityProvider: string;
   identityProviderUserId: string;
   identityProviderUserDetails: string;
