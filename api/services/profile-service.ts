@@ -32,6 +32,9 @@ import {
   deleteUserLoginsByProfileId,
   getUserLogin,
 } from "./user-service";
+import { defaultListAccess } from "../model/graph/default-graph-list-access";
+import { Effect, Layer } from "effect";
+import { defaultGraphClient } from "../graph/default-graph-client";
 
 const workforcePortalConfig = getWorkforcePortalConfig();
 const maxPhotosPerPerson = workforcePortalConfig.maxProfilePhotosPerPerson;
@@ -99,7 +102,18 @@ export const getProfileForAuthenticatedUser = async (
       throw new ProfileServiceError("missing-user-profile");
     }
 
-    const existingApplication = await getApplicationByProfile(profile);
+    const existingApplicationEffect = getApplicationByProfile(profile).pipe(
+      Effect.match({
+        onSuccess: (application) => application,
+        onFailure: () => null,
+      })
+    );
+
+    const layers = defaultListAccess.pipe(Layer.provide(defaultGraphClient));
+    const runnable = Effect.provide(existingApplicationEffect, layers);
+
+    const existingApplication = await Effect.runPromise(runnable);
+
     if (existingApplication) {
       const updateApplication = await updateApplicationFromProfileIfNeeded(
         existingApplication,

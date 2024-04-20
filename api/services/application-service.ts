@@ -10,7 +10,6 @@ import { logError, logTrace, logWarn } from "../utilties/logging";
 import {
   createApplicationListItem,
   deleteApplicationListItem,
-  getApplicationByProfileId,
   updateApplicationListItem,
 } from "./application-sp";
 import {
@@ -18,6 +17,13 @@ import {
   setApplicationIdForPhoto,
 } from "./photo-service";
 import { getProfileForAuthenticatedUser } from "./profile-service";
+import {
+  modelGetApplicationByProfileId,
+  modelSaveApplicationChanges,
+} from "../model/applications-repository";
+import { defaultListAccess } from "../model/graph/default-graph-list-access";
+import { Effect, Layer } from "effect";
+import { defaultGraphClient } from "../graph/default-graph-client";
 
 const APPLICATION_SERVICE_ERROR_TYPE_VAL =
   "application-service-error-760bf8f3-6c06-4d4d-86ce-050884c8f50a";
@@ -44,11 +50,9 @@ export function isApplicationServiceError(
   return obj?.type === APPLICATION_SERVICE_ERROR_TYPE_VAL;
 }
 
-export const getApplicationByProfile = async (
-  profile: Profile
-): Promise<Application | null> => {
-  const application = await getApplicationByProfileId(profile.profileId);
-  return application;
+export const getApplicationByProfile = (profile: Profile) => {
+  const program = modelGetApplicationByProfileId(profile.profileId);
+  return program;
 };
 
 function propertyValueIsString(v: any): v is string {
@@ -257,10 +261,74 @@ export const updateApplicationFromProfileIfNeeded = async (
     existingApplication.telephone !== updatedApplication.telephone ||
     existingApplication.status !== updatedApplication.status
   ) {
-    return updateApplicationListItem(updatedApplication);
+    const saveApplicationEffect = modelSaveApplicationChanges(
+      existingApplication.applicationId
+    )(existingApplication.version)(updatedApplication).pipe(
+      Effect.catchTags({
+        // If the application cannot be found or there is a repository conflict then
+        // we'll just return the existing application. The underlying issue will be reported
+        // to the user next time they retrieve or update the application.
+        ApplicationNotFound: () => Effect.succeed(existingApplication),
+        RepositoryConflictError: () => Effect.succeed(existingApplication),
+      })
+    );
+
+    const layers = defaultListAccess.pipe(Layer.provide(defaultGraphClient));
+    const runnable = Effect.provide(saveApplicationEffect, layers);
+
+    const savedApplication = await Effect.runPromise(runnable);
+    return savedApplication;
   } else {
     return existingApplication;
   }
+};
+
+export const updateApplicationFromProfileIfNeededEffect = (
+  existingApplication: Application,
+  profile: Profile
+) => {
+  const updatedApplication: Application = {
+    ...existingApplication,
+    title: profile.displayName,
+    address: profile.address ?? undefined,
+    telephone: profile.telephone ?? undefined,
+    version: existingApplication.version + 1,
+  };
+
+  updatedApplication.status = determineApplicationStatus(
+    updatedApplication,
+    profile
+  );
+
+  return Effect.log(
+    "updateApplicationFromProfile: Determined application status: " +
+      updatedApplication.status
+  ).pipe(
+    Effect.andThen(
+      Effect.if(
+        existingApplication.title !== updatedApplication.title ||
+          existingApplication.address !== updatedApplication.address ||
+          existingApplication.telephone !== updatedApplication.telephone ||
+          existingApplication.status !== updatedApplication.status,
+        {
+          onTrue: () =>
+            modelSaveApplicationChanges(existingApplication.applicationId)(
+              existingApplication.version
+            )(updatedApplication).pipe(
+              Effect.catchTags({
+                // If the application cannot be found or there is a repository conflict then
+                // we'll just return the existing application. The underlying issue will be reported
+                // to the user next time they retrieve or update the application.
+                ApplicationNotFound: () => Effect.succeed(existingApplication),
+                RepositoryConflictError: () =>
+                  Effect.succeed(existingApplication),
+              })
+            ),
+          onFalse: () => Effect.succeed(existingApplication),
+        }
+      )
+    )
+  );
 };
 
 export const deleteApplication = async (

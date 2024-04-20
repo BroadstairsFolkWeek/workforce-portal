@@ -9,6 +9,7 @@
     "start:host": "func start",
     "start": "npm-run-all --parallel start:host watch",
     "test": "jest --roots ./tests",
+    "test:integration": "env-cmd -f ./tests-integration/.env jest --roots ./tests-integration",
     "test:exploratory": "env-cmd -f ./tests-exploratory/.env jest --roots ./tests-exploratory"
   },
   "description": "",
@@ -27,12 +28,14 @@
     "@aaronpowell/static-web-apps-api-auth": "^0.1.3",
     "@anzp/azure-function-multipart": "^3.1.0",
     "@azure/identity": "^2.0.2",
+    "@effect/schema": "^0.66.4",
     "@microsoft/microsoft-graph-client": "^3.0.1",
     "@pnp/common-commonjs": "^2.11.0",
     "@pnp/logging-commonjs": "^2.11.0",
     "@pnp/nodejs-commonjs": "^2.11.0",
     "@pnp/sp-commonjs": "^2.11.0",
-    "effect": "^2.4.18",
+    "effect": "^3.0.3",
+    "fast-check": "^3.17.1",
     "isomorphic-fetch": "^3.0.0",
     "runtypes": "^6.5.0",
     "uuid": "^8.3.2"

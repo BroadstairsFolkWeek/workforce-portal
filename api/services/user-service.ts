@@ -13,6 +13,7 @@ import {
   getUserLoginsByProfileId,
   updateUserLoginListItem,
 } from "./users-sp";
+import { Effect } from "effect";
 
 const USER_SERVICE_ERROR_TYPE_VAL =
   "user-service-error-d992f06a-75df-478c-a169-ec4024b48092";
@@ -32,6 +33,14 @@ export class UserServiceError {
     this.error = error;
     this.arg1 = arg1 ?? null;
   }
+}
+
+export class UserUnauthenticatedError {
+  _tag = "UserUnauthenticatedError";
+}
+
+export class UnknownUser {
+  _tag = "UnknownUser";
 }
 
 export function isUserServiceError(obj: any): obj is UserServiceError {
@@ -78,6 +87,24 @@ export const getUserLogin = async (
 
   return getUserLoginByIdentityProviderUserId(userInfo.userId);
 };
+
+export const getUserLoginEffect = (userInfo: UserInfo) =>
+  Effect.if(!!userInfo && !!userInfo.userId, {
+    onTrue: () =>
+      Effect.tryPromise({
+        try: () => getUserLoginByIdentityProviderUserId(userInfo.userId!),
+        catch: (e) => e,
+      }).pipe(
+        // Exceptions from getUserLoginByIdentityProviderUserId are considered as unrecoverable
+        // since the user is authenticated and the user login should exist.
+        Effect.orDie
+      ),
+    onFalse: () => Effect.fail(new UserUnauthenticatedError()),
+  }).pipe(
+    Effect.andThen((userLogin) =>
+      userLogin ? Effect.succeed(userLogin) : Effect.fail(new UnknownUser())
+    )
+  );
 
 export const createUserLogin = async (
   userInfo: UserInfo,

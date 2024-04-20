@@ -29,6 +29,13 @@
     },
     {
       "type": "node-terminal",
+      "name": "API Integration Tests",
+      "request": "launch",
+      "command": "npm run test:integration",
+      "cwd": "${workspaceFolder}/api"
+    },
+    {
+      "type": "node-terminal",
       "name": "API Exploratory Tests",
       "request": "launch",
       "command": "npm run test:exploratory",
