@@ -21,7 +21,7 @@ const httpTrigger: AzureFunction = async function (
     );
 
     try {
-      const submittedApplication = await submitApplication(userInfo);
+      const submittedApplication = await submitApplication(userInfo.userId!);
       context.res = { status: 200, body: submittedApplication };
     } catch (err) {
       if (isUserServiceError(err)) {

@@ -31,7 +31,7 @@ const httpTrigger: AzureFunction = async function (
     try {
       const savedProfile = await updateUserProfile(
         updatedUserProfile,
-        userInfo
+        userInfo.userId!
       );
       context.res = { status: 200, body: savedProfile };
     } catch (err) {

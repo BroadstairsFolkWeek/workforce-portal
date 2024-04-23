@@ -13,6 +13,10 @@ const applicationsListId = Config.string(
   "WORKFORCE_APPLICATIONS_LIST_GUID"
 ).pipe(Effect.orDie);
 
+const userLoginsListId = Config.string("WORKFORCE_LOGINS_LIST_GUID").pipe(
+  Effect.orDie
+);
+
 const getListItemsByFilter =
   (client: Client) => (siteId: string, listId: string) => (filter?: string) => {
     const apiPath = `/sites/${siteId}/lists/${listId}/items`;
@@ -26,13 +30,6 @@ const getListItemsByFilter =
       Effect.map((graphResponse) => graphResponse.value as Array<any>)
     );
   };
-
-const getApplicationGraphListItemsByFilter =
-  (client: Client, siteId: string, listId: string) => (filter?: string) =>
-    getListItemsByFilter(client)(
-      siteId,
-      listId
-    )(filter).pipe(Effect.map((items) => items as Array<any>));
 
 const updateApplicationGraphListItemFields =
   (client: Client, siteId: string, listId: string) =>
@@ -50,13 +47,23 @@ const clientEffect = GraphClient.pipe(Effect.flatMap((gc) => gc.client));
 
 export const defaultListAccess = Layer.effect(
   GraphListAccess,
-  Effect.all([clientEffect, siteId, applicationsListId]).pipe(
-    Effect.map(([client, siteId, listId]) =>
+  Effect.all([clientEffect, siteId, applicationsListId, userLoginsListId]).pipe(
+    Effect.map(([client, siteId, applicationsListId, userLoginsListId]) =>
       GraphListAccess.of({
-        getApplicationGraphListItemsByFilter:
-          getApplicationGraphListItemsByFilter(client, siteId, listId),
+        getApplicationGraphListItemsByFilter: getListItemsByFilter(client)(
+          siteId,
+          applicationsListId
+        ),
+        getUserLoginGraphListItemsByFilter: getListItemsByFilter(client)(
+          siteId,
+          userLoginsListId
+        ),
         updateApplicationGraphListItemFields:
-          updateApplicationGraphListItemFields(client, siteId, listId),
+          updateApplicationGraphListItemFields(
+            client,
+            siteId,
+            applicationsListId
+          ),
       })
     )
   )

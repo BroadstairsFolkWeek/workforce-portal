@@ -20,7 +20,9 @@ const httpTrigger: AzureFunction = async function (
   const userInfo = getUserInfo(req);
   if (userInfo) {
     try {
-      const userProfile = await getProfileForAuthenticatedUser(userInfo);
+      const userProfile = await getProfileForAuthenticatedUser(
+        userInfo.userId!
+      );
       if (userProfile) {
         logTrace("profile: Got profile: " + JSON.stringify(userProfile));
         context.res = {

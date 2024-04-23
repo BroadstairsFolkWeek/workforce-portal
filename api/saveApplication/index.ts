@@ -29,7 +29,10 @@ const httpTrigger: AzureFunction = async function (
 
     try {
       const application = sanitiseApplicationFromApiClient(req.body);
-      const savedApplication = await saveApplication(application, userInfo);
+      const savedApplication = await saveApplication(
+        application,
+        userInfo.userId!
+      );
       context.res = { status: 200, body: savedApplication };
     } catch (err) {
       if (isProfileServiceError(err)) {

@@ -1,4 +1,3 @@
-import { UserInfo } from "@aaronpowell/static-web-apps-api-auth";
 import {
   AddableUserLogin,
   UpdatableUserLogin,
@@ -9,11 +8,15 @@ import { getGraphUser } from "./users-graph";
 import {
   createUserLoginListItem,
   deleteUserLogin,
-  getUserLoginByIdentityProviderUserId,
   getUserLoginsByProfileId,
   updateUserLoginListItem,
 } from "./users-sp";
-import { Effect } from "effect";
+import { Effect, Either, Layer } from "effect";
+import { UserLoginRepository } from "../model/user-login-repository";
+import { userLoginRepositoryLive } from "../model/user-logins-repository-graph";
+import { applicationsRepositoryLive } from "../model/applications-repository-graph";
+import { defaultListAccess } from "../model/graph/default-graph-list-access";
+import { defaultGraphClient } from "../graph/default-graph-client";
 
 const USER_SERVICE_ERROR_TYPE_VAL =
   "user-service-error-d992f06a-75df-478c-a169-ec4024b48092";
@@ -50,13 +53,9 @@ export function isUserServiceError(obj: any): obj is UserServiceError {
 type RawUserLogin = Omit<AddableUserLogin, "profileId">;
 
 const getUserLoginPropertiesFromGraph = async (
-  userInfo: UserInfo
+  userId: string
 ): Promise<RawUserLogin | null> => {
-  if (!userInfo || !userInfo.userId) {
-    throw new UserServiceError("unauthenticated");
-  }
-
-  const graphUser = await getGraphUser(userInfo.userId);
+  const graphUser = await getGraphUser(userId);
   console.log(
     "getUserLoginPropertiesFromGraph: GraphUser: " +
       JSON.stringify(graphUser, null, 2)
@@ -65,8 +64,8 @@ const getUserLoginPropertiesFromGraph = async (
   if (graphUser && graphUser.identityProvider) {
     const userLoginFromGraph: RawUserLogin = {
       displayName: graphUser.displayName ?? "unknown",
-      identityProviderUserId: userInfo.userId,
-      identityProviderUserDetails: userInfo.userDetails ?? "unknown",
+      identityProviderUserId: userId,
+      identityProviderUserDetails: "unused",
       givenName: graphUser.givenName,
       surname: graphUser.surname,
       email: graphUser.email,
@@ -78,49 +77,26 @@ const getUserLoginPropertiesFromGraph = async (
   }
 };
 
-export const getUserLogin = async (
-  userInfo: UserInfo
-): Promise<UserLogin | null> => {
-  if (!userInfo || !userInfo.userId) {
-    throw new UserServiceError("unauthenticated");
-  }
+export const getUserLogin = (userId: string) =>
+  UserLoginRepository.pipe(
+    Effect.andThen((repo) =>
+      repo.modelGetUserLoginByIdentityProviderUserId(userId)
+    ),
 
-  return getUserLoginByIdentityProviderUserId(userInfo.userId);
-};
-
-export const getUserLoginEffect = (userInfo: UserInfo) =>
-  Effect.if(!!userInfo && !!userInfo.userId, {
-    onTrue: () =>
-      Effect.tryPromise({
-        try: () => getUserLoginByIdentityProviderUserId(userInfo.userId!),
-        catch: (e) => e,
-      }).pipe(
-        // Exceptions from getUserLoginByIdentityProviderUserId are considered as unrecoverable
-        // since the user is authenticated and the user login should exist.
-        Effect.orDie
-      ),
-    onFalse: () => Effect.fail(new UserUnauthenticatedError()),
-  }).pipe(
-    Effect.andThen((userLogin) =>
-      userLogin ? Effect.succeed(userLogin) : Effect.fail(new UnknownUser())
-    )
+    Effect.catchTag("UserLoginNotFound", () => Effect.fail(new UnknownUser()))
   );
 
 export const createUserLogin = async (
-  userInfo: UserInfo,
+  userId: string,
   profileId: string
 ): Promise<UserLogin> => {
-  if (!userInfo || !userInfo.userId) {
-    throw new UserServiceError("unauthenticated");
-  }
-
-  const graphUser = await getUserLoginPropertiesFromGraph(userInfo);
+  const graphUser = await getUserLoginPropertiesFromGraph(userId);
   if (graphUser && graphUser.identityProvider) {
     const newUserLogin: AddableUserLogin = {
       profileId,
       displayName: graphUser.displayName ?? "unknown",
-      identityProviderUserId: userInfo.userId,
-      identityProviderUserDetails: userInfo.userDetails ?? "unknown",
+      identityProviderUserId: userId,
+      identityProviderUserDetails: "unused",
       givenName: graphUser.givenName,
       surname: graphUser.surname,
       email: graphUser.email,
@@ -142,12 +118,27 @@ export const createUserLogin = async (
 
 export const updateUserLogin = async (
   updatableUserLogin: UpdatableUserLogin,
-  userInfo: UserInfo
+  userId: string
 ): Promise<UserLogin> => {
-  // Retrieve the existing user login
-  const existingUserLogin = await getUserLogin(userInfo);
+  const repositoriesLayer = Layer.merge(
+    userLoginRepositoryLive,
+    applicationsRepositoryLive
+  );
 
-  if (existingUserLogin) {
+  const layers = repositoriesLayer.pipe(
+    Layer.provide(defaultListAccess),
+    Layer.provide(defaultGraphClient)
+  );
+
+  // Retrieve the existing user login
+  const existingUserLoginEffect = getUserLogin(userId).pipe(Effect.either);
+  const runnableGetUserLogin = Effect.provide(existingUserLoginEffect, layers);
+
+  const existingUserLoginEither = await Effect.runPromise(runnableGetUserLogin);
+
+  if (Either.isRight(existingUserLoginEither)) {
+    const existingUserLogin = existingUserLoginEither.right;
+
     const updatedUserLogin: UserLogin = {
       ...existingUserLogin,
       ...updatableUserLogin,

@@ -21,7 +21,7 @@ const httpTrigger: AzureFunction = async function (
     );
 
     try {
-      const retractedApplication = await retractApplication(userInfo);
+      const retractedApplication = await retractApplication(userInfo.userId!);
       context.res = { status: 200, body: retractedApplication };
     } catch (err) {
       if (isUserServiceError(err)) {

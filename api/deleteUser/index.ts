@@ -18,7 +18,7 @@ const httpTrigger: AzureFunction = async function (
     );
 
     try {
-      await deleteUser(userInfo);
+      await deleteUser(userInfo.userId!);
       context.res = logoutHandler(req);
     } catch (err) {}
   } else {

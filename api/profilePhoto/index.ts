@@ -63,7 +63,7 @@ const handlePostProfilePhoto = async function (
     const [, fileExtension, fileBuffer] = sanitiseImageFromApiClient(imageFile);
 
     const updatedProfile = await setProfilePicture(
-      userInfo,
+      userInfo.userId!,
       fileExtension,
       fileBuffer
     );
@@ -94,7 +94,7 @@ const handlePostProfilePhoto = async function (
 
 const handleDeleteProfilePhoto = async function (userInfo: UserInfo) {
   try {
-    const result = await deleteProfilePicture(userInfo);
+    const result = await deleteProfilePicture(userInfo.userId!);
     return {
       status: 200,
       body: result,

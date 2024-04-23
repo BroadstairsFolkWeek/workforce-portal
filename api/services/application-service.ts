@@ -1,4 +1,3 @@
-import { UserInfo } from "@aaronpowell/static-web-apps-api-auth";
 import { v4 as uuidv4 } from "uuid";
 import {
   AddableApplication,
@@ -17,13 +16,11 @@ import {
   setApplicationIdForPhoto,
 } from "./photo-service";
 import { getProfileForAuthenticatedUser } from "./profile-service";
-import {
-  modelGetApplicationByProfileId,
-  modelSaveApplicationChanges,
-} from "../model/applications-repository";
 import { defaultListAccess } from "../model/graph/default-graph-list-access";
 import { Effect, Layer } from "effect";
 import { defaultGraphClient } from "../graph/default-graph-client";
+import { ApplicationsRepository } from "../model/applications-repository";
+import { applicationsRepositoryLive } from "../model/applications-repository-graph";
 
 const APPLICATION_SERVICE_ERROR_TYPE_VAL =
   "application-service-error-760bf8f3-6c06-4d4d-86ce-050884c8f50a";
@@ -50,10 +47,12 @@ export function isApplicationServiceError(
   return obj?.type === APPLICATION_SERVICE_ERROR_TYPE_VAL;
 }
 
-export const getApplicationByProfile = (profile: Profile) => {
-  const program = modelGetApplicationByProfileId(profile.profileId);
-  return program;
-};
+export const getApplicationByProfile = (profile: Profile) =>
+  ApplicationsRepository.pipe(
+    Effect.andThen((service) =>
+      service.modelGetApplicationByProfileId(profile.profileId)
+    )
+  );
 
 function propertyValueIsString(v: any): v is string {
   return typeof v === "string";
@@ -154,10 +153,10 @@ const determineApplicationStatus = (
 
 export const saveApplication = async (
   applicationDto: ApplicationDto,
-  userInfo: UserInfo
+  userId: string
 ): Promise<Application> => {
   const userProfileWithCurrentApplication =
-    await getProfileForAuthenticatedUser(userInfo);
+    await getProfileForAuthenticatedUser(userId);
 
   const userProfile = userProfileWithCurrentApplication.profile;
   const existingApplication = userProfileWithCurrentApplication.application;
@@ -261,9 +260,12 @@ export const updateApplicationFromProfileIfNeeded = async (
     existingApplication.telephone !== updatedApplication.telephone ||
     existingApplication.status !== updatedApplication.status
   ) {
-    const saveApplicationEffect = modelSaveApplicationChanges(
-      existingApplication.applicationId
-    )(existingApplication.version)(updatedApplication).pipe(
+    const saveApplicationEffect = ApplicationsRepository.pipe(
+      Effect.andThen((repository) =>
+        repository.modelSaveApplicationChanges(
+          existingApplication.applicationId
+        )(existingApplication.version)(updatedApplication)
+      ),
       Effect.catchTags({
         // If the application cannot be found or there is a repository conflict then
         // we'll just return the existing application. The underlying issue will be reported
@@ -273,7 +275,10 @@ export const updateApplicationFromProfileIfNeeded = async (
       })
     );
 
-    const layers = defaultListAccess.pipe(Layer.provide(defaultGraphClient));
+    const layers = applicationsRepositoryLive.pipe(
+      Layer.provide(defaultListAccess),
+      Layer.provide(defaultGraphClient)
+    );
     const runnable = Effect.provide(saveApplicationEffect, layers);
 
     const savedApplication = await Effect.runPromise(runnable);
@@ -312,9 +317,12 @@ export const updateApplicationFromProfileIfNeededEffect = (
           existingApplication.status !== updatedApplication.status,
         {
           onTrue: () =>
-            modelSaveApplicationChanges(existingApplication.applicationId)(
-              existingApplication.version
-            )(updatedApplication).pipe(
+            ApplicationsRepository.pipe(
+              Effect.andThen((service) =>
+                service.modelSaveApplicationChanges(
+                  existingApplication.applicationId
+                )(existingApplication.version)(updatedApplication)
+              ),
               Effect.catchTags({
                 // If the application cannot be found or there is a repository conflict then
                 // we'll just return the existing application. The underlying issue will be reported
@@ -332,11 +340,11 @@ export const updateApplicationFromProfileIfNeededEffect = (
 };
 
 export const deleteApplication = async (
-  userInfo: UserInfo,
+  userId: string,
   applicationVersion: number
 ): Promise<void> => {
   // Retrieve any application the user may have already saved.
-  const profileAndApplication = await getProfileForAuthenticatedUser(userInfo);
+  const profileAndApplication = await getProfileForAuthenticatedUser(userId);
   const existingApplication = profileAndApplication?.application;
   if (existingApplication) {
     logTrace(
@@ -361,9 +369,9 @@ export const deleteApplication = async (
 };
 
 export const submitApplication = async (
-  userInfo: UserInfo
+  userId: string
 ): Promise<Application> => {
-  const profileAndApplication = await getProfileForAuthenticatedUser(userInfo);
+  const profileAndApplication = await getProfileForAuthenticatedUser(userId);
   const application = profileAndApplication?.application;
 
   if (application) {
@@ -415,9 +423,9 @@ export const submitApplication = async (
 };
 
 export const retractApplication = async (
-  userInfo: UserInfo
+  userId: string
 ): Promise<Application> => {
-  const profileAndApplication = await getProfileForAuthenticatedUser(userInfo);
+  const profileAndApplication = await getProfileForAuthenticatedUser(userId);
   const application = profileAndApplication?.application;
 
   if (application) {

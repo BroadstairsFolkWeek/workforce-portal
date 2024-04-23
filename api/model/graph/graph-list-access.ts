@@ -8,6 +8,10 @@ export class GraphListAccess extends Context.Tag("GraphListAccess")<
       filter?: string
     ) => Effect.Effect<PersistedGraphListItem<any>[]>;
 
+    readonly getUserLoginGraphListItemsByFilter: (
+      filter?: string
+    ) => Effect.Effect<PersistedGraphListItem<any>[]>;
+
     readonly updateApplicationGraphListItemFields: (
       id: number,
       versionedChanges: any

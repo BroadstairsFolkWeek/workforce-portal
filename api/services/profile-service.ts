@@ -1,4 +1,3 @@
-import { UserInfo } from "@aaronpowell/static-web-apps-api-auth";
 import { v4 as uuidv4 } from "uuid";
 import { FileContentWithInfo } from "../interfaces/file";
 import {
@@ -33,8 +32,10 @@ import {
   getUserLogin,
 } from "./user-service";
 import { defaultListAccess } from "../model/graph/default-graph-list-access";
-import { Effect, Layer } from "effect";
+import { Effect, Either, Layer } from "effect";
 import { defaultGraphClient } from "../graph/default-graph-client";
+import { userLoginRepositoryLive } from "../model/user-logins-repository-graph";
+import { applicationsRepositoryLive } from "../model/applications-repository-graph";
 
 const workforcePortalConfig = getWorkforcePortalConfig();
 const maxPhotosPerPerson = workforcePortalConfig.maxProfilePhotosPerPerson;
@@ -61,11 +62,24 @@ export function isProfileServiceError(obj: any): obj is ProfileServiceError {
 }
 
 export const getProfileForAuthenticatedUser = async (
-  userInfo: UserInfo
+  userId: string
 ): Promise<ProfileWithCurrentApplication> => {
-  const userLogin = await getUserLogin(userInfo);
+  const repositoriesLayer = Layer.merge(
+    userLoginRepositoryLive,
+    applicationsRepositoryLive
+  );
 
-  if (!userLogin) {
+  const layers = repositoriesLayer.pipe(
+    Layer.provide(defaultListAccess),
+    Layer.provide(defaultGraphClient)
+  );
+
+  const userLoginEffect = getUserLogin(userId).pipe(Effect.either);
+  const runnableGetUserLogin = Effect.provide(userLoginEffect, layers);
+
+  const userLoginEither = await Effect.runPromise(runnableGetUserLogin);
+
+  if (Either.isLeft(userLoginEither)) {
     const profileId = uuidv4();
     logTrace(
       "getProfileForAuthenticatedUser: User login does not exist. Creating new user login and profile. Profile ID: " +
@@ -73,7 +87,7 @@ export const getProfileForAuthenticatedUser = async (
     );
 
     const createdUserLogin: UserLogin = await createUserLogin(
-      userInfo,
+      userId,
       profileId
     );
 
@@ -96,6 +110,7 @@ export const getProfileForAuthenticatedUser = async (
       profile: await createProfileListItem(newProfile),
     };
   } else {
+    const userLogin = userLoginEither.right;
     const profileId = userLogin.profileId;
     const profile = await getProfileByProfileId(profileId);
     if (!profile) {
@@ -109,7 +124,6 @@ export const getProfileForAuthenticatedUser = async (
       })
     );
 
-    const layers = defaultListAccess.pipe(Layer.provide(defaultGraphClient));
     const runnable = Effect.provide(existingApplicationEffect, layers);
 
     const existingApplication = await Effect.runPromise(runnable);
@@ -132,11 +146,11 @@ export const getProfileForAuthenticatedUser = async (
 
 export const updateUserProfile = async (
   updatableProfile: UpdatableProfile,
-  userInfo: UserInfo
+  userId: string
 ): Promise<ProfileWithCurrentApplication> => {
   // Retrieve the existing user profile
   const existingProfileAndApplication = await getProfileForAuthenticatedUser(
-    userInfo
+    userId
   );
   const existingProfile = existingProfileAndApplication?.profile;
 
@@ -220,10 +234,10 @@ export const deleteUserProfile = async (profile: Profile) => {
 };
 
 export const deleteProfilePicture = async (
-  userInfo: UserInfo
+  userId: string
 ): Promise<ProfileWithCurrentApplication> => {
   const userProfileAndApplication = await getProfileForAuthenticatedUser(
-    userInfo
+    userId
   );
 
   if (userProfileAndApplication) {
@@ -267,12 +281,12 @@ export const deleteProfilePicture = async (
 };
 
 export const setProfilePicture = async (
-  userInfo: UserInfo,
+  userId: string,
   fileExtension: ACCEPTED_IMAGE_EXTENSIONS,
   fileBuffer: Buffer
 ): Promise<ProfileWithCurrentApplication> => {
   const userProfileAndApplication = await getProfileForAuthenticatedUser(
-    userInfo
+    userId
   );
 
   if (userProfileAndApplication) {

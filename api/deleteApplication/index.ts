@@ -30,7 +30,7 @@ const httpTrigger: AzureFunction = async function (
       );
 
       try {
-        await deleteApplication(userInfo, version);
+        await deleteApplication(userInfo.userId!, version);
         context.res = {
           status: 204,
         };
