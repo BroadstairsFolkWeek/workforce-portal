@@ -1,15 +1,14 @@
-import { env } from "process";
 import { GraphError } from "@microsoft/microsoft-graph-client";
 import { Site } from "@microsoft/microsoft-graph-types";
 import { getTestGraphClient } from "./graph-client";
+import { getTestConfig } from "./test-config";
+
+const testConfig = getTestConfig();
 
 const graphClient = getTestGraphClient();
 
-const siteHostname = env.GRAPH_SITE_HOSTNAME;
-const sitePath = env.GRAPH_SITE_PATH;
-
 export const getTestSite = async (
-  apiPath: string = `/sites/${siteHostname}:${sitePath}`
+  apiPath: string = `/sites/${testConfig.GRAPH_SITE_HOSTNAME}:${testConfig.GRAPH_SITE_PATH}`
 ) => {
   console.log(`Getting Site from API path: ${apiPath}`);
   return graphClient.api(apiPath).get() as Site;
@@ -34,7 +33,7 @@ test("Get site promise rejects for an invalid site path", async () => {
   expect.assertions(3);
 
   try {
-    await getTestSite(`/sites/${siteHostname}:/unknownpath`);
+    await getTestSite(`/sites/${testConfig.GRAPH_SITE_HOSTNAME}:/unknownpath`);
   } catch (error) {
     console.log(
       `Error from get-site for invalid site path: ${JSON.stringify(error)}`
@@ -51,7 +50,7 @@ test("Get site promise rejects for invalid site hostname for tenancy being conne
   expect.assertions(3);
 
   try {
-    await getTestSite(`/sites/example.com:${sitePath}`);
+    await getTestSite(`/sites/example.com:${testConfig.GRAPH_SITE_PATH}`);
   } catch (error) {
     console.log(
       `Error from get-site for invalid site hostname: ${JSON.stringify(error)}`

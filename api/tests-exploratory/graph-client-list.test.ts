@@ -1,14 +1,16 @@
-import { env } from "process";
 import { GraphError } from "@microsoft/microsoft-graph-client";
 import { List } from "@microsoft/microsoft-graph-types";
 import { getTestSiteId } from "./graph-client-site.test";
 import { getTestGraphClient } from "./graph-client";
+import { getTestConfig } from "./test-config";
+
+const testConfig = getTestConfig();
 
 const graphClient = getTestGraphClient();
 
-const listName = env.GRAPH_LIST_NAME;
-
-export const getTestList = async (listIdOrTitle: string = `${listName}`) => {
+export const getTestList = async (
+  listIdOrTitle: string = `${testConfig.GRAPH_LIST_NAME}`
+) => {
   const testSiteId = await getTestSiteId();
   const apiPath = `/sites/${testSiteId}/lists/${listIdOrTitle}`;
 
