@@ -1,6 +1,9 @@
 import { Effect, Context } from "effect";
 import { ModelPersistedUserLogin } from "./interfaces/user-login";
-import { UserLoginNotFound } from "./user-logins-repository-graph";
+
+export class UserLoginNotFound {
+  readonly _tag = "UserLoginNotFound";
+}
 
 export class UserLoginRepository extends Context.Tag("UserLoginRepository")<
   UserLoginRepository,

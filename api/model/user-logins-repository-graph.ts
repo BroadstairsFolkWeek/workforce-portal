@@ -2,11 +2,10 @@ import { Effect, Layer } from "effect";
 import { Schema } from "@effect/schema";
 import { GraphListAccess } from "./graph/graph-list-access";
 import { ModelPersistedUserLogin } from "./interfaces/user-login";
-import { UserLoginRepository } from "./user-login-repository";
-
-export class UserLoginNotFound {
-  readonly _tag = "UserLoginNotFound";
-}
+import {
+  UserLoginNotFound,
+  UserLoginRepository,
+} from "./user-login-repository";
 
 const listItemToUserLogin = (item: any) => {
   // Apply defaults for any missing fields.

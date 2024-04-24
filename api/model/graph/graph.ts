@@ -9,11 +9,14 @@ import { GraphClient } from "../../graph/graph-client";
 export const getGraphClient = () =>
   GraphClient.pipe(Effect.flatMap((gc) => gc.client));
 
-export const graphRequestGetOrDie = (gr: GraphRequest) =>
+export const graphRequestGet = (gr: GraphRequest) =>
   Effect.tryPromise({
     try: () => gr.get(),
     catch: (e) => wrapIfGraphError(e),
-  }).pipe(
+  });
+
+export const graphRequestGetOrDie = (gr: GraphRequest) =>
+  graphRequestGet(gr).pipe(
     Effect.catchAll((e) =>
       e instanceof GraphClientGraphError ? Effect.fail(e) : Effect.die(e)
     )
