@@ -1,6 +1,6 @@
 import { getUserInfo } from "@aaronpowell/static-web-apps-api-auth";
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
-import { getProfileForAuthenticatedUser } from "../services/profile-service";
+import { getOrCreateProfileForAuthenticatedUser } from "../services/profile-service";
 import { isUserServiceError } from "../services/user-service";
 import {
   logError,
@@ -20,7 +20,7 @@ const httpTrigger: AzureFunction = async function (
   const userInfo = getUserInfo(req);
   if (userInfo) {
     try {
-      const userProfile = await getProfileForAuthenticatedUser(
+      const userProfile = await getOrCreateProfileForAuthenticatedUser(
         userInfo.userId!
       );
       if (userProfile) {

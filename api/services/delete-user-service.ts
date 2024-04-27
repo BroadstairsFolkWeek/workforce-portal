@@ -2,12 +2,14 @@ import { logTrace } from "../utilties/logging";
 import { deleteApplication } from "./application-service";
 import {
   deleteUserProfile,
-  getProfileForAuthenticatedUser,
+  getOrCreateProfileForAuthenticatedUser,
 } from "./profile-service";
 
 export const deleteUser = async (userId: string): Promise<void> => {
   // Retrieve any application the user may have already saved.
-  const profileAndApplication = await getProfileForAuthenticatedUser(userId);
+  const profileAndApplication = await getOrCreateProfileForAuthenticatedUser(
+    userId
+  );
   const existingApplication = profileAndApplication?.application;
   if (existingApplication) {
     logTrace(

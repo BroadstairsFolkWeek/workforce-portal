@@ -15,7 +15,7 @@ import {
   clearApplicationIdForPhoto,
   setApplicationIdForPhoto,
 } from "./photo-service";
-import { getProfileForAuthenticatedUser } from "./profile-service";
+import { getOrCreateProfileForAuthenticatedUser } from "./profile-service";
 import { defaultListAccess } from "../model/graph/default-graph-list-access";
 import { Effect, Layer } from "effect";
 import { defaultGraphClient } from "../graph/default-graph-client";
@@ -156,7 +156,7 @@ export const saveApplication = async (
   userId: string
 ): Promise<Application> => {
   const userProfileWithCurrentApplication =
-    await getProfileForAuthenticatedUser(userId);
+    await getOrCreateProfileForAuthenticatedUser(userId);
 
   const userProfile = userProfileWithCurrentApplication.profile;
   const existingApplication = userProfileWithCurrentApplication.application;
@@ -344,7 +344,9 @@ export const deleteApplication = async (
   applicationVersion: number
 ): Promise<void> => {
   // Retrieve any application the user may have already saved.
-  const profileAndApplication = await getProfileForAuthenticatedUser(userId);
+  const profileAndApplication = await getOrCreateProfileForAuthenticatedUser(
+    userId
+  );
   const existingApplication = profileAndApplication?.application;
   if (existingApplication) {
     logTrace(
@@ -371,7 +373,9 @@ export const deleteApplication = async (
 export const submitApplication = async (
   userId: string
 ): Promise<Application> => {
-  const profileAndApplication = await getProfileForAuthenticatedUser(userId);
+  const profileAndApplication = await getOrCreateProfileForAuthenticatedUser(
+    userId
+  );
   const application = profileAndApplication?.application;
 
   if (application) {
@@ -425,7 +429,9 @@ export const submitApplication = async (
 export const retractApplication = async (
   userId: string
 ): Promise<Application> => {
-  const profileAndApplication = await getProfileForAuthenticatedUser(userId);
+  const profileAndApplication = await getOrCreateProfileForAuthenticatedUser(
+    userId
+  );
   const application = profileAndApplication?.application;
 
   if (application) {

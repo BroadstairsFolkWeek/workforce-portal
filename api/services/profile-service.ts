@@ -61,7 +61,7 @@ export function isProfileServiceError(obj: any): obj is ProfileServiceError {
   return obj?.type === PROFILE_SERVICE_ERROR_TYPE_VAL;
 }
 
-export const getProfileForAuthenticatedUser = async (
+export const getOrCreateProfileForAuthenticatedUser = async (
   userId: string
 ): Promise<ProfileWithCurrentApplication> => {
   const repositoriesLayer = Layer.merge(
@@ -149,9 +149,8 @@ export const updateUserProfile = async (
   userId: string
 ): Promise<ProfileWithCurrentApplication> => {
   // Retrieve the existing user profile
-  const existingProfileAndApplication = await getProfileForAuthenticatedUser(
-    userId
-  );
+  const existingProfileAndApplication =
+    await getOrCreateProfileForAuthenticatedUser(userId);
   const existingProfile = existingProfileAndApplication?.profile;
 
   if (existingProfile) {
@@ -236,9 +235,8 @@ export const deleteUserProfile = async (profile: Profile) => {
 export const deleteProfilePicture = async (
   userId: string
 ): Promise<ProfileWithCurrentApplication> => {
-  const userProfileAndApplication = await getProfileForAuthenticatedUser(
-    userId
-  );
+  const userProfileAndApplication =
+    await getOrCreateProfileForAuthenticatedUser(userId);
 
   if (userProfileAndApplication) {
     logTrace("deleteProfilePicture: Retrieved existing user profile");
@@ -285,9 +283,8 @@ export const setProfilePicture = async (
   fileExtension: ACCEPTED_IMAGE_EXTENSIONS,
   fileBuffer: Buffer
 ): Promise<ProfileWithCurrentApplication> => {
-  const userProfileAndApplication = await getProfileForAuthenticatedUser(
-    userId
-  );
+  const userProfileAndApplication =
+    await getOrCreateProfileForAuthenticatedUser(userId);
 
   if (userProfileAndApplication) {
     logTrace("setProfilePicture: Retrieved existing user profile");
