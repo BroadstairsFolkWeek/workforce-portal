@@ -31,11 +31,11 @@ import {
   deleteUserLoginsByProfileId,
   getUserLogin,
 } from "./user-service";
-import { defaultListAccess } from "../model/graph/default-graph-list-access";
 import { Effect, Either, Layer } from "effect";
 import { defaultGraphClient } from "../graph/default-graph-client";
 import { userLoginRepositoryLive } from "../model/user-logins-repository-graph";
 import { applicationsRepositoryLive } from "../model/applications-repository-graph";
+import { graphListAccessesLive } from "../model/graph/default-graph-list-access";
 
 const workforcePortalConfig = getWorkforcePortalConfig();
 const maxPhotosPerPerson = workforcePortalConfig.maxProfilePhotosPerPerson;
@@ -70,7 +70,7 @@ export const getOrCreateProfileForAuthenticatedUser = async (
   );
 
   const layers = repositoriesLayer.pipe(
-    Layer.provide(defaultListAccess),
+    Layer.provide(graphListAccessesLive),
     Layer.provide(defaultGraphClient)
   );
 

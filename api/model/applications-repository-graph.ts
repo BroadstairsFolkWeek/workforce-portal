@@ -1,6 +1,5 @@
 import { Effect, Layer } from "effect";
 import { Schema } from "@effect/schema";
-import { GraphListAccess } from "./graph/graph-list-access";
 import {
   ModelApplicationChanges,
   ModelApplicationChangesVersioned,
@@ -11,6 +10,7 @@ import {
   ApplicationNotFound,
   ApplicationsRepository,
 } from "./applications-repository";
+import { ApplicationsGraphListAccess } from "./graph/applications-graph-list-access";
 
 const listItemToApplication = (item: any) => {
   // Apply defaults for any missing fields.
@@ -26,7 +26,7 @@ const listItemToApplication = (item: any) => {
 };
 
 const modelGetApplicationByFilter = (filter: string) => {
-  return GraphListAccess.pipe(
+  return ApplicationsGraphListAccess.pipe(
     Effect.flatMap((listAccess) =>
       listAccess.getApplicationGraphListItemsByFilter(filter)
     ),
@@ -74,7 +74,7 @@ const modelSaveApplicationChanges =
     return Effect.all([
       dbIdAndConflictCheck,
       changedFields,
-      GraphListAccess,
+      ApplicationsGraphListAccess,
     ]).pipe(
       Effect.flatMap(([dbId, fields, listAccess]) =>
         listAccess.updateApplicationGraphListItemFields(dbId, fields)
@@ -87,16 +87,16 @@ const modelSaveApplicationChanges =
 
 export const applicationsRepositoryLive = Layer.effect(
   ApplicationsRepository,
-  GraphListAccess.pipe(
+  ApplicationsGraphListAccess.pipe(
     Effect.map((service) => ({
       modelGetApplicationByProfileId: (profileId: string) =>
         modelGetApplicationByProfileId(profileId).pipe(
-          Effect.provideService(GraphListAccess, service)
+          Effect.provideService(ApplicationsGraphListAccess, service)
         ),
 
       modelGetApplicationByApplicationId: (applicationId: string) =>
         modelGetApplicationByApplicationId(applicationId).pipe(
-          Effect.provideService(GraphListAccess, service)
+          Effect.provideService(ApplicationsGraphListAccess, service)
         ),
 
       modelSaveApplicationChanges:
@@ -105,7 +105,7 @@ export const applicationsRepositoryLive = Layer.effect(
         (changes: ModelApplicationChanges) =>
           modelSaveApplicationChanges(applicationId)(applyToVersion)(
             changes
-          ).pipe(Effect.provideService(GraphListAccess, service)),
+          ).pipe(Effect.provideService(ApplicationsGraphListAccess, service)),
     }))
   )
 );

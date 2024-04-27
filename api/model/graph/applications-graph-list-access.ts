@@ -1,14 +1,12 @@
 import { Effect, Context } from "effect";
 import { PersistedGraphListItem } from "../interfaces/graph/graph-items";
 
-export class GraphListAccess extends Context.Tag("GraphListAccess")<
-  GraphListAccess,
+export class ApplicationsGraphListAccess extends Context.Tag(
+  "ApplicationsGraphListAccess"
+)<
+  ApplicationsGraphListAccess,
   {
     readonly getApplicationGraphListItemsByFilter: (
-      filter?: string
-    ) => Effect.Effect<PersistedGraphListItem<any>[]>;
-
-    readonly getUserLoginGraphListItemsByFilter: (
       filter?: string
     ) => Effect.Effect<PersistedGraphListItem<any>[]>;
 

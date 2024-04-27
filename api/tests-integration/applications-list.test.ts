@@ -1,16 +1,18 @@
 import { Effect, Layer } from "effect";
-import { GraphListAccess } from "../model/graph/graph-list-access";
-import { defaultListAccess } from "../model/graph/default-graph-list-access";
 import { defaultGraphClient } from "../graph/default-graph-client";
+import { ApplicationsGraphListAccess } from "../model/graph/applications-graph-list-access";
 
 import "isomorphic-fetch";
+import { applicationsGraphListAccessLive } from "../model/graph/applications-graph-list-access-live";
 
 test("get application list items", async () => {
-  const program = Effect.all([GraphListAccess]).pipe(
+  const program = Effect.all([ApplicationsGraphListAccess]).pipe(
     Effect.flatMap(([ga]) => ga.getApplicationGraphListItemsByFilter())
   );
 
-  const layers = defaultListAccess.pipe(Layer.provide(defaultGraphClient));
+  const layers = applicationsGraphListAccessLive.pipe(
+    Layer.provide(defaultGraphClient)
+  );
 
   const runnable = Effect.provide(program, layers);
 

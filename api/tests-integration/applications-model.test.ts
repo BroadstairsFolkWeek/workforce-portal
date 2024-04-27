@@ -1,10 +1,10 @@
 import { Config, Effect, Layer } from "effect";
-import { defaultListAccess } from "../model/graph/default-graph-list-access";
 import { defaultGraphClient } from "../graph/default-graph-client";
 
 import "isomorphic-fetch";
 import { ApplicationsRepository } from "../model/applications-repository";
 import { applicationsRepositoryLive } from "../model/applications-repository-graph";
+import { applicationsGraphListAccessLive } from "../model/graph/applications-graph-list-access-live";
 
 test("get application by Profile ID", async () => {
   const program = Effect.all([
@@ -17,7 +17,7 @@ test("get application by Profile ID", async () => {
   );
 
   const layers = applicationsRepositoryLive.pipe(
-    Layer.provide(defaultListAccess),
+    Layer.provide(applicationsGraphListAccessLive),
     Layer.provide(defaultGraphClient)
   );
 
@@ -39,7 +39,7 @@ test("get application by Application ID", async () => {
   );
 
   const layers = applicationsRepositoryLive.pipe(
-    Layer.provide(defaultListAccess),
+    Layer.provide(applicationsGraphListAccessLive),
     Layer.provide(defaultGraphClient)
   );
 
@@ -79,7 +79,7 @@ test("update application by Application ID", async () => {
   );
 
   const layers = applicationsRepositoryLive.pipe(
-    Layer.provide(defaultListAccess),
+    Layer.provide(applicationsGraphListAccessLive),
     Layer.provide(defaultGraphClient)
   );
 

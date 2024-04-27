@@ -14,12 +14,12 @@ import { Effect, Either, Layer } from "effect";
 import { UserLoginRepository } from "../model/user-login-repository";
 import { userLoginRepositoryLive } from "../model/user-logins-repository-graph";
 import { applicationsRepositoryLive } from "../model/applications-repository-graph";
-import { defaultListAccess } from "../model/graph/default-graph-list-access";
 import { defaultGraphClient } from "../graph/default-graph-client";
 import { GraphUsersRepository } from "../model/graph-users-repository";
 import { ModelGraphUser } from "../model/interfaces/graph-user";
 import { graphUsersRepositoryLive } from "../model/graph-users-repository-graph";
 import { b2cGraphClient } from "../graph/b2c-graph-client";
+import { graphListAccessesLive } from "../model/graph/default-graph-list-access";
 
 const USER_SERVICE_ERROR_TYPE_VAL =
   "user-service-error-d992f06a-75df-478c-a169-ec4024b48092";
@@ -172,7 +172,7 @@ export const updateUserLogin = async (
   );
 
   const layers = repositoriesLayer.pipe(
-    Layer.provide(defaultListAccess),
+    Layer.provide(graphListAccessesLive),
     Layer.provide(defaultGraphClient)
   );
 

@@ -1,11 +1,11 @@
 import { Effect, Layer } from "effect";
 import { Schema } from "@effect/schema";
-import { GraphListAccess } from "./graph/graph-list-access";
 import { ModelPersistedUserLogin } from "./interfaces/user-login";
 import {
   UserLoginNotFound,
   UserLoginRepository,
 } from "./user-login-repository";
+import { UserLoginsGraphListAccess } from "./graph/user-logins-graph-list-access";
 
 const listItemToUserLogin = (item: any) => {
   // Apply defaults for any missing fields.
@@ -17,7 +17,7 @@ const listItemToUserLogin = (item: any) => {
 };
 
 const modelGetUserLoginsByFilter = (filter: string) => {
-  return GraphListAccess.pipe(
+  return UserLoginsGraphListAccess.pipe(
     Effect.flatMap((listAccess) =>
       listAccess.getUserLoginGraphListItemsByFilter(filter)
     ),
@@ -38,11 +38,11 @@ const modelGetUserLoginByIdentityProviderUserId = (id: string) => {
 
 export const userLoginRepositoryLive = Layer.effect(
   UserLoginRepository,
-  GraphListAccess.pipe(
+  UserLoginsGraphListAccess.pipe(
     Effect.map((service) => ({
       modelGetUserLoginByIdentityProviderUserId: (userId: string) =>
         modelGetUserLoginByIdentityProviderUserId(userId).pipe(
-          Effect.provideService(GraphListAccess, service)
+          Effect.provideService(UserLoginsGraphListAccess, service)
         ),
     }))
   )

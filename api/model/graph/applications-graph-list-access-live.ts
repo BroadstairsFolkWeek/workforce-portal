@@ -1,0 +1,35 @@
+import { Config, Effect, Layer } from "effect";
+import { GraphClient } from "../../graph/graph-client";
+import { ApplicationsGraphListAccess } from "./applications-graph-list-access";
+import {
+  getListItemsByFilter,
+  updateApplicationGraphListItemFields,
+} from "./common-graph-list-access";
+
+// Any config error is unrecoverable.
+const applicationsListId = Config.string(
+  "WORKFORCE_APPLICATIONS_LIST_GUID"
+).pipe(Effect.orDie);
+
+export const applicationsGraphListAccessLive = Layer.effect(
+  ApplicationsGraphListAccess,
+  Effect.all([applicationsListId, GraphClient]).pipe(
+    Effect.map(([applicationsListId, graphClient]) =>
+      ApplicationsGraphListAccess.of({
+        getApplicationGraphListItemsByFilter: (filter?: string) =>
+          getListItemsByFilter(applicationsListId)(filter).pipe(
+            Effect.provideService(GraphClient, graphClient)
+          ),
+
+        updateApplicationGraphListItemFields: (
+          id: number,
+          versionedChanges: any
+        ) =>
+          updateApplicationGraphListItemFields(applicationsListId)(
+            id,
+            versionedChanges
+          ).pipe(Effect.provideService(GraphClient, graphClient)),
+      })
+    )
+  )
+);

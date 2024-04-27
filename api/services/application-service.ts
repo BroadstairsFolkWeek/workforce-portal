@@ -16,11 +16,11 @@ import {
   setApplicationIdForPhoto,
 } from "./photo-service";
 import { getOrCreateProfileForAuthenticatedUser } from "./profile-service";
-import { defaultListAccess } from "../model/graph/default-graph-list-access";
 import { Effect, Layer } from "effect";
 import { defaultGraphClient } from "../graph/default-graph-client";
 import { ApplicationsRepository } from "../model/applications-repository";
 import { applicationsRepositoryLive } from "../model/applications-repository-graph";
+import { graphListAccessesLive } from "../model/graph/default-graph-list-access";
 
 const APPLICATION_SERVICE_ERROR_TYPE_VAL =
   "application-service-error-760bf8f3-6c06-4d4d-86ce-050884c8f50a";
@@ -276,7 +276,7 @@ export const updateApplicationFromProfileIfNeeded = async (
     );
 
     const layers = applicationsRepositoryLive.pipe(
-      Layer.provide(defaultListAccess),
+      Layer.provide(graphListAccessesLive),
       Layer.provide(defaultGraphClient)
     );
     const runnable = Effect.provide(saveApplicationEffect, layers);
