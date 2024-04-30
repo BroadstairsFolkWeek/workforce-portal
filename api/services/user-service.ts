@@ -158,6 +158,11 @@ export const createUserLogin = async (
       "createUserLogin: About to create user login: " +
         JSON.stringify(newUserLogin)
     );
+
+    UserLoginRepository.pipe(
+      Effect.andThen((repo) => repo.modelCreateUserLogin(newUserLogin))
+    );
+
     return createUserLoginListItem(newUserLogin);
   }
 };

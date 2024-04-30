@@ -31,3 +31,16 @@ export const graphRequestPatchOrDie = (gr: GraphRequest) => (body: any) =>
       e instanceof GraphClientGraphError ? Effect.fail(e) : Effect.die(e)
     )
   );
+
+export const graphRequestPost = (gr: GraphRequest) => (body: any) =>
+  Effect.tryPromise({
+    try: () => gr.post(body),
+    catch: (e) => wrapIfGraphError(e),
+  });
+
+export const graphRequestPostOrDie = (gr: GraphRequest) => (body: any) =>
+  graphRequestPost(gr)(body).pipe(
+    Effect.catchAll((e) =>
+      e instanceof GraphClientGraphError ? Effect.fail(e) : Effect.die(e)
+    )
+  );

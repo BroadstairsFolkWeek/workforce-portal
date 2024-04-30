@@ -3,7 +3,7 @@ import { GraphClient } from "../../graph/graph-client";
 import { ApplicationsGraphListAccess } from "./applications-graph-list-access";
 import {
   getListItemsByFilter,
-  updateApplicationGraphListItemFields,
+  updateGraphListItemFields,
 } from "./common-graph-list-access";
 
 // Any config error is unrecoverable.
@@ -25,7 +25,7 @@ export const applicationsGraphListAccessLive = Layer.effect(
           id: number,
           versionedChanges: any
         ) =>
-          updateApplicationGraphListItemFields(applicationsListId)(
+          updateGraphListItemFields(applicationsListId)(
             id,
             versionedChanges
           ).pipe(Effect.provideService(GraphClient, graphClient)),
