@@ -1,8 +1,15 @@
 import { Effect, Context } from "effect";
-import { ModelPersistedUserLogin } from "./interfaces/user-login";
+import {
+  ModelAddableUserLogin,
+  ModelPersistedUserLogin,
+} from "./interfaces/user-login";
 
 export class UserLoginNotFound {
   readonly _tag = "UserLoginNotFound";
+}
+
+export class InvalidUserLoginValue {
+  readonly _tag = "InvalidUserLoginValue";
 }
 
 export class UserLoginRepository extends Context.Tag("UserLoginRepository")<
@@ -11,5 +18,9 @@ export class UserLoginRepository extends Context.Tag("UserLoginRepository")<
     readonly modelGetUserLoginByIdentityProviderUserId: (
       userId: string
     ) => Effect.Effect<ModelPersistedUserLogin, UserLoginNotFound>;
+
+    readonly modelCreateUserLogin: (
+      addableUserLogin: ModelAddableUserLogin
+    ) => Effect.Effect<ModelPersistedUserLogin, InvalidUserLoginValue>;
   }
 >() {}

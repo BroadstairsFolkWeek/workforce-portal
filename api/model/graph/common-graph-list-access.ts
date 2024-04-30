@@ -1,5 +1,9 @@
 import { Effect } from "effect";
-import { graphRequestGetOrDie, graphRequestPatchOrDie } from "./graph";
+import {
+  graphRequestGetOrDie,
+  graphRequestPatchOrDie,
+  graphRequestPostOrDie,
+} from "./graph";
 import { ModelApplicationChangesVersioned } from "../interfaces/application";
 import { GraphClient } from "../../graph/graph-client";
 import { getSiteId } from "./site-graph";
@@ -27,7 +31,7 @@ export const getListItemsByFilter = (listId: string) => (filter?: string) => {
   );
 };
 
-export const updateApplicationGraphListItemFields =
+export const updateGraphListItemFields =
   (listId: string) =>
   (id: number, versionedChanges: ModelApplicationChangesVersioned) => {
     return siteIdEffect.pipe(
@@ -46,3 +50,21 @@ export const updateApplicationGraphListItemFields =
       )
     );
   };
+
+export const createGraphListItem = (listId: string) => (fields: any) => {
+  return siteIdEffect.pipe(
+    Effect.andThen((siteId) =>
+      GraphClient.pipe(
+        Effect.andThen((gc) => gc.client),
+        Effect.andThen((client) =>
+          client.api(`/sites/${siteId}/lists/${listId}/items`)
+        ),
+        Effect.andThen((gr) => graphRequestPostOrDie(gr)(fields)),
+        // No graph errors for get requests against a list are expected to be recoverable.
+        Effect.catchTag("GraphClientGraphError", (e) =>
+          Effect.die(e.graphError)
+        )
+      )
+    )
+  );
+};

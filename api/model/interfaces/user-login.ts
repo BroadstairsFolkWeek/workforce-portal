@@ -29,6 +29,11 @@ const ModelUserLoginPersistanceData = S.Struct({
   ),
 });
 
+export const ModelAddableUserLogin = S.extend(
+  ModelCoreUserLogin,
+  ModelUserLoginMetadata
+);
+
 export const ModelPersistedUserLogin = S.extend(
   ModelCoreUserLogin,
   S.extend(ModelUserLoginMetadata, ModelUserLoginPersistanceData)
@@ -36,3 +41,6 @@ export const ModelPersistedUserLogin = S.extend(
 
 export interface ModelPersistedUserLogin
   extends S.Schema.Type<typeof ModelPersistedUserLogin> {}
+
+export interface ModelAddableUserLogin
+  extends S.Schema.Type<typeof ModelAddableUserLogin> {}

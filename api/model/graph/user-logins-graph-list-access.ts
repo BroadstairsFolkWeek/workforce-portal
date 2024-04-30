@@ -9,5 +9,7 @@ export class UserLoginsGraphListAccess extends Context.Tag(
     readonly getUserLoginGraphListItemsByFilter: (
       filter?: string
     ) => Effect.Effect<PersistedGraphListItem<any>[]>;
+
+    readonly createUserLoginGraphListItem: (fields: any) => Effect.Effect<any>;
   }
 >() {}
