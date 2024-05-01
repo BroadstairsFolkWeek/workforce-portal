@@ -23,5 +23,6 @@
       "runMode": "on-demand",
       "jestCommandLine": "npm run test:exploratory --"
     }
-  ]
+  ],
+  "editor.defaultFormatter": "esbenp.prettier-vscode"
 }
