@@ -3,6 +3,8 @@ import { Schema as S } from "@effect/schema";
 export const ModelProfileId = S.String.pipe(S.brand("ProfileId"));
 export type ModelProfileId = S.Schema.Type<typeof ModelProfileId>;
 
+const ModelPhotoIds = S.split("\n");
+
 const ModelCoreProfile = S.Struct({
   email: S.optional(S.String).pipe(S.fromKey("Email")),
   displayName: S.propertySignature(S.String).pipe(S.fromKey("Title")),
@@ -11,7 +13,7 @@ const ModelCoreProfile = S.Struct({
   address: S.optional(S.String).pipe(S.fromKey("Address")),
   telephone: S.optional(S.String).pipe(S.fromKey("Telephone")),
   version: S.propertySignature(S.Number).pipe(S.fromKey("Version")),
-  photoIds: S.propertySignature(S.Array(S.String)).pipe(S.fromKey("PhotoIds")),
+  photoIds: S.optional(ModelPhotoIds).pipe(S.fromKey("PhotoIds")),
 });
 
 const ModelProfileMetadata = S.Struct({

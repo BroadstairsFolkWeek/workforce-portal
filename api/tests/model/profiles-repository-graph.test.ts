@@ -9,6 +9,7 @@ import {
 import { ProfilesGraphListAccess } from "../../model/graph/profiles-graph-list-access";
 import { ProfilesRepository } from "../../model/profiles-repository";
 import { profilesRepositoryLive } from "../../model/profiles-repository-graph";
+import exp from "constants";
 
 const sharepointItemFields = {
   id: "1",
@@ -22,7 +23,7 @@ const sharepointItemFields = {
   Addresss: "Address",
   ProfileId: "ProfileId",
   PhotoIds:
-    "cd75d654-6e8c-4d3f-9144-cc98cb72474d:dabf5573-56e1-43f1-86ce-92edc89cc78c",
+    "cd75d654-6e8c-4d3f-9144-cc98cb72474d:dabf5573-56e1-43f1-86ce-92edc89cc78c\n5b2f278c-4233-4ae3-ac3f-5a577960145b:078c6b36-0779-452e-9f00-3973b0d7fda4",
   Version: 2,
 };
 
@@ -36,6 +37,7 @@ const modelAddableItemFields = {
   profileId: S.decodeSync(ModelProfileId)("ProfileId"),
   photoIds: [
     "cd75d654-6e8c-4d3f-9144-cc98cb72474d:dabf5573-56e1-43f1-86ce-92edc89cc78c",
+    "5b2f278c-4233-4ae3-ac3f-5a577960145b:078c6b36-0779-452e-9f00-3973b0d7fda4",
   ],
   version: 2,
 };
@@ -47,26 +49,32 @@ const modelPersistedItemFields = {
   modifiedDate: new Date("2021-02-03T04:05:06Z"),
 };
 
+const mockCreateProfileGraphListItem = jest.fn((fields) =>
+  Effect.succeed({
+    fields: {
+      id: "1",
+      Created: "2021-01-01T00:00:00Z",
+      Modified: "2021-02-03T04:05:06Z",
+      Title: fields.Title,
+      GivenName: fields.GivenName,
+      Surname: fields.Surname,
+      Email: fields.Email,
+      Telephone: fields.Telephone,
+      Address: fields.Address,
+      PhotoIds: fields.PhotoIds,
+      Version: fields.Version,
+      ProfileId: fields.ProfileId,
+    },
+  })
+);
+
+const mockGetProfileGraphListItemsByFilter = jest.fn((filter?: string) =>
+  Effect.succeed([{ fields: sharepointItemFields }])
+);
+
 const mockLayers = Layer.succeed(ProfilesGraphListAccess, {
-  createProfileGraphListItem: (fields) =>
-    Effect.succeed({
-      fields: {
-        id: "1",
-        Created: "2021-01-01T00:00:00Z",
-        Modified: "2021-02-03T04:05:06Z",
-        Title: fields.Title,
-        GivenName: fields.GivenName,
-        Surname: fields.Surname,
-        Email: fields.Email,
-        Telephone: fields.Telephone,
-        Address: fields.Address,
-        PhotoIds: fields.PhotoIds,
-        Version: fields.Version,
-        ProfileId: fields.ProfileId,
-      },
-    }),
-  getProfileGraphListItemsByFilter: () =>
-    Effect.succeed([{ fields: sharepointItemFields }]),
+  createProfileGraphListItem: mockCreateProfileGraphListItem,
+  getProfileGraphListItemsByFilter: mockGetProfileGraphListItemsByFilter,
 });
 
 test("modelCreateProfile returns a ModelPersistedProfile", () => {
@@ -87,4 +95,7 @@ test("modelCreateProfile returns a ModelPersistedProfile", () => {
   const actual = Effect.runSync(runnable);
 
   expect(actual).toStrictEqual(expected);
+  expect(mockCreateProfileGraphListItem.mock.calls).toHaveLength(1);
+  const [inputToMock] = mockCreateProfileGraphListItem.mock.calls[0];
+  expect(inputToMock.PhotoIds).toEqual(sharepointItemFields.PhotoIds);
 });

@@ -1,13 +1,10 @@
+import { Effect, Option } from "effect";
 import { getUserInfo } from "@aaronpowell/static-web-apps-api-auth";
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
-import { getOrCreateProfileForAuthenticatedUser } from "../services/profile-service";
+import { getOrCreateProfileForAuthenticatedUserEffect } from "../services/profile-service";
 import { isUserServiceError } from "../services/user-service";
-import {
-  logError,
-  logTrace,
-  logWarn,
-  setLoggerFromContext,
-} from "../utilties/logging";
+import { logError, logTrace, setLoggerFromContext } from "../utilties/logging";
+import { repositoriesLayerLive } from "../contexts/repositories-live";
 
 const httpTrigger: AzureFunction = async function (
   context: Context,
@@ -20,21 +17,48 @@ const httpTrigger: AzureFunction = async function (
   const userInfo = getUserInfo(req);
   if (userInfo) {
     try {
-      const userProfile = await getOrCreateProfileForAuthenticatedUser(
-        userInfo.userId!
+      const userProfileWithOptionalApplicationEffect =
+        getOrCreateProfileForAuthenticatedUserEffect(userInfo.userId!)
+          .pipe(
+            Effect.andThen((profileWithOptionalApplication) =>
+              Option.match({
+                onSome: (application) =>
+                  Effect.succeed({
+                    profile: profileWithOptionalApplication.profile,
+                    application: application,
+                  }),
+                onNone: () =>
+                  Effect.succeed({
+                    profile: profileWithOptionalApplication.profile,
+                  }),
+              })(profileWithOptionalApplication.application)
+            ),
+            Effect.andThen((body) => ({
+              status: 200 as const,
+              body,
+            }))
+          )
+          .pipe(
+            Effect.catchTag("ProfileNotFound", () =>
+              Effect.succeed({
+                status: 404 as const,
+                body: "Profile does not exist",
+              })
+            ),
+            Effect.catchTag("GraphUserNotFound", () =>
+              Effect.succeed({
+                status: 404 as const,
+                body: "Graph user does not exist",
+              })
+            )
+          );
+
+      const foo = await Effect.runPromise(
+        userProfileWithOptionalApplicationEffect.pipe(
+          Effect.provide(repositoriesLayerLive)
+        )
       );
-      if (userProfile) {
-        logTrace("profile: Got profile: " + JSON.stringify(userProfile));
-        context.res = {
-          body: userProfile,
-        };
-      } else {
-        logWarn("profile: Profile does not exist and was not created.");
-        context.res = {
-          status: 404,
-          body: "Profile does not exist",
-        };
-      }
+      context.res = foo;
     } catch (err) {
       if (isUserServiceError(err)) {
         switch (err.error) {

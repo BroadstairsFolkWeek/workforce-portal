@@ -20,7 +20,12 @@ import { Effect, Layer } from "effect";
 import { defaultGraphClient } from "../graph/default-graph-client";
 import { ApplicationsRepository } from "../model/applications-repository";
 import { applicationsRepositoryLive } from "../model/applications-repository-graph";
-import { graphListAccessesLive } from "../model/graph/default-graph-list-access";
+import { graphListAccessesLive } from "../contexts/graph-list-access-live";
+import { ModelPersistedProfile } from "../model/interfaces/profile";
+import {
+  ModelApplicationChanges,
+  ModelPersistedApplication,
+} from "../model/interfaces/application";
 
 const APPLICATION_SERVICE_ERROR_TYPE_VAL =
   "application-service-error-760bf8f3-6c06-4d4d-86ce-050884c8f50a";
@@ -47,12 +52,22 @@ export function isApplicationServiceError(
   return obj?.type === APPLICATION_SERVICE_ERROR_TYPE_VAL;
 }
 
-export const getApplicationByProfile = (profile: Profile) =>
+export const getApplicationByProfile = (
+  profile: Profile | ModelPersistedProfile
+) =>
   ApplicationsRepository.pipe(
     Effect.andThen((service) =>
       service.modelGetApplicationByProfileId(profile.profileId)
     )
   );
+
+export const getApplicationByProfileAndUpdateIfNeeded = (
+  profile: ModelPersistedProfile
+) => {
+  return getApplicationByProfile(profile).pipe(
+    Effect.andThen(updateApplicationFromProfileIfNeededEffect(profile))
+  );
+};
 
 function propertyValueIsString(v: any): v is string {
   return typeof v === "string";
@@ -62,31 +77,27 @@ const isPropertyValueMissing = <T>(
   addableApplication: T,
   field: keyof T
 ): boolean => {
-  if (
-    addableApplication[field] === undefined ||
-    addableApplication[field] === null
-  ) {
-    return true;
-  }
+  return isValueMissing(addableApplication[field]);
+};
 
-  const v = addableApplication[field];
-  if (propertyValueIsString(v) && v?.toString().trim().length === 0) {
-    return true;
-  }
-
-  return false;
+const isValueMissing = (value: any) => {
+  return (
+    value === undefined ||
+    value === null ||
+    (propertyValueIsString(value) && value.trim().length === 0)
+  );
 };
 
 const determineApplicationStatus = (
-  addableApplication: AddableApplication,
-  userProfile: Profile
+  addableApplication: AddableApplication | ModelApplicationChanges,
+  userProfile: Profile | ModelPersistedProfile
 ): AddableApplication["status"] => {
   logTrace(
     "determineApplicationStatus: addableApplication: " +
       JSON.stringify(addableApplication, null, 2)
   );
 
-  const mandatoryFields: Array<keyof AddableApplication> = [
+  const mandatoryFields: Array<keyof ModelApplicationChanges> = [
     "emergencyContactName",
     "emergencyContactTelephone",
     "ageGroup",
@@ -107,7 +118,7 @@ const determineApplicationStatus = (
       addableApplication.teamPreference3,
     ].includes("Children's Events")
   ) {
-    const mandatoryChildrensTeamFields: Array<keyof AddableApplication> = [
+    const mandatoryChildrensTeamFields: Array<keyof ModelApplicationChanges> = [
       "dbsDisclosureNumber",
       "dbsDisclosureDate",
     ];
@@ -133,7 +144,7 @@ const determineApplicationStatus = (
     return "profile-required";
   }
 
-  if (userProfile.photoIds.length === 0) {
+  if (!userProfile.photoIds || userProfile.photoIds.length === 0) {
     return "photo-required";
   }
 
@@ -288,56 +299,55 @@ export const updateApplicationFromProfileIfNeeded = async (
   }
 };
 
-export const updateApplicationFromProfileIfNeededEffect = (
-  existingApplication: Application,
-  profile: Profile
-) => {
-  const updatedApplication: Application = {
-    ...existingApplication,
-    title: profile.displayName,
-    address: profile.address ?? undefined,
-    telephone: profile.telephone ?? undefined,
-    version: existingApplication.version + 1,
-  };
+const updateApplicationFromProfileIfNeededEffect =
+  (profile: Profile | ModelPersistedProfile) =>
+  (existingApplication: ModelPersistedApplication) => {
+    const interimUpdatedApplication: ModelApplicationChanges = {
+      ...existingApplication,
+      title: profile.displayName,
+      address: profile.address ?? undefined,
+      telephone: profile.telephone ?? undefined,
+    };
 
-  updatedApplication.status = determineApplicationStatus(
-    updatedApplication,
-    profile
-  );
+    const updatedApplication: ModelApplicationChanges = {
+      ...interimUpdatedApplication,
+      status: determineApplicationStatus(interimUpdatedApplication, profile),
+    };
 
-  return Effect.log(
-    "updateApplicationFromProfile: Determined application status: " +
-      updatedApplication.status
-  ).pipe(
-    Effect.andThen(
-      Effect.if(
-        existingApplication.title !== updatedApplication.title ||
-          existingApplication.address !== updatedApplication.address ||
-          existingApplication.telephone !== updatedApplication.telephone ||
-          existingApplication.status !== updatedApplication.status,
-        {
-          onTrue: () =>
-            ApplicationsRepository.pipe(
-              Effect.andThen((service) =>
-                service.modelSaveApplicationChanges(
-                  existingApplication.applicationId
-                )(existingApplication.version)(updatedApplication)
+    return Effect.log(
+      "updateApplicationFromProfile: Determined application status: " +
+        updatedApplication.status
+    ).pipe(
+      Effect.andThen(
+        Effect.if(
+          existingApplication.title !== updatedApplication.title ||
+            existingApplication.address !== updatedApplication.address ||
+            existingApplication.telephone !== updatedApplication.telephone ||
+            existingApplication.status !== updatedApplication.status,
+          {
+            onTrue: () =>
+              ApplicationsRepository.pipe(
+                Effect.andThen((service) =>
+                  service.modelSaveApplicationChanges(
+                    existingApplication.applicationId
+                  )(existingApplication.version)(updatedApplication)
+                ),
+                Effect.catchTags({
+                  // If the application cannot be found or there is a repository conflict then
+                  // we'll just return the existing application. The underlying issue will be reported
+                  // to the user next time they retrieve or update the application.
+                  ApplicationNotFound: () =>
+                    Effect.succeed(existingApplication),
+                  RepositoryConflictError: () =>
+                    Effect.succeed(existingApplication),
+                })
               ),
-              Effect.catchTags({
-                // If the application cannot be found or there is a repository conflict then
-                // we'll just return the existing application. The underlying issue will be reported
-                // to the user next time they retrieve or update the application.
-                ApplicationNotFound: () => Effect.succeed(existingApplication),
-                RepositoryConflictError: () =>
-                  Effect.succeed(existingApplication),
-              })
-            ),
-          onFalse: () => Effect.succeed(existingApplication),
-        }
+            onFalse: () => Effect.succeed(existingApplication),
+          }
+        )
       )
-    )
-  );
-};
+    );
+  };
 
 export const deleteApplication = async (
   userId: string,

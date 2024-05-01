@@ -1,3 +1,5 @@
+import { Effect, Either, Option, Layer } from "effect";
+import { Schema as S } from "@effect/schema";
 import { v4 as uuidv4 } from "uuid";
 import { FileContentWithInfo } from "../interfaces/file";
 import {
@@ -11,6 +13,7 @@ import { UserLogin } from "../interfaces/user-login";
 import { logTrace } from "../utilties/logging";
 import {
   getApplicationByProfile,
+  getApplicationByProfileAndUpdateIfNeeded,
   updateApplicationFromProfileIfNeeded,
 } from "./application-service";
 import { getWorkforcePortalConfig } from "./configuration-service";
@@ -28,14 +31,20 @@ import {
 } from "./profile-sp";
 import {
   createUserLogin,
+  createUserLoginForGraphUser,
   deleteUserLoginsByProfileId,
   getUserLogin,
 } from "./user-service";
-import { Effect, Either, Layer } from "effect";
 import { defaultGraphClient } from "../graph/default-graph-client";
 import { userLoginRepositoryLive } from "../model/user-logins-repository-graph";
 import { applicationsRepositoryLive } from "../model/applications-repository-graph";
-import { graphListAccessesLive } from "../model/graph/default-graph-list-access";
+import { graphListAccessesLive } from "../contexts/graph-list-access-live";
+import {
+  ModelAddableProfile,
+  ModelProfileId,
+} from "../model/interfaces/profile";
+import { ModelPersistedUserLogin } from "../model/interfaces/user-login";
+import { ProfilesRepository } from "../model/profiles-repository";
 
 const workforcePortalConfig = getWorkforcePortalConfig();
 const maxPhotosPerPerson = workforcePortalConfig.maxProfilePhotosPerPerson;
@@ -60,6 +69,77 @@ export class ProfileServiceError {
 export function isProfileServiceError(obj: any): obj is ProfileServiceError {
   return obj?.type === PROFILE_SERVICE_ERROR_TYPE_VAL;
 }
+
+const getNewProfileId = () => S.decodeSync(ModelProfileId)(uuidv4());
+
+const getNewProfileDataForUserLogin =
+  (profileId: ModelProfileId) =>
+  (createdUserLogin: ModelPersistedUserLogin): ModelAddableProfile => ({
+    profileId,
+    displayName: createdUserLogin.displayName,
+    givenName: createdUserLogin.givenName,
+    surname: createdUserLogin.surname,
+    email: createdUserLogin.email,
+    photoIds: [],
+    version: 1,
+  });
+
+const createNewUserLoginAndProfileForGraphUser = (graphUserId: string) => {
+  const profileId = getNewProfileId();
+  logTrace(
+    "getProfileForAuthenticatedUser: User login does not exist. Creating new user login and profile. Profile ID: " +
+      profileId
+  );
+
+  return createUserLoginForGraphUser(graphUserId, profileId).pipe(
+    Effect.andThen(getNewProfileDataForUserLogin(profileId)),
+    Effect.andThen((addedProfile) =>
+      ProfilesRepository.pipe(
+        Effect.andThen((repository) =>
+          repository.modelCreateProfile(addedProfile)
+        )
+      )
+    )
+  );
+};
+
+const getProfileWithApplication = (profileId: ModelProfileId) => {
+  return ProfilesRepository.pipe(
+    Effect.andThen((repository) =>
+      repository.modelGetProfileByProfileId(profileId)
+    ),
+    Effect.andThen((profile) =>
+      getApplicationByProfileAndUpdateIfNeeded(profile).pipe(
+        Effect.andThen((application) =>
+          Effect.succeed({
+            profile,
+            application: Option.some(application),
+          } as const)
+        ),
+        Effect.catchTag("ApplicationNotFound", () =>
+          Effect.succeed({ profile, application: Option.none() } as const)
+        )
+      )
+    )
+  );
+};
+
+export const getOrCreateProfileForAuthenticatedUserEffect = (
+  userId: string
+) => {
+  return getUserLogin(userId).pipe(
+    Effect.andThen((userLogin) =>
+      getProfileWithApplication(userLogin.profileId)
+    ),
+    Effect.catchTag("UnknownUser", () =>
+      createNewUserLoginAndProfileForGraphUser(userId).pipe(
+        Effect.andThen((profile) =>
+          Effect.succeed({ profile, application: Option.none() } as const)
+        )
+      )
+    )
+  );
+};
 
 export const getOrCreateProfileForAuthenticatedUser = async (
   userId: string

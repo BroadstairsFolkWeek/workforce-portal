@@ -21,8 +21,7 @@ const modelGetProfileByFilter = (filter: string) => {
     Effect.catchTag("NoSuchElementException", () =>
       Effect.fail(new ProfileNotFound())
     ),
-    Effect.map((item) => item.fields),
-    Effect.flatMap((fields) => graphListItemToProfile(fields)),
+    Effect.flatMap((item) => graphListItemToProfile(item)),
     // Parse errors of data from Graph/SharePoint are considered unrecoverable.
     Effect.catchTag("ParseError", (e) => Effect.die(e))
   );

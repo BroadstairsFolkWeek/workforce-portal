@@ -11,15 +11,16 @@ import {
   updateUserLoginListItem,
 } from "./users-sp";
 import { Effect, Either, Layer } from "effect";
-import { UserLoginRepository } from "../model/user-login-repository";
+import { UserLoginRepository } from "../model/user-logins-repository";
 import { userLoginRepositoryLive } from "../model/user-logins-repository-graph";
 import { applicationsRepositoryLive } from "../model/applications-repository-graph";
 import { defaultGraphClient } from "../graph/default-graph-client";
 import { GraphUsersRepository } from "../model/graph-users-repository";
 import { ModelGraphUser } from "../model/interfaces/graph-user";
+import { graphListAccessesLive } from "../contexts/graph-list-access-live";
+import { ModelProfileId } from "../model/interfaces/profile";
 import { graphUsersRepositoryLive } from "../model/graph-users-repository-graph";
 import { b2cGraphClient } from "../graph/b2c-graph-client";
-import { graphListAccessesLive } from "../model/graph/default-graph-list-access";
 
 const USER_SERVICE_ERROR_TYPE_VAL =
   "user-service-error-d992f06a-75df-478c-a169-ec4024b48092";
@@ -42,11 +43,11 @@ export class UserServiceError {
 }
 
 export class UserUnauthenticatedError {
-  _tag = "UserUnauthenticatedError";
+  readonly _tag = "UserUnauthenticatedError";
 }
 
 export class UnknownUser {
-  _tag = "UnknownUser";
+  readonly _tag = "UnknownUser";
 }
 
 export function isUserServiceError(obj: any): obj is UserServiceError {
@@ -159,12 +160,31 @@ export const createUserLogin = async (
         JSON.stringify(newUserLogin)
     );
 
-    UserLoginRepository.pipe(
-      Effect.andThen((repo) => repo.modelCreateUserLogin(newUserLogin))
-    );
-
     return createUserLoginListItem(newUserLogin);
   }
+};
+
+export const createUserLoginForGraphUser = (
+  userId: string,
+  profileId: ModelProfileId
+) => {
+  return getUserLoginPropertiesFromGraph(userId).pipe(
+    Effect.andThen((graphUser) => ({
+      profileId,
+      displayName: graphUser.displayName,
+      identityProviderUserId: userId,
+      identityProviderUserDetails: "unused",
+      givenName: graphUser.givenName,
+      surname: graphUser.surname,
+      email: graphUser.email,
+      identityProvider: "unknown",
+    })),
+    Effect.andThen((newUserLogin) =>
+      UserLoginRepository.pipe(
+        Effect.andThen((repo) => repo.modelCreateUserLogin(newUserLogin))
+      )
+    )
+  );
 };
 
 export const updateUserLogin = async (
