@@ -59,7 +59,7 @@ export const createGraphListItem = (listId: string) => (fields: any) => {
         Effect.andThen((client) =>
           client.api(`/sites/${siteId}/lists/${listId}/items`)
         ),
-        Effect.andThen((gr) => graphRequestPostOrDie(gr)(fields)),
+        Effect.andThen((gr) => graphRequestPostOrDie(gr)({fields})),
         // No graph errors for get requests against a list are expected to be recoverable.
         Effect.catchTag("GraphClientGraphError", (e) =>
           Effect.die(e.graphError)

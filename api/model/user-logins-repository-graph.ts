@@ -5,19 +5,18 @@ import {
   ModelPersistedUserLogin,
 } from "./interfaces/user-login";
 import {
-  InvalidUserLoginValue,
   UserLoginNotFound,
   UserLoginRepository,
-} from "./user-login-repository";
+} from "./user-logins-repository";
 import { UserLoginsGraphListAccess } from "./graph/user-logins-graph-list-access";
 
-const listItemToUserLogin = (item: any) => {
+const graphListItemToUserLogin = (item: any) => {
   // Apply defaults for any missing fields.
-  const itemWithDefaults = {
-    ...item,
+  const itemFieldsWithDefaults = {
+    ...item.fields,
   };
 
-  return Schema.decode(ModelPersistedUserLogin)(itemWithDefaults);
+  return Schema.decode(ModelPersistedUserLogin)(itemFieldsWithDefaults);
 };
 
 const modelGetUserLoginsByFilter = (filter: string) => {
@@ -29,8 +28,7 @@ const modelGetUserLoginsByFilter = (filter: string) => {
     Effect.catchTag("NoSuchElementException", () =>
       Effect.fail(new UserLoginNotFound())
     ),
-    Effect.map((item) => item.fields),
-    Effect.flatMap((fields) => listItemToUserLogin(fields)),
+    Effect.flatMap((item) => graphListItemToUserLogin(item)),
     // Parse errors of data from Graph/SharePoint are considered unrecoverable.
     Effect.catchTag("ParseError", (e) => Effect.die(e))
   );
@@ -47,10 +45,9 @@ const modelCreateUserLogin = (userLogin: ModelAddableUserLogin) => {
         Effect.andThen(listAccess.createUserLoginGraphListItem)
       )
     ),
-    Effect.andThen(listItemToUserLogin),
-    Effect.catchTag("ParseError", (e) =>
-      Effect.fail(new InvalidUserLoginValue())
-    )
+    Effect.andThen(graphListItemToUserLogin),
+    // Parse errors of data from Graph/SharePoint are considered unrecoverable.
+    Effect.catchTag("ParseError", (e) => Effect.die(e))
   );
 };
 

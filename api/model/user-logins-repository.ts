@@ -8,10 +8,6 @@ export class UserLoginNotFound {
   readonly _tag = "UserLoginNotFound";
 }
 
-export class InvalidUserLoginValue {
-  readonly _tag = "InvalidUserLoginValue";
-}
-
 export class UserLoginRepository extends Context.Tag("UserLoginRepository")<
   UserLoginRepository,
   {
@@ -21,6 +17,6 @@ export class UserLoginRepository extends Context.Tag("UserLoginRepository")<
 
     readonly modelCreateUserLogin: (
       addableUserLogin: ModelAddableUserLogin
-    ) => Effect.Effect<ModelPersistedUserLogin, InvalidUserLoginValue>;
+    ) => Effect.Effect<ModelPersistedUserLogin>;
   }
 >() {}
