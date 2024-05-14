@@ -53,12 +53,11 @@ const httpTrigger: AzureFunction = async function (
             )
           );
 
-      const foo = await Effect.runPromise(
+      context.res = await Effect.runPromise(
         userProfileWithOptionalApplicationEffect.pipe(
           Effect.provide(repositoriesLayerLive)
         )
       );
-      context.res = foo;
     } catch (err) {
       if (isUserServiceError(err)) {
         switch (err.error) {
