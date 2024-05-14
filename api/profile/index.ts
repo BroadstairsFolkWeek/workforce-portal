@@ -1,17 +1,25 @@
-import { Effect, Option } from "effect";
+import { Effect, LogLevel, Logger, Option } from "effect";
 import { getUserInfo } from "@aaronpowell/static-web-apps-api-auth";
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import { getOrCreateProfileForAuthenticatedUserEffect } from "../services/profile-service";
 import { isUserServiceError } from "../services/user-service";
-import { logError, logTrace, setLoggerFromContext } from "../utilties/logging";
+import {
+  createLoggerLayer,
+  logError,
+  logTrace,
+  logWarn,
+  setLoggerFromContext,
+} from "../utilties/logging";
 import { repositoriesLayerLive } from "../contexts/repositories-live";
+import { logInfo } from "effect/Effect";
 
 const httpTrigger: AzureFunction = async function (
   context: Context,
   req: HttpRequest
 ): Promise<void> {
   setLoggerFromContext(context);
-  logTrace("profile: entry");
+  logWarn("profile: entry");
+  console.log("This is CONSOLE LOG");
   logTrace("headers: " + JSON.stringify(req.headers, null, 2));
 
   const userInfo = getUserInfo(req);
@@ -20,6 +28,10 @@ const httpTrigger: AzureFunction = async function (
       const userProfileWithOptionalApplicationEffect =
         getOrCreateProfileForAuthenticatedUserEffect(userInfo.userId!)
           .pipe(
+            Effect.tap(Effect.logInfo("Got or created a profile")),
+            Effect.tap(
+              Effect.logWarning("Got or created a profile as a warning")
+            ),
             Effect.andThen((profileWithOptionalApplication) =>
               Option.match({
                 onSome: (application) =>
@@ -53,9 +65,13 @@ const httpTrigger: AzureFunction = async function (
             )
           );
 
+      const logLayer = createLoggerLayer(context);
+
       context.res = await Effect.runPromise(
         userProfileWithOptionalApplicationEffect.pipe(
-          Effect.provide(repositoriesLayerLive)
+          Effect.provide(repositoriesLayerLive),
+          Logger.withMinimumLogLevel(LogLevel.Debug),
+          Effect.provide(logLayer)
         )
       );
     } catch (err) {
