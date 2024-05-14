@@ -22,7 +22,8 @@
         "esbenp.prettier-vscode",
         "ms-vscode-remote.remote-containers",
         "ms-azuretools.vscode-azurefunctions",
-        "ms-azuretools.vscode-azurestaticwebapps"
+        "ms-azuretools.vscode-azurestaticwebapps",
+        "Orta.vscode-jest"
       ]
     }
   },
