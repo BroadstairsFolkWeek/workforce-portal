@@ -1,6 +1,8 @@
-import { Team } from "../interfaces/team";
-import { getAllTeams } from "./teams-sp";
+import { Effect, Array, Order } from "effect";
+import { TeamsRepository } from "../model/teams-repository";
 
-export const getTeams = async (): Promise<Team[]> => {
-  return getAllTeams();
-};
+export const getTeamsSortedByDisplayOrder = () =>
+  TeamsRepository.pipe(
+    Effect.andThen((repo) => repo.modelGetTeams()),
+    Effect.andThen(Array.sortWith((t) => t.displayOrder, Order.number))
+  );
