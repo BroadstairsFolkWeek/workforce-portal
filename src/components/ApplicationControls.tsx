@@ -45,10 +45,6 @@ const isEditable = (application: Application): boolean => {
   );
 };
 
-const isDeletable = (application: Application): boolean => {
-  return true;
-};
-
 const isDocumentsUploadable = (application: Application): boolean => {
   return application.status === "documents-required";
 };
@@ -115,14 +111,13 @@ const ApplicationControls = ({
   );
 
   const deleteElement = useMemo(
-    () =>
-      isDeletable(application) ? (
-        <ControlsButton
-          text="Delete"
-          className="bg-red-400"
-          onClicked={() => setConfirmDelete(true)}
-        />
-      ) : null,
+    () => (
+      <ControlsButton
+        text="Delete"
+        className="bg-red-400"
+        onClicked={() => setConfirmDelete(true)}
+      />
+    ),
     [application]
   );
 

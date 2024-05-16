@@ -40,7 +40,7 @@ const TeamsContextProvider = ({ children }: { children: JSX.Element }) => {
           setTeams(json);
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError("Error processing teams from server");
       console.log(err);
     }

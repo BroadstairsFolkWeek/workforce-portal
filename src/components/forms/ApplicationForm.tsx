@@ -105,7 +105,7 @@ const ApplicationForm: React.FC = () => {
     );
   }
 
-  let errorComponent: any;
+  let errorComponent: JSX.Element;
   if (saveErrorCode !== 200) {
     switch (saveErrorCode) {
       case 409:

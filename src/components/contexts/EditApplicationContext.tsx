@@ -150,7 +150,7 @@ const EditApplicationContextProvider = ({
           console.error("No application to update");
           return -1;
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.log(err);
         return -1;
       }
@@ -171,7 +171,7 @@ const EditApplicationContextProvider = ({
       }
 
       return deleteApplicationResponse.status;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.log(err);
       return -1;
     }

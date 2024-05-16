@@ -143,7 +143,7 @@ const ProfileForm: React.FC<ProfileFormProps> = () => {
       <Formik
         initialValues={initialValues}
         enableReinitialize
-        onSubmit={async (values, { setSubmitting }) => {
+        onSubmit={async (values) => {
           const saveStatus = await saveUserProfile(values);
 
           if (saveStatus !== 200) {

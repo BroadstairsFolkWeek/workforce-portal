@@ -1,4 +1,3 @@
-import React from "react";
 import { ErrorRenderer } from "../../interfaces/error-renderer";
 
 export class SaveProfileConflictError implements ErrorRenderer {

@@ -47,7 +47,7 @@ export const TeamPreferenceField: React.FC<TeamPreferenceFieldProps> = ({
   const { teams } = useTeams();
 
   const options: IDropdownOption[] = useMemo(() => {
-    return teams.map((team, index) => {
+    return teams.map((team) => {
       return {
         key: team.team,
         text: team.description,
@@ -56,11 +56,7 @@ export const TeamPreferenceField: React.FC<TeamPreferenceFieldProps> = ({
   }, [teams]);
 
   const onChangeHandler = useCallback(
-    (
-      event: React.FormEvent<HTMLDivElement>,
-      option?: IDropdownOption,
-      index?: number
-    ) => {
+    (event: React.FormEvent<HTMLDivElement>, option?: IDropdownOption) => {
       if (option) {
         helper.setValue(option.key);
       } else {

@@ -101,8 +101,7 @@ export const DateInput: React.FC<DateInputProps> = ({ name, label }) => {
   );
 
   useEffect(() => {
-    if (field.value) {
-    } else {
+    if (!field.value) {
       setDateValue(null);
     }
   }, [field.value]);

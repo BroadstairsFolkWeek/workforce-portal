@@ -89,7 +89,7 @@ const UserProfileContextProvider = ({
           // Not logged in, can't save.
           return 401;
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.log(err);
         return -1;
       }

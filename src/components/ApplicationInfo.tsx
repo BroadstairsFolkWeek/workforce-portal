@@ -42,7 +42,7 @@ const isDraftApplication = (application: Application) => {
 };
 
 const addDescriptionComponents = (
-  descriptionComponents: any[],
+  descriptionComponents: JSX.Element[],
   application: Application,
   property: keyof Application
 ) => {
@@ -59,7 +59,7 @@ const addDescriptionComponents = (
 };
 
 const addMultilineDescriptionComponents = (
-  descriptionComponents: any[],
+  descriptionComponents: JSX.Element[],
   application: Application,
   property: keyof Application
 ) => {
