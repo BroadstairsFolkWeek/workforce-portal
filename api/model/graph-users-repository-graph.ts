@@ -8,12 +8,8 @@ import { GraphClient } from "../graph/graph-client";
 import { graphRequestGetOrDie } from "./graph/graph";
 import { ModelGraphUser } from "./interfaces/graph-user";
 
-const bodyToGraphUser = (body: any) => {
-  const bodyWithDefaults = {
-    ...body,
-  };
-
-  return Schema.decode(ModelGraphUser)(bodyWithDefaults);
+const bodyToGraphUser = (body: unknown) => {
+  return Schema.decodeUnknown(ModelGraphUser)(body);
 };
 
 const modelGetGraphUserById = (id: string) => {
@@ -35,8 +31,6 @@ const modelGetGraphUserById = (id: string) => {
     Effect.catchTag("ParseError", (e) => Effect.die(e))
   );
 };
-
-const clientEffect = GraphClient.pipe(Effect.flatMap((gc) => gc.client));
 
 export const graphUsersRepositoryLive = Layer.effect(
   GraphUsersRepository,

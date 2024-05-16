@@ -181,3 +181,9 @@ export interface ModelApplicationChanges
 
 export interface ModelApplicationChangesVersioned
   extends ModelApplicationChanges {}
+
+export interface ModelEncodedPersistedApplication
+  extends S.Schema.Encoded<typeof ModelPersistedApplication> {}
+
+export interface ModelEncodedApplicationChanges
+  extends S.Schema.Encoded<typeof ModelApplicationChanges> {}

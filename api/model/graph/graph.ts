@@ -22,7 +22,7 @@ export const graphRequestGetOrDie = (gr: GraphRequest) =>
     )
   );
 
-export const graphRequestPatchOrDie = (gr: GraphRequest) => (body: any) =>
+export const graphRequestPatchOrDie = (gr: GraphRequest) => (body: unknown) =>
   Effect.tryPromise({
     try: () => gr.patch(body),
     catch: (e) => wrapIfGraphError(e),
@@ -32,13 +32,13 @@ export const graphRequestPatchOrDie = (gr: GraphRequest) => (body: any) =>
     )
   );
 
-export const graphRequestPost = (gr: GraphRequest) => (body: any) =>
+export const graphRequestPost = (gr: GraphRequest) => (body: unknown) =>
   Effect.tryPromise({
     try: () => gr.post(body),
     catch: (e) => wrapIfGraphError(e),
   });
 
-export const graphRequestPostOrDie = (gr: GraphRequest) => (body: any) =>
+export const graphRequestPostOrDie = (gr: GraphRequest) => (body: unknown) =>
   graphRequestPost(gr)(body).pipe(
     Effect.catchAll((e) =>
       e instanceof GraphClientGraphError ? Effect.fail(e) : Effect.die(e)

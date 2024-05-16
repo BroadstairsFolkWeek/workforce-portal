@@ -5,6 +5,10 @@ import {
   createGraphListItem,
   getListItemsByFilter,
 } from "./common-graph-list-access";
+import {
+  ModelEncodedAddableUserLogin,
+  ModelEncodedPersistedUserLogin,
+} from "../interfaces/user-login";
 
 // Any config error is unrecoverable.
 const userLoginsListId = Config.string("WORKFORCE_LOGINS_LIST_GUID").pipe(
@@ -17,11 +21,13 @@ export const userLoginsGraphListAccessLive = Layer.effect(
     Effect.map(([userLoginsListId, graphClient]) =>
       UserLoginsGraphListAccess.of({
         getUserLoginGraphListItemsByFilter: (filter?: string) =>
-          getListItemsByFilter(userLoginsListId)(filter).pipe(
+          getListItemsByFilter(
+            userLoginsListId
+          )<ModelEncodedPersistedUserLogin>(filter).pipe(
             Effect.provideService(GraphClient, graphClient)
           ),
 
-        createUserLoginGraphListItem: (fields: any) =>
+        createUserLoginGraphListItem: (fields: ModelEncodedAddableUserLogin) =>
           createGraphListItem(userLoginsListId)(fields).pipe(
             Effect.provideService(GraphClient, graphClient)
           ),

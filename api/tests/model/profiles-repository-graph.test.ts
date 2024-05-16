@@ -3,13 +3,13 @@ import { Schema as S } from "@effect/schema";
 import { Effect, Layer } from "effect";
 import {
   ModelAddableProfile,
+  ModelEncodedAddableProfile,
   ModelPersistedProfile,
   ModelProfileId,
 } from "../../model/interfaces/profile";
 import { ProfilesGraphListAccess } from "../../model/graph/profiles-graph-list-access";
 import { ProfilesRepository } from "../../model/profiles-repository";
 import { profilesRepositoryLive } from "../../model/profiles-repository-graph";
-import exp from "constants";
 
 const sharepointItemFields = {
   id: "1",
@@ -49,26 +49,27 @@ const modelPersistedItemFields = {
   modifiedDate: new Date("2021-02-03T04:05:06Z"),
 };
 
-const mockCreateProfileGraphListItem = jest.fn((fields) =>
-  Effect.succeed({
-    fields: {
-      id: "1",
-      Created: "2021-01-01T00:00:00Z",
-      Modified: "2021-02-03T04:05:06Z",
-      Title: fields.Title,
-      GivenName: fields.GivenName,
-      Surname: fields.Surname,
-      Email: fields.Email,
-      Telephone: fields.Telephone,
-      Address: fields.Address,
-      PhotoIds: fields.PhotoIds,
-      Version: fields.Version,
-      ProfileId: fields.ProfileId,
-    },
-  })
+const mockCreateProfileGraphListItem = jest.fn(
+  (fields: ModelEncodedAddableProfile) =>
+    Effect.succeed({
+      fields: {
+        id: "1",
+        Created: "2021-01-01T00:00:00Z",
+        Modified: "2021-02-03T04:05:06Z",
+        Title: fields.Title,
+        GivenName: fields.GivenName,
+        Surname: fields.Surname,
+        Email: fields.Email,
+        Telephone: fields.Telephone,
+        Address: fields.Address,
+        PhotoIds: fields.PhotoIds,
+        Version: fields.Version,
+        ProfileId: fields.ProfileId,
+      },
+    })
 );
 
-const mockGetProfileGraphListItemsByFilter = jest.fn((filter?: string) =>
+const mockGetProfileGraphListItemsByFilter = jest.fn(() =>
   Effect.succeed([{ fields: sharepointItemFields }])
 );
 

@@ -5,6 +5,10 @@ import {
   createGraphListItem,
   getListItemsByFilter,
 } from "./common-graph-list-access";
+import {
+  ModelEncodedAddableProfile,
+  ModelEncodedPersistedProfile,
+} from "../interfaces/profile";
 
 // Any config error is unrecoverable.
 const profilesListId = Config.string("WORKFORCE_PROFILES_LIST_GUID").pipe(
@@ -17,11 +21,11 @@ export const profilesGraphListAccessLive = Layer.effect(
     Effect.map(([userLoginsListId, graphClient]) =>
       ProfilesGraphListAccess.of({
         getProfileGraphListItemsByFilter: (filter?: string) =>
-          getListItemsByFilter(userLoginsListId)(filter).pipe(
-            Effect.provideService(GraphClient, graphClient)
-          ),
+          getListItemsByFilter(userLoginsListId)<ModelEncodedPersistedProfile>(
+            filter
+          ).pipe(Effect.provideService(GraphClient, graphClient)),
 
-        createProfileGraphListItem: (fields: any) =>
+        createProfileGraphListItem: (fields: ModelEncodedAddableProfile) =>
           createGraphListItem(userLoginsListId)(fields).pipe(
             Effect.provideService(GraphClient, graphClient)
           ),

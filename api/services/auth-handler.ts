@@ -8,7 +8,7 @@ const config = getWorkforcePortalConfig();
  * HTTP response object. Provided to your function when using HTTP Bindings.
  */
 export type HttpResponseContextObject = {
-  [key: string]: any;
+  [key: string]: unknown;
 };
 
 export const logoutHandler = (req: HttpRequest): HttpResponseContextObject => {

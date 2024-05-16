@@ -44,3 +44,8 @@ export interface ModelPersistedUserLogin
 
 export interface ModelAddableUserLogin
   extends S.Schema.Type<typeof ModelAddableUserLogin> {}
+
+export interface ModelEncodedPersistedUserLogin
+  extends S.Schema.Encoded<typeof ModelPersistedUserLogin> {}
+export interface ModelEncodedAddableUserLogin
+  extends S.Schema.Encoded<typeof ModelAddableUserLogin> {}

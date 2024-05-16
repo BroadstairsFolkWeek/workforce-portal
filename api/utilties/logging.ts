@@ -42,8 +42,8 @@ export const setLoggerFromContext = (context: Context) => {
   logger = context.log;
 };
 
-export const logError = (...args: any[]) => logger.error(...args);
-export const logWarn = (...args: any[]) => logger.warn(...args);
-export const logInfo = (...args: any[]) => logger.info(...args);
-export const logVerbose = (...args: any[]) => logger.verbose(...args);
-export const logTrace = (...args: any[]) => logger(...args);
+export const logError = (...args: unknown[]) => logger.error(...args);
+export const logWarn = (...args: unknown[]) => logger.warn(...args);
+export const logInfo = (...args: unknown[]) => logger.info(...args);
+export const logVerbose = (...args: unknown[]) => logger.verbose(...args);
+export const logTrace = (...args: unknown[]) => logger(...args);

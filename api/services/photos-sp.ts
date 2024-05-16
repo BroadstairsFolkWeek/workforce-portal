@@ -73,7 +73,7 @@ export const addProfilePhotoFileWithItem = async (
   surname: string,
   photoId: string
 ): Promise<IFileAddResult> => {
-  let newFilename = fileBaseName + "." + fileExtension;
+  const newFilename = fileBaseName + "." + fileExtension;
 
   const photoItem: AddableUserPhotoListItem = {
     Title: newFilename,

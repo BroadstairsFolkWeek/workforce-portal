@@ -3,14 +3,15 @@ import { Schema } from "@effect/schema";
 import { TeamsGraphListAccess } from "./graph/teams-graph-list-access";
 import { ModelPersistedTeam } from "./interfaces/team";
 import { TeamsRepository } from "./teams-repository";
+import {
+  PersistedGraphListItem,
+  PersistedGraphListItemFields,
+} from "./interfaces/graph/graph-items";
 
-const graphListItemToTeam = (item: any) => {
-  // Apply defaults for any missing fields.
-  const itemFieldsWithDefaults = {
-    ...item.fields,
-  };
-
-  return Schema.decode(ModelPersistedTeam)(itemFieldsWithDefaults);
+const graphListItemToTeam = (
+  item: PersistedGraphListItem<PersistedGraphListItemFields>
+) => {
+  return Schema.decodeUnknown(ModelPersistedTeam)(item.fields);
 };
 
 const modelGetTeamsByFilter = (filter?: string) => {

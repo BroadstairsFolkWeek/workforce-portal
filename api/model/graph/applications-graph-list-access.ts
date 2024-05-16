@@ -1,5 +1,9 @@
 import { Effect, Context } from "effect";
 import { PersistedGraphListItem } from "../interfaces/graph/graph-items";
+import {
+  ModelEncodedApplicationChanges,
+  ModelEncodedPersistedApplication,
+} from "../interfaces/application";
 
 export class ApplicationsGraphListAccess extends Context.Tag(
   "ApplicationsGraphListAccess"
@@ -8,11 +12,13 @@ export class ApplicationsGraphListAccess extends Context.Tag(
   {
     readonly getApplicationGraphListItemsByFilter: (
       filter?: string
-    ) => Effect.Effect<PersistedGraphListItem<any>[]>;
+    ) => Effect.Effect<
+      PersistedGraphListItem<ModelEncodedPersistedApplication>[]
+    >;
 
     readonly updateApplicationGraphListItemFields: (
       id: number,
-      versionedChanges: any
-    ) => Effect.Effect<any>;
+      changes: ModelEncodedApplicationChanges
+    ) => Effect.Effect<ModelEncodedPersistedApplication>;
   }
 >() {}

@@ -11,18 +11,19 @@ import {
   ApplicationsRepository,
 } from "./applications-repository";
 import { ApplicationsGraphListAccess } from "./graph/applications-graph-list-access";
+import { PersistedGraphListItemFields } from "./interfaces/graph/graph-items";
 
-const listItemToApplication = (item: any) => {
+const fieldsToApplication = (fields: PersistedGraphListItemFields) => {
   // Apply defaults for any missing fields.
   const itemWithDefaults = {
     ConsentNewlifeWills: false,
     NewlifeHaveWillInPlace: false,
     NewlifeHavePoaInPlace: false,
     NewlifeWantFreeReview: false,
-    ...item,
+    ...fields,
   };
 
-  return Schema.decode(ModelPersistedApplication)(itemWithDefaults);
+  return Schema.decodeUnknown(ModelPersistedApplication)(itemWithDefaults);
 };
 
 const modelGetApplicationByFilter = (filter: string) => {
@@ -35,7 +36,7 @@ const modelGetApplicationByFilter = (filter: string) => {
       Effect.fail(new ApplicationNotFound())
     ),
     Effect.map((item) => item.fields),
-    Effect.flatMap((fields) => listItemToApplication(fields)),
+    Effect.flatMap((fields) => fieldsToApplication(fields)),
     // Parse errors of data from Graph/SharePoint are considered unrecoverable.
     Effect.catchTag("ParseError", (e) => Effect.die(e))
   );
@@ -79,7 +80,7 @@ const modelSaveApplicationChanges =
       Effect.flatMap(([dbId, fields, listAccess]) =>
         listAccess.updateApplicationGraphListItemFields(dbId, fields)
       ),
-      Effect.flatMap((fields) => listItemToApplication(fields)),
+      Effect.flatMap((fields) => fieldsToApplication(fields)),
       // Parse errors of data from Graph/SharePoint are considered unrecoverable.
       Effect.catchTag("ParseError", (e) => Effect.die(e))
     );

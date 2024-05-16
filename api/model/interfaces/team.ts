@@ -26,3 +26,6 @@ export const ModelPersistedTeam = S.extend(
 
 export interface ModelPersistedTeam
   extends S.Schema.Type<typeof ModelPersistedTeam> {}
+
+export interface ModelEncodedPersistedTeam
+  extends S.Schema.Encoded<typeof ModelPersistedTeam> {}

@@ -1,12 +1,11 @@
-import { AzureFunction, Context, HttpRequest } from "@azure/functions";
+import { AzureFunction, Context } from "@azure/functions";
 import { getTeamsSortedByDisplayOrder } from "../services/teams-service";
 import { createLoggerLayer } from "../utilties/logging";
 import { Effect, LogLevel, Logger } from "effect";
 import { repositoriesLayerLive } from "../contexts/repositories-live";
 
 const httpTrigger: AzureFunction = async function (
-  context: Context,
-  req: HttpRequest
+  context: Context
 ): Promise<void> {
   const getTeams = Effect.logTrace("teams: entry****").pipe(
     Effect.andThen(getTeamsSortedByDisplayOrder),

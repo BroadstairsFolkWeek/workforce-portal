@@ -45,7 +45,7 @@ const httpTrigger: AzureFunction = async function (
             body: "User Profile does not exist, cannot update profile.",
           };
         } else if (err.error === "version-conflict") {
-          const latestUserProfile: Profile = err.arg1;
+          const latestUserProfile: Profile = err.arg1 as Profile;
           logInfo(
             `saveProfile: Version conflict: Attempted to make changes to version ${updatedUserProfile.version} when version ${latestUserProfile.version} already exists.`
           );

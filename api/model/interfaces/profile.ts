@@ -43,3 +43,9 @@ export interface ModelAddableProfile
 
 export interface ModelPersistedProfile
   extends S.Schema.Type<typeof ModelPersistedProfile> {}
+
+export interface ModelEncodedAddableProfile
+  extends S.Schema.Encoded<typeof ModelAddableProfile> {}
+
+export interface ModelEncodedPersistedProfile
+  extends S.Schema.Encoded<typeof ModelPersistedProfile> {}

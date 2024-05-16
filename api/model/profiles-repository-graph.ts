@@ -7,9 +7,18 @@ import {
   ModelPersistedProfile,
   ModelProfileId,
 } from "./interfaces/profile";
+import {
+  PersistedGraphListItem,
+  PersistedGraphListItemFields,
+} from "./interfaces/graph/graph-items";
 
-const graphListItemToProfile = (item: any) => {
-  return Schema.decode(ModelPersistedProfile)(item.fields);
+const fieldsToProfile = (fields: PersistedGraphListItemFields) =>
+  Schema.decodeUnknown(ModelPersistedProfile)(fields);
+
+const graphListItemToProfile = (
+  item: PersistedGraphListItem<PersistedGraphListItemFields>
+) => {
+  return fieldsToProfile(item.fields);
 };
 
 const modelGetProfileByFilter = (filter: string) => {

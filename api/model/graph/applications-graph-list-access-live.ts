@@ -5,6 +5,10 @@ import {
   getListItemsByFilter,
   updateGraphListItemFields,
 } from "./common-graph-list-access";
+import {
+  ModelEncodedApplicationChanges,
+  ModelEncodedPersistedApplication,
+} from "../interfaces/application";
 
 // Any config error is unrecoverable.
 const applicationsListId = Config.string(
@@ -17,18 +21,21 @@ export const applicationsGraphListAccessLive = Layer.effect(
     Effect.map(([applicationsListId, graphClient]) =>
       ApplicationsGraphListAccess.of({
         getApplicationGraphListItemsByFilter: (filter?: string) =>
-          getListItemsByFilter(applicationsListId)(filter).pipe(
+          getListItemsByFilter(
+            applicationsListId
+          )<ModelEncodedPersistedApplication>(filter).pipe(
             Effect.provideService(GraphClient, graphClient)
           ),
 
         updateApplicationGraphListItemFields: (
           id: number,
-          versionedChanges: any
+          changes: ModelEncodedApplicationChanges
         ) =>
-          updateGraphListItemFields(applicationsListId)(
-            id,
-            versionedChanges
-          ).pipe(Effect.provideService(GraphClient, graphClient)),
+          updateGraphListItemFields(
+            applicationsListId
+          )<ModelEncodedPersistedApplication>(id, changes).pipe(
+            Effect.provideService(GraphClient, graphClient)
+          ),
       })
     )
   )

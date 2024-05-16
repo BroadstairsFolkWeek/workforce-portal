@@ -34,9 +34,9 @@ export class UserServiceError {
   private type: typeof USER_SERVICE_ERROR_TYPE_VAL =
     USER_SERVICE_ERROR_TYPE_VAL;
   public error: UserServiceErrorType;
-  public arg1: any | null;
+  public arg1: unknown | null;
 
-  constructor(error: UserServiceErrorType, arg1?: any) {
+  constructor(error: UserServiceErrorType, arg1?: unknown) {
     this.error = error;
     this.arg1 = arg1 ?? null;
   }
@@ -50,8 +50,13 @@ export class UnknownUser {
   readonly _tag = "UnknownUser";
 }
 
-export function isUserServiceError(obj: any): obj is UserServiceError {
-  return obj?.type === USER_SERVICE_ERROR_TYPE_VAL;
+export function isUserServiceError(obj: unknown): obj is UserServiceError {
+  return (
+    !!obj &&
+    typeof obj === "object" &&
+    "type" in obj &&
+    obj.type === USER_SERVICE_ERROR_TYPE_VAL
+  );
 }
 
 const emailFromGraphUser = (graphUser: ModelGraphUser): string => {

@@ -9,8 +9,8 @@ export class GraphClientGraphError {
   }
 }
 
-export function wrapIfGraphError(error: any) {
+export function wrapIfGraphError(error: unknown) {
   return error instanceof GraphError
     ? new GraphClientGraphError(error)
-    : new Error(error);
+    : new Error("" + error);
 }

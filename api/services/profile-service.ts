@@ -58,16 +58,23 @@ export class ProfileServiceError {
   private type: typeof PROFILE_SERVICE_ERROR_TYPE_VAL =
     PROFILE_SERVICE_ERROR_TYPE_VAL;
   public error: ProfileServiceErrorType;
-  public arg1: any | null;
+  public arg1: unknown | null;
 
-  constructor(error: ProfileServiceErrorType, arg1?: any) {
+  constructor(error: ProfileServiceErrorType, arg1?: unknown) {
     this.error = error;
     this.arg1 = arg1 ?? null;
   }
 }
 
-export function isProfileServiceError(obj: any): obj is ProfileServiceError {
-  return obj?.type === PROFILE_SERVICE_ERROR_TYPE_VAL;
+export function isProfileServiceError(
+  obj: unknown
+): obj is ProfileServiceError {
+  return (
+    !!obj &&
+    typeof obj === "object" &&
+    "type" in obj &&
+    obj.type === PROFILE_SERVICE_ERROR_TYPE_VAL
+  );
 }
 
 const getNewProfileId = () => S.decodeSync(ModelProfileId)(uuidv4());

@@ -31,7 +31,7 @@ test("Get user throws an exception for unknown user", async () => {
   expect.assertions(1);
 
   try {
-    const result = (await graphClient.api(`/users/000`).get()) as User;
+    await graphClient.api(`/users/000`).get();
   } catch (e) {
     console.log(`Error from get-user: ${JSON.stringify(e)}`);
     expect(e).toBeDefined();

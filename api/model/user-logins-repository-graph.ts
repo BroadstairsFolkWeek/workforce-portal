@@ -9,14 +9,18 @@ import {
   UserLoginRepository,
 } from "./user-logins-repository";
 import { UserLoginsGraphListAccess } from "./graph/user-logins-graph-list-access";
+import {
+  PersistedGraphListItem,
+  PersistedGraphListItemFields,
+} from "./interfaces/graph/graph-items";
 
-const graphListItemToUserLogin = (item: any) => {
-  // Apply defaults for any missing fields.
-  const itemFieldsWithDefaults = {
-    ...item.fields,
-  };
+const fieldsToUserLogin = (fields: PersistedGraphListItemFields) =>
+  Schema.decodeUnknown(ModelPersistedUserLogin)(fields);
 
-  return Schema.decode(ModelPersistedUserLogin)(itemFieldsWithDefaults);
+const graphListItemToUserLogin = (
+  item: PersistedGraphListItem<PersistedGraphListItemFields>
+) => {
+  return fieldsToUserLogin(item.fields);
 };
 
 const modelGetUserLoginsByFilter = (filter: string) => {

@@ -14,6 +14,16 @@ export interface AddableGraphListItemFields {
     | undefined;
 }
 
+export interface UpdatableGraphListItemFields {
+  [x: string]:
+    | string
+    | number
+    | boolean
+    | AddableMultiLookupId
+    | null
+    | undefined;
+}
+
 export interface PersistedGraphListItemFields
   extends AddableGraphListItemFields {
   id: string;

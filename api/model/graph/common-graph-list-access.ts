@@ -4,36 +4,51 @@ import {
   graphRequestPatchOrDie,
   graphRequestPostOrDie,
 } from "./graph";
-import { ModelApplicationChangesVersioned } from "../interfaces/application";
 import { GraphClient } from "../../graph/graph-client";
 import { getSiteId } from "./site-graph";
+import {
+  AddableGraphListItemFields,
+  PersistedGraphListItem,
+  PersistedGraphListItemFields,
+  UpdatableGraphListItemFields,
+} from "../interfaces/graph/graph-items";
 
 // Consider any error whilst retrieving the siteId as an unexpected (and unrecoverable) error.
 const siteIdEffect = getSiteId().pipe(Effect.orDie);
 
-export const getListItemsByFilter = (listId: string) => (filter?: string) => {
-  return siteIdEffect.pipe(
-    Effect.andThen((siteId) =>
-      GraphClient.pipe(
-        Effect.andThen((gc) => gc.client),
-        Effect.andThen((client) =>
-          client.api(`/sites/${siteId}/lists/${listId}/items`).expand("fields")
-        ),
-        Effect.andThen((gr) => (filter ? gr.filter(filter) : gr)),
-        Effect.andThen(graphRequestGetOrDie),
-        // No graph errors for get requests against a list are expected to be recoverable.
-        Effect.catchTag("GraphClientGraphError", (e) =>
-          Effect.die(e.graphError)
-        ),
-        Effect.andThen((graphResponse) => graphResponse.value as Array<any>)
+export const getListItemsByFilter =
+  (listId: string) =>
+  <RetT extends PersistedGraphListItemFields>(filter?: string) => {
+    return siteIdEffect.pipe(
+      Effect.andThen((siteId) =>
+        GraphClient.pipe(
+          Effect.andThen((gc) => gc.client),
+          Effect.andThen((client) =>
+            client
+              .api(`/sites/${siteId}/lists/${listId}/items`)
+              .expand("fields")
+          ),
+          Effect.andThen((gr) => (filter ? gr.filter(filter) : gr)),
+          Effect.andThen(graphRequestGetOrDie),
+          // No graph errors for get requests against a list are expected to be recoverable.
+          Effect.catchTag("GraphClientGraphError", (e) =>
+            Effect.die(e.graphError)
+          ),
+          Effect.andThen(
+            (graphResponse) =>
+              graphResponse.value as PersistedGraphListItem<RetT>[]
+          )
+        )
       )
-    )
-  );
-};
+    );
+  };
 
 export const updateGraphListItemFields =
   (listId: string) =>
-  (id: number, versionedChanges: ModelApplicationChangesVersioned) => {
+  <RetT extends PersistedGraphListItemFields>(
+    id: number,
+    changes: UpdatableGraphListItemFields
+  ) => {
     return siteIdEffect.pipe(
       Effect.andThen((siteId) =>
         GraphClient.pipe(
@@ -41,7 +56,34 @@ export const updateGraphListItemFields =
           Effect.andThen((client) =>
             client.api(`/sites/${siteId}/lists/${listId}/items/${id}/fields`)
           ),
-          Effect.andThen((gr) => graphRequestPatchOrDie(gr)(versionedChanges)),
+          Effect.andThen((gr) => graphRequestPatchOrDie(gr)(changes)),
+          // No graph errors for get requests against a list are expected to be recoverable.
+          Effect.catchTag("GraphClientGraphError", (e) =>
+            Effect.die(e.graphError)
+          ),
+          Effect.andThen((graphResponse) => graphResponse as RetT)
+        )
+      )
+    );
+  };
+
+export const createGraphListItem =
+  (listId: string) =>
+  <Addable extends AddableGraphListItemFields>(
+    fields: Addable
+  ): Effect.Effect<
+    PersistedGraphListItem<Addable & PersistedGraphListItemFields>,
+    never,
+    GraphClient
+  > => {
+    return siteIdEffect.pipe(
+      Effect.andThen((siteId) =>
+        GraphClient.pipe(
+          Effect.andThen((gc) => gc.client),
+          Effect.andThen((client) =>
+            client.api(`/sites/${siteId}/lists/${listId}/items`)
+          ),
+          Effect.andThen((gr) => graphRequestPostOrDie(gr)({ fields })),
           // No graph errors for get requests against a list are expected to be recoverable.
           Effect.catchTag("GraphClientGraphError", (e) =>
             Effect.die(e.graphError)
@@ -50,21 +92,3 @@ export const updateGraphListItemFields =
       )
     );
   };
-
-export const createGraphListItem = (listId: string) => (fields: any) => {
-  return siteIdEffect.pipe(
-    Effect.andThen((siteId) =>
-      GraphClient.pipe(
-        Effect.andThen((gc) => gc.client),
-        Effect.andThen((client) =>
-          client.api(`/sites/${siteId}/lists/${listId}/items`)
-        ),
-        Effect.andThen((gr) => graphRequestPostOrDie(gr)({ fields })),
-        // No graph errors for get requests against a list are expected to be recoverable.
-        Effect.catchTag("GraphClientGraphError", (e) =>
-          Effect.die(e.graphError)
-        )
-      )
-    )
-  );
-};
