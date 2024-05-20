@@ -31,7 +31,6 @@ import {
   ModelPersistedApplication,
 } from "../model/interfaces/application";
 import { repositoriesLayerLive } from "../contexts/repositories-live";
-import { ap } from "effect/Option";
 
 const APPLICATION_SERVICE_ERROR_TYPE_VAL =
   "application-service-error-760bf8f3-6c06-4d4d-86ce-050884c8f50a";
