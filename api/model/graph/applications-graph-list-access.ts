@@ -20,5 +20,9 @@ export class ApplicationsGraphListAccess extends Context.Tag(
       id: number,
       changes: ModelEncodedApplicationChanges
     ) => Effect.Effect<ModelEncodedPersistedApplication>;
+
+    readonly deleteApplicationGraphListItem: (
+      id: number
+    ) => Effect.Effect<unknown>;
   }
 >() {}

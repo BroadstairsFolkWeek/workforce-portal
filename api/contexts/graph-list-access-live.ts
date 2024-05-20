@@ -3,10 +3,12 @@ import { applicationsGraphListAccessLive } from "../model/graph/applications-gra
 import { userLoginsGraphListAccessLive } from "../model/graph/user-logins-graph-list-access-live";
 import { profilesGraphListAccessLive } from "../model/graph/profiles-graph-list-access-live";
 import { teamsGraphListAccessLive } from "../model/graph/teams-graph-list-access-live";
+import { photosGraphListAccessLive } from "../model/graph/photos-graph-list-access-live";
 
 export const graphListAccessesLive = Layer.mergeAll(
   applicationsGraphListAccessLive,
   userLoginsGraphListAccessLive,
   profilesGraphListAccessLive,
-  teamsGraphListAccessLive
+  teamsGraphListAccessLive,
+  photosGraphListAccessLive
 );

@@ -86,6 +86,18 @@ const modelSaveApplicationChanges =
     );
   };
 
+const modelDeleteApplicationByApplicationId = (applicationId: string) =>
+  ApplicationsGraphListAccess.pipe(
+    Effect.andThen((listAccess) =>
+      modelGetApplicationByApplicationId(applicationId).pipe(
+        Effect.andThen((application) => application.dbId),
+        Effect.andThen((dbId) =>
+          listAccess.deleteApplicationGraphListItem(dbId)
+        )
+      )
+    )
+  );
+
 export const applicationsRepositoryLive = Layer.effect(
   ApplicationsRepository,
   ApplicationsGraphListAccess.pipe(
@@ -107,6 +119,11 @@ export const applicationsRepositoryLive = Layer.effect(
           modelSaveApplicationChanges(applicationId)(applyToVersion)(
             changes
           ).pipe(Effect.provideService(ApplicationsGraphListAccess, service)),
+
+      modelDeleteApplicationByApplicationId: (applicationId: string) =>
+        modelDeleteApplicationByApplicationId(applicationId).pipe(
+          Effect.provideService(ApplicationsGraphListAccess, service)
+        ),
     }))
   )
 );

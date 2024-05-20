@@ -2,6 +2,7 @@ import { Config, Effect, Layer } from "effect";
 import { GraphClient } from "../../graph/graph-client";
 import { ApplicationsGraphListAccess } from "./applications-graph-list-access";
 import {
+  deleteGraphListItem,
   getListItemsByFilter,
   updateGraphListItemFields,
 } from "./common-graph-list-access";
@@ -34,6 +35,11 @@ export const applicationsGraphListAccessLive = Layer.effect(
           updateGraphListItemFields(
             applicationsListId
           )<ModelEncodedPersistedApplication>(id, changes).pipe(
+            Effect.provideService(GraphClient, graphClient)
+          ),
+
+        deleteApplicationGraphListItem: (id: number) =>
+          deleteGraphListItem(applicationsListId)(id).pipe(
             Effect.provideService(GraphClient, graphClient)
           ),
       })

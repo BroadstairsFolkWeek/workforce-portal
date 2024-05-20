@@ -13,9 +13,13 @@ import {
 } from "./application-sp";
 import {
   clearApplicationIdForPhoto,
+  clearApplicationIdForPhotoEffect,
   setApplicationIdForPhoto,
 } from "./photo-service";
-import { getOrCreateProfileForAuthenticatedUser } from "./profile-service";
+import {
+  getOrCreateProfileForAuthenticatedUser,
+  getProfileForAuthenticatedUserEffect,
+} from "./profile-service";
 import { Effect, Layer } from "effect";
 import { defaultGraphClient } from "../graph/default-graph-client";
 import { ApplicationsRepository } from "../model/applications-repository";
@@ -26,6 +30,8 @@ import {
   ModelApplicationChanges,
   ModelPersistedApplication,
 } from "../model/interfaces/application";
+import { repositoriesLayerLive } from "../contexts/repositories-live";
+import { ap } from "effect/Option";
 
 const APPLICATION_SERVICE_ERROR_TYPE_VAL =
   "application-service-error-760bf8f3-6c06-4d4d-86ce-050884c8f50a";
@@ -44,6 +50,14 @@ export class ApplicationServiceError {
     this.error = error;
     this.arg1 = arg1 ?? null;
   }
+}
+
+export class ApplicationVersionMismatch {
+  readonly _tag = "ApplicationVersionMismatch";
+}
+
+export class ApplicationNotFound {
+  readonly _tag = "ApplicationNotFound";
 }
 
 export function isApplicationServiceError(
@@ -349,6 +363,70 @@ const updateApplicationFromProfileIfNeededEffect =
     );
   };
 
+const clearApplicationPhotoLink = (application: ModelPersistedApplication) => {
+  if (application.photoId) {
+    return Effect.logInfo(
+      `Clearing link between ApplicationId ${application.applicationId} and PhotoId ${application.photoId}`
+    ).pipe(
+      Effect.andThen(
+        clearApplicationIdForPhotoEffect(application.photoId).pipe(
+          // No need to return anything.
+          Effect.andThen(Effect.succeedNone)
+        )
+      ),
+      // If the photo cannot be found then we can consider the application-photo link already cleared. Log a warning, though, since
+      // it means we have some inconsistency in our data storage.
+      Effect.catchTag("PhotoNotFound", () =>
+        Effect.logWarning(
+          `PhotoId ${application.photoId} could not be found even though it is referenced by ApplicationId ${application.applicationId}`
+        ).pipe(Effect.andThen(Effect.succeedNone))
+      )
+    );
+  } else {
+    return Effect.succeedNone;
+  }
+};
+
+const deleteApplicationIfVersionMatch =
+  (applicationVersion: number) => (application: ModelPersistedApplication) => {
+    if (applicationVersion === application.version) {
+      return clearApplicationPhotoLink(application).pipe(
+        Effect.andThen(
+          ApplicationsRepository.pipe(
+            Effect.andThen((service) =>
+              service.modelDeleteApplicationByApplicationId(
+                application.applicationId
+              )
+            )
+          )
+        )
+      );
+    } else {
+      return Effect.logWarning(
+        `deleteApplication: Aborting due to application version mismatch. Expected version: ${applicationVersion}. Application's actual version: ${application.version}`
+      ).pipe(Effect.andThen(Effect.fail(new ApplicationVersionMismatch())));
+    }
+  };
+
+export const deleteApplicationEffect = (
+  userId: string,
+  applicationVersion: number
+) =>
+  getProfileForAuthenticatedUserEffect(userId).pipe(
+    Effect.andThen(({ profile, application }) =>
+      application.pipe(
+        Effect.andThen((application) =>
+          deleteApplicationIfVersionMatch(applicationVersion)(application)
+        ),
+        Effect.catchTag("NoSuchElementException", () =>
+          Effect.logWarning(
+            `deleteApplication: No application found for ProfileId ${profile.profileId}`
+          ).pipe(Effect.andThen(Effect.fail(new ApplicationNotFound())))
+        )
+      )
+    )
+  );
+
 export const deleteApplication = async (
   userId: string,
   applicationVersion: number
@@ -370,7 +448,10 @@ export const deleteApplication = async (
     }
 
     if (existingApplication.photoId) {
-      await clearApplicationIdForPhoto(existingApplication.photoId);
+      const clearAppIdForPhoto = clearApplicationIdForPhotoEffect(
+        existingApplication.photoId
+      ).pipe(Effect.provide(repositoriesLayerLive));
+      await Effect.runPromise(clearAppIdForPhoto);
     }
 
     await deleteApplicationListItem(existingApplication);

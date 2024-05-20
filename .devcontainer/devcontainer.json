@@ -23,7 +23,9 @@
         "ms-vscode-remote.remote-containers",
         "ms-azuretools.vscode-azurefunctions",
         "ms-azuretools.vscode-azurestaticwebapps",
-        "Orta.vscode-jest"
+        "Orta.vscode-jest",
+        "GitHub.copilot",
+        "GitHub.copilot-chat"
       ]
     }
   },

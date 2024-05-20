@@ -1,3 +1,5 @@
+import { Effect } from "effect";
+import { PhotosRepository } from "../model/photos-repository";
 import { logTrace } from "../utilties/logging";
 import {
   deletePhotoByUniqueId,
@@ -69,4 +71,25 @@ export const clearApplicationIdForPhoto = async (
       applicationId: null,
     });
   }
+};
+
+const photoIdFromEncodedPhotoId = (encodedPhotoId: string) => {
+  const splitIds = encodedPhotoId.split(":");
+  if (splitIds.length > 1) {
+    return splitIds[1];
+  } else {
+    return splitIds[0];
+  }
+};
+
+export const clearApplicationIdForPhotoEffect = (encodedPhotoId: string) => {
+  const photoId = photoIdFromEncodedPhotoId(encodedPhotoId);
+
+  return PhotosRepository.pipe(
+    Effect.andThen((repo) =>
+      repo.modelSavePhotoChanges(photoId)({
+        applicationId: null,
+      })
+    )
+  );
 };

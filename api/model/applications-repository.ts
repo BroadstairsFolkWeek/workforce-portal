@@ -19,7 +19,7 @@ export class ApplicationsRepository extends Context.Tag(
     ) => Effect.Effect<ModelPersistedApplication, ApplicationNotFound>;
 
     readonly modelGetApplicationByApplicationId: (
-      profileId: string
+      applicationId: string
     ) => Effect.Effect<ModelPersistedApplication, ApplicationNotFound>;
 
     readonly modelSaveApplicationChanges: (
@@ -32,5 +32,9 @@ export class ApplicationsRepository extends Context.Tag(
       ModelPersistedApplication,
       ApplicationNotFound | RepositoryConflictError
     >;
+
+    readonly modelDeleteApplicationByApplicationId: (
+      applicationId: string
+    ) => Effect.Effect<unknown, ApplicationNotFound>;
   }
 >() {}

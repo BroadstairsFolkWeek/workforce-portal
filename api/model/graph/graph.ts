@@ -44,3 +44,16 @@ export const graphRequestPostOrDie = (gr: GraphRequest) => (body: unknown) =>
       e instanceof GraphClientGraphError ? Effect.fail(e) : Effect.die(e)
     )
   );
+
+export const graphRequestDelete = (gr: GraphRequest) =>
+  Effect.tryPromise({
+    try: () => gr.delete(),
+    catch: (e) => wrapIfGraphError(e),
+  });
+
+export const graphRequestDeleteOrDie = (gr: GraphRequest) =>
+  graphRequestDelete(gr).pipe(
+    Effect.catchAll((e) =>
+      e instanceof GraphClientGraphError ? Effect.fail(e) : Effect.die(e)
+    )
+  );

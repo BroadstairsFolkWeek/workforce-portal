@@ -41,10 +41,12 @@ import { applicationsRepositoryLive } from "../model/applications-repository-gra
 import { graphListAccessesLive } from "../contexts/graph-list-access-live";
 import {
   ModelAddableProfile,
+  ModelPersistedProfile,
   ModelProfileId,
 } from "../model/interfaces/profile";
 import { ModelPersistedUserLogin } from "../model/interfaces/user-login";
 import { ProfilesRepository } from "../model/profiles-repository";
+import { ModelPersistedApplication } from "../model/interfaces/application";
 
 const workforcePortalConfig = getWorkforcePortalConfig();
 const maxPhotosPerPerson = workforcePortalConfig.maxProfilePhotosPerPerson;
@@ -110,6 +112,11 @@ const createNewUserLoginAndProfileForGraphUser = (graphUserId: string) => {
   );
 };
 
+type ProfileWithOptionalApplication = {
+  profile: ModelPersistedProfile;
+  application: Option.Option<ModelPersistedApplication>;
+};
+
 const getProfileWithApplication = (profileId: ModelProfileId) => {
   return ProfilesRepository.pipe(
     Effect.andThen((repository) =>
@@ -121,27 +128,37 @@ const getProfileWithApplication = (profileId: ModelProfileId) => {
           Effect.succeed({
             profile,
             application: Option.some(application),
-          } as const)
+          } as ProfileWithOptionalApplication)
         ),
         Effect.catchTag("ApplicationNotFound", () =>
-          Effect.succeed({ profile, application: Option.none() } as const)
+          Effect.succeed({
+            profile,
+            application: Option.none(),
+          } as ProfileWithOptionalApplication)
         )
       )
     )
   );
 };
 
+export const getProfileForAuthenticatedUserEffect = (userId: string) =>
+  getUserLogin(userId).pipe(
+    Effect.andThen((userLogin) =>
+      getProfileWithApplication(userLogin.profileId)
+    )
+  );
+
 export const getOrCreateProfileForAuthenticatedUserEffect = (
   userId: string
 ) => {
-  return getUserLogin(userId).pipe(
-    Effect.andThen((userLogin) =>
-      getProfileWithApplication(userLogin.profileId)
-    ),
+  return getProfileForAuthenticatedUserEffect(userId).pipe(
     Effect.catchTag("UnknownUser", () =>
       createNewUserLoginAndProfileForGraphUser(userId).pipe(
         Effect.andThen((profile) =>
-          Effect.succeed({ profile, application: Option.none() } as const)
+          Effect.succeed({
+            profile,
+            application: Option.none(),
+          } as ProfileWithOptionalApplication)
         )
       )
     )
