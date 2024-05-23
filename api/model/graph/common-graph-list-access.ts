@@ -19,15 +19,16 @@ const siteIdEffect = getSiteId().pipe(Effect.orDie);
 
 export const getListItemsByFilter =
   (listId: string) =>
-  <RetT extends PersistedGraphListItemFields>(filter?: string) => {
+  <RetT extends PersistedGraphListItemFields>(
+    filter?: string,
+    expand: string[] = ["fields"]
+  ) => {
     return siteIdEffect.pipe(
       Effect.andThen((siteId) =>
         GraphClient.pipe(
           Effect.andThen((gc) => gc.client),
           Effect.andThen((client) =>
-            client
-              .api(`/sites/${siteId}/lists/${listId}/items`)
-              .expand("fields")
+            client.api(`/sites/${siteId}/lists/${listId}/items`).expand(expand)
           ),
           Effect.andThen((gr) => (filter ? gr.filter(filter) : gr)),
           Effect.andThen(graphRequestGetOrDie),

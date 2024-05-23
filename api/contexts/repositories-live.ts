@@ -8,6 +8,7 @@ import { graphListAccessesLive } from "./graph-list-access-live";
 import { defaultGraphClient } from "../graph/default-graph-client";
 import { teamsRepositoryLive } from "../model/teams-repository-graph";
 import { photosRepositoryLive } from "../model/photos-repository-graph";
+import { fetchApiLive } from "../fetch/fetch-api-live";
 
 const graphUsersLayer = graphUsersRepositoryLive.pipe(
   Layer.provide(b2cGraphClient)
@@ -20,4 +21,8 @@ export const repositoriesLayerLive = Layer.mergeAll(
   profilesRepositoryLive,
   teamsRepositoryLive,
   photosRepositoryLive
-).pipe(Layer.provide(graphListAccessesLive), Layer.provide(defaultGraphClient));
+).pipe(
+  Layer.provide(graphListAccessesLive),
+  Layer.provide(defaultGraphClient),
+  Layer.provide(fetchApiLive)
+);

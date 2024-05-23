@@ -1,7 +1,11 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
+import { Effect, LogLevel, Logger } from "effect";
+import { Schema as S } from "@effect/schema";
+
 import { getUserInfo, UserInfo } from "@aaronpowell/static-web-apps-api-auth";
 import parseMultipartFormData from "@anzp/azure-function-multipart";
 import {
+  createLoggerLayer,
   logError,
   logTrace,
   logWarn,
@@ -18,32 +22,24 @@ import {
   setProfilePicture,
 } from "../services/profile-service";
 import { isUserServiceError } from "../services/user-service";
+import { ApiGetPhotoRequestQuery } from "../api/profile";
+import { repositoriesLayerLive } from "../contexts/repositories-live";
 
-const handleGetProfilePhoto = async function (photoId: string) {
-  if (photoId) {
-    const result = await getProfilePicture(photoId);
-    if (result) {
-      return {
-        status: 200,
-        body: new Uint8Array(result.content),
-        isRaw: true,
-        headers: {
-          "Content-Type": result.mimeType,
-          "Cache-Control": "public, max-age=604800",
-        },
-      };
-    } else {
-      return {
-        status: 404,
-      };
-    }
-  } else {
-    return {
-      status: 400,
-      body: "Missing id query parameter",
-    };
-  }
-};
+const handleGetProfilePhoto = (photoId: string) =>
+  getProfilePicture(photoId).pipe(
+    Effect.andThen(({ content, mimeType }) => ({
+      status: 200 as const,
+      body: new Uint8Array(content),
+      isRaw: true,
+      headers: {
+        "Content-Type": mimeType,
+        "Cache-Control": "public, max-age=604800",
+      },
+    })),
+    Effect.catchTag("PhotoNotFound", () =>
+      Effect.succeed({ status: 404 as const })
+    )
+  );
 
 const handlePostProfilePhoto = async function (
   req: HttpRequest,
@@ -161,8 +157,31 @@ const httpTrigger: AzureFunction = async function (
   }
 
   if (req.method === "GET") {
-    const id = req.query.id;
-    context.res = await handleGetProfilePhoto(id);
+    const getProfilePhotoProgram = Effect.logTrace(`GET profilePhoto: entry.`)
+      .pipe(
+        Effect.andThen(S.decodeUnknown(ApiGetPhotoRequestQuery)(req.query)),
+        Effect.andThen((getPhotoRequest) =>
+          handleGetProfilePhoto(getPhotoRequest.id)
+        )
+      )
+      .pipe(
+        Effect.catchTag("ParseError", () =>
+          Effect.succeed({
+            status: 400 as const,
+            body: "Invalid request",
+          })
+        )
+      );
+
+    const logLayer = createLoggerLayer(context);
+
+    context.res = await Effect.runPromise(
+      getProfilePhotoProgram.pipe(
+        Effect.provide(repositoriesLayerLive),
+        Logger.withMinimumLogLevel(LogLevel.Debug),
+        Effect.provide(logLayer)
+      )
+    );
   } else {
     const userInfo = getUserInfo(req);
     if (userInfo) {

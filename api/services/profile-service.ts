@@ -1,7 +1,6 @@
 import { Effect, Either, Option, Layer } from "effect";
 import { Schema as S } from "@effect/schema";
 import { v4 as uuidv4 } from "uuid";
-import { FileContentWithInfo } from "../interfaces/file";
 import {
   AddableProfile,
   Profile,
@@ -17,11 +16,13 @@ import {
   updateApplicationFromProfileIfNeeded,
 } from "./application-service";
 import { getWorkforcePortalConfig } from "./configuration-service";
-import { clearProfileIdForPhoto } from "./photo-service";
+import {
+  clearProfileIdForPhoto,
+  photoIdFromEncodedPhotoId,
+} from "./photo-service";
 import {
   addProfilePhotoFileWithItem,
   deletePhotoByUniqueId,
-  getProfilePhotoFileByUniqueId,
 } from "./photos-sp";
 import {
   createProfileListItem,
@@ -47,6 +48,7 @@ import {
 import { ModelPersistedUserLogin } from "../model/interfaces/user-login";
 import { ProfilesRepository } from "../model/profiles-repository";
 import { ModelPersistedApplication } from "../model/interfaces/application";
+import { PhotosRepository } from "../model/photos-repository";
 
 const workforcePortalConfig = getWorkforcePortalConfig();
 const maxPhotosPerPerson = workforcePortalConfig.maxProfilePhotosPerPerson;
@@ -294,23 +296,14 @@ export const updateUserProfile = async (
   }
 };
 
-export const getProfilePicture = async (
-  encodedPhotoId: string
-): Promise<FileContentWithInfo | null> => {
-  const [uniqueId] = encodedPhotoId.split(":");
-  const getPhotoResult = await getProfilePhotoFileByUniqueId(uniqueId);
-  if (!getPhotoResult) {
-    return null;
-  }
-
-  const [filename, content, extension, mimeType] = getPhotoResult;
-  return {
-    filename,
-    content,
-    extension,
-    mimeType,
-  };
-};
+export const getProfilePicture = (encodedPhotoId: string) =>
+  PhotosRepository.pipe(
+    Effect.andThen((photoRepository) =>
+      photoRepository.modelGetPhotoContentByPhotoId(
+        photoIdFromEncodedPhotoId(encodedPhotoId)
+      )
+    )
+  );
 
 const deleteAllPicturesForProfile = async (profile: Profile): Promise<void> => {
   const photoIds = profile.photoIds;

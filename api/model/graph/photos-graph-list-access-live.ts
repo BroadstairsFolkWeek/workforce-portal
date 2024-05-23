@@ -22,7 +22,8 @@ export const photosGraphListAccessLive = Layer.effect(
       PhotosGraphListAccess.of({
         getPhotoGraphListItemsByFilter: (filter?: string) =>
           getListItemsByFilter(photosListId)<ModelEncodedPersistedPhoto>(
-            filter
+            filter,
+            ["fields", "driveItem"]
           ).pipe(Effect.provideService(GraphClient, graphClient)),
 
         updatePhotoGraphListItemFields: (

@@ -12,7 +12,6 @@ import {
   updateApplicationListItem,
 } from "./application-sp";
 import {
-  clearApplicationIdForPhoto,
   clearApplicationIdForPhotoEffect,
   setApplicationIdForPhoto,
 } from "./photo-service";
@@ -490,7 +489,17 @@ export const submitApplication = async (
           application.applicationId
         );
         if (currentApplicationPhotoId) {
-          await clearApplicationIdForPhoto(currentApplicationPhotoId);
+          const clearApplicationIdForPhotoProgram =
+            clearApplicationIdForPhotoEffect(currentApplicationPhotoId).pipe(
+              // If the photo cannot be found then we can consider the application-photo link already cleared.
+              Effect.catchTag("PhotoNotFound", () => Effect.succeedNone)
+            );
+
+          await Effect.runPromise(
+            clearApplicationIdForPhotoProgram.pipe(
+              Effect.provide(repositoriesLayerLive)
+            )
+          );
         }
       }
 
