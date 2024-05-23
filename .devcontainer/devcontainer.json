@@ -10,6 +10,20 @@
 
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   // "forwardPorts": [],
+  "portsAttributes": {
+    "5173": {
+      "label": "Frontend",
+      // Do not automatically forward 5173 to the local host. Access to the Frontend is through
+      // the SWA emulator on port 4280.
+      "onAutoForward": "ignore"
+    },
+    "7071": {
+      "label": "API",
+      // Do not automatically forward 7071 to the local host. Access to the API is through
+      // the SWA emulator on port 4280.
+      "onAutoForward": "ignore"
+    }
+  },
 
   // Use 'postCreateCommand' to run commands after the container is created.
   // "postCreateCommand": "yarn install",
