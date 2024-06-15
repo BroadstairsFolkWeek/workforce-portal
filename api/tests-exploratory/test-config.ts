@@ -26,5 +26,10 @@ export const getTestConfig = () => {
     GRAPH_LIST_NAME: str(),
     GRAPH_LIST_ITEM_ID: num(),
     GRAPH_USER_ID: str(),
+    WF_API_CLIENT_AUTH_AUTHORITY: str(),
+    WF_API_CLIENT_AUTH_CLIENT_ID: str(),
+    WF_API_CLIENT_AUTH_CLIENT_SECRET: str(),
+    WF_API_CLIENT_AUTH_SCOPES: str(),
+    WF_API_URL: str(),
   });
 };
