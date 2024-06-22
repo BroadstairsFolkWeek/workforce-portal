@@ -21,7 +21,7 @@ const msalConfidentialClientApp = new ConfidentialClientApplication({
 const getAccessToken = async () => {
   const authResult =
     await msalConfidentialClientApp.acquireTokenByClientCredential({
-      scopes: [testConfig.WF_API_CLIENT_AUTH_SCOPES],
+      scopes: [testConfig.WF_API_CLIENT_AUTH_SCOPE],
     });
 
   if (authResult) {

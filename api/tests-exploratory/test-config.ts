@@ -29,7 +29,7 @@ export const getTestConfig = () => {
     WF_API_CLIENT_AUTH_AUTHORITY: str(),
     WF_API_CLIENT_AUTH_CLIENT_ID: str(),
     WF_API_CLIENT_AUTH_CLIENT_SECRET: str(),
-    WF_API_CLIENT_AUTH_SCOPES: str(),
+    WF_API_CLIENT_AUTH_SCOPE: str(),
     WF_API_URL: str(),
   });
 };

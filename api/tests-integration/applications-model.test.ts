@@ -26,7 +26,7 @@ test("get application by Profile ID", async () => {
   const result = await Effect.runPromise(runnable);
 
   console.log(JSON.stringify(result, null, 2));
-});
+}, 10000);
 
 test("get application by Application ID", async () => {
   const program = Effect.all([
@@ -48,7 +48,7 @@ test("get application by Application ID", async () => {
   const result = await Effect.runPromise(runnable);
 
   console.log(JSON.stringify(result, null, 2));
-});
+}, 10000);
 
 test("update application by Application ID", async () => {
   const program = Effect.all([
