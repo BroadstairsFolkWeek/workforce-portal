@@ -5,12 +5,14 @@ import { ProfilesGraphListAccess } from "./graph/profiles-graph-list-access";
 import {
   ModelAddableProfile,
   ModelPersistedProfile,
+  ModelProfile,
   ModelProfileId,
 } from "./interfaces/profile";
 import {
   PersistedGraphListItem,
   PersistedGraphListItemFields,
 } from "./interfaces/graph/graph-items";
+import { WfApiClient } from "../wf-api/wf-client";
 
 const fieldsToProfile = (fields: PersistedGraphListItemFields) =>
   Schema.decodeUnknown(ModelPersistedProfile)(fields);
@@ -20,6 +22,9 @@ const graphListItemToProfile = (
 ) => {
   return fieldsToProfile(item.fields);
 };
+
+const apiResponseJsonToProfiles = (responseJson: unknown) =>
+  Schema.decodeUnknown(Schema.Array(ModelProfile))(responseJson);
 
 const modelGetProfileByFilter = (filter: string) => {
   return ProfilesGraphListAccess.pipe(
@@ -40,6 +45,30 @@ const modelGetProfileByProfileId = (profileId: ModelProfileId) => {
   return modelGetProfileByFilter(`fields/ProfileId eq '${profileId}'`);
 };
 
+const parseProfilesResponse = (
+  responseAsJson: unknown
+): Effect.Effect<readonly ModelProfile[]> =>
+  apiResponseJsonToProfiles(responseAsJson).pipe(
+    // Parse errors of data from the WF API are considered unrecoverable.
+    Effect.catchTag("ParseError", (e) => Effect.die(e))
+  );
+
+const parseProfilesResponseForSingleProfile = (responseJson: unknown) =>
+  parseProfilesResponse(responseJson).pipe(
+    Effect.head,
+    Effect.catchTag("NoSuchElementException", () =>
+      Effect.fail(new ProfileNotFound())
+    )
+  );
+
+const modelGetProfileByUserId = (userId: string) =>
+  WfApiClient.pipe(
+    Effect.andThen((apiClient) =>
+      apiClient.getJson("/api/profiles", `userId=${userId}`)
+    ),
+    Effect.andThen(parseProfilesResponseForSingleProfile)
+  );
+
 const modelCreateProfile = (addableProfile: ModelAddableProfile) => {
   return ProfilesGraphListAccess.pipe(
     Effect.andThen((listAccess) =>
@@ -55,12 +84,18 @@ const modelCreateProfile = (addableProfile: ModelAddableProfile) => {
 
 export const profilesRepositoryLive = Layer.effect(
   ProfilesRepository,
-  ProfilesGraphListAccess.pipe(
-    Effect.map((service) => ({
+  Effect.all([ProfilesGraphListAccess, WfApiClient]).pipe(
+    Effect.andThen(([service, wfApiClient]) => ({
+      modelGetProfileByUserId: (userId: string) =>
+        modelGetProfileByUserId(userId).pipe(
+          Effect.provideService(WfApiClient, wfApiClient)
+        ),
+
       modelCreateProfile: (addableProfile: ModelAddableProfile) =>
         modelCreateProfile(addableProfile).pipe(
           Effect.provideService(ProfilesGraphListAccess, service)
         ),
+
       modelGetProfileByProfileId: (profileId: ModelProfileId) =>
         modelGetProfileByProfileId(profileId).pipe(
           Effect.provideService(ProfilesGraphListAccess, service)

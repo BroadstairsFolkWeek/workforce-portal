@@ -38,6 +38,18 @@ export const ModelPersistedProfile = S.extend(
   S.extend(ModelProfileMetadata, ModelProfilePersistanceData)
 );
 
+export const ModelProfile = S.Struct({
+  profileId: ModelProfileId,
+  email: S.optional(S.String),
+  displayName: S.String,
+  givenName: S.optional(S.String),
+  surname: S.optional(S.String),
+  address: S.optional(S.String),
+  telephone: S.optional(S.String),
+  version: S.Number,
+  photoUrl: S.optional(S.String),
+});
+
 export interface ModelAddableProfile
   extends S.Schema.Type<typeof ModelAddableProfile> {}
 
@@ -49,3 +61,5 @@ export interface ModelEncodedAddableProfile
 
 export interface ModelEncodedPersistedProfile
   extends S.Schema.Encoded<typeof ModelPersistedProfile> {}
+
+export interface ModelProfile extends S.Schema.Type<typeof ModelProfile> {}
