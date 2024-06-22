@@ -8,7 +8,7 @@
     "prestart": "npm run build && func extensions install",
     "start:host": "func start",
     "start": "npm-run-all --parallel start:host watch",
-    "test": "jest --roots ./tests",
+    "test": "tsc && jest --roots ./tests",
     "test:integration": "env-cmd -f ./tests-integration/.env jest --roots ./tests-integration",
     "test:exploratory": "jest --roots ./tests-exploratory"
   },
