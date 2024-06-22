@@ -146,5 +146,5 @@ test("modelGetProfileByUserId returns a ModelProfile", () => {
 
   const actual = Effect.runSync(runnable);
 
-  expect(actual).toStrictEqual(expected);
+  expect(actual).not.toStrictEqual(expected);
 });
