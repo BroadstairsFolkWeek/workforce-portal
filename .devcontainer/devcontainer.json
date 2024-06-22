@@ -38,8 +38,7 @@
         "ms-azuretools.vscode-azurefunctions",
         "ms-azuretools.vscode-azurestaticwebapps",
         "Orta.vscode-jest",
-        "GitHub.copilot",
-        "GitHub.copilot-chat"
+        "GitHub.vscode-github-actions"
       ]
     }
   },
