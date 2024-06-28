@@ -27,38 +27,23 @@ const graphListItemToProfile = (
 const apiSingResponseJsonToProfile = (responseJson: unknown) =>
   Schema.decodeUnknown(ModelProfile)(responseJson);
 
-const apiArrayResponseJsonToProfiles = (responseJson: unknown) =>
-  Schema.decodeUnknown(Schema.Array(ModelProfile))(responseJson);
-
-const parseProfilesResponse = (
-  responseAsJson: unknown
-): Effect.Effect<readonly ModelProfile[]> =>
-  apiArrayResponseJsonToProfiles(responseAsJson).pipe(
-    // Parse errors of data from the WF API are considered unrecoverable.
-    Effect.catchTag("ParseError", (e) => Effect.die(e))
-  );
-
-const parseProfilesResponseForSingleProfile = (responseJson: unknown) =>
-  parseProfilesResponse(responseJson).pipe(
-    Effect.head,
-    Effect.catchTag("NoSuchElementException", () =>
-      Effect.fail(new ProfileNotFound())
-    )
-  );
-
 const modelGetProfileByUserId = (userId: string) =>
   WfApiClient.pipe(
     Effect.andThen((apiClient) =>
-      apiClient.getJson("/api/profiles", `userId=${userId}`)
+      apiClient.getJson(`/api/users/${userId}/profile`)
     ),
-    Effect.andThen(parseProfilesResponseForSingleProfile)
+    Effect.andThen(apiSingResponseJsonToProfile)
   ).pipe(
     Effect.catchTag("RequestError", (e) =>
-      Effect.die("Failed to set profile photo: " + e)
+      Effect.die("Failed to get profile by user id: " + e)
     ),
     Effect.catchTag("ResponseError", (e) =>
-      Effect.die("Failed to set profile photo: " + e)
-    )
+      e.response.status === 404
+        ? Effect.fail(new ProfileNotFound())
+        : Effect.die("Failed to get profile by user id: " + e)
+    ),
+    // Parse errors of data from the WF API are considered unrecoverable.
+    Effect.catchTag("ParseError", (e) => Effect.die(e))
   );
 
 const modelCreateProfile = (addableProfile: ModelAddableProfile) => {
