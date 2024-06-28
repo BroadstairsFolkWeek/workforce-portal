@@ -1,40 +1,24 @@
-import { Effect, Either, Option, Layer } from "effect";
+import { Effect, Option, Layer } from "effect";
 import { Schema as S } from "@effect/schema";
 import { v4 as uuidv4 } from "uuid";
 import {
-  AddableProfile,
   Profile,
   ProfileWithCurrentApplication,
   UpdatableProfile,
 } from "../interfaces/profile";
-import { ACCEPTED_IMAGE_EXTENSIONS } from "../interfaces/sp-files";
-import { UserLogin } from "../interfaces/user-login";
 import { logTrace } from "../utilties/logging";
 import {
   getApplicationByProfile,
   getApplicationByProfileAndUpdateIfNeeded,
   updateApplicationFromProfileIfNeeded,
+  updateApplicationFromProfileIfNeededEffect,
 } from "./application-service";
-import { getWorkforcePortalConfig } from "./configuration-service";
+import { photoIdFromEncodedPhotoId } from "./photo-service";
+import { deleteProfileListItem, updateProfileListItem } from "./profile-sp";
 import {
-  clearProfileIdForPhoto,
-  photoIdFromEncodedPhotoId,
-} from "./photo-service";
-import {
-  addProfilePhotoFileWithItem,
-  deletePhotoByUniqueId,
-} from "./photos-sp";
-import {
-  createProfileListItem,
-  deleteProfileListItem,
-  getProfileByProfileId,
-  updateProfileListItem,
-} from "./profile-sp";
-import {
-  createUserLogin,
+  createUserLoginEffect,
   createUserLoginForGraphUser,
   deleteUserLoginsByProfileId,
-  getUserLogin,
 } from "./user-service";
 import { defaultGraphClient } from "../graph/default-graph-client";
 import { userLoginRepositoryLive } from "../model/user-logins-repository-graph";
@@ -42,16 +26,16 @@ import { applicationsRepositoryLive } from "../model/applications-repository-gra
 import { graphListAccessesLive } from "../contexts/graph-list-access-live";
 import {
   ModelAddableProfile,
-  ModelPersistedProfile,
+  ModelProfile,
   ModelProfileId,
 } from "../model/interfaces/profile";
 import { ModelPersistedUserLogin } from "../model/interfaces/user-login";
 import { ProfilesRepository } from "../model/profiles-repository";
 import { ModelPersistedApplication } from "../model/interfaces/application";
 import { PhotosRepository } from "../model/photos-repository";
-
-const workforcePortalConfig = getWorkforcePortalConfig();
-const maxPhotosPerPerson = workforcePortalConfig.maxProfilePhotosPerPerson;
+import { profilesRepositoryLive } from "../model/profiles-repository-live";
+import { wfApiClientLive } from "../wf-api/wf-client-live";
+import { graphUsersRepositoryLive } from "../model/graph-users-repository-graph";
 
 const PROFILE_SERVICE_ERROR_TYPE_VAL =
   "profile-service-error-b2facf8d-038c-449b-8e24-d6cfe6680bd4";
@@ -115,15 +99,17 @@ const createNewUserLoginAndProfileForGraphUser = (graphUserId: string) => {
 };
 
 type ProfileWithOptionalApplication = {
-  profile: ModelPersistedProfile;
+  profile: ModelProfile;
   application: Option.Option<ModelPersistedApplication>;
 };
 
-const getProfileWithApplication = (profileId: ModelProfileId) => {
-  return ProfilesRepository.pipe(
-    Effect.andThen((repository) =>
-      repository.modelGetProfileByProfileId(profileId)
-    ),
+const getProfileByUserId = (userId: string) =>
+  ProfilesRepository.pipe(
+    Effect.andThen((repository) => repository.modelGetProfileByUserId(userId))
+  );
+
+const getProfileWithApplicationByUserId = (userId: string) => {
+  return getProfileByUserId(userId).pipe(
     Effect.andThen((profile) =>
       getApplicationByProfileAndUpdateIfNeeded(profile).pipe(
         Effect.andThen((application) =>
@@ -144,17 +130,13 @@ const getProfileWithApplication = (profileId: ModelProfileId) => {
 };
 
 export const getProfileForAuthenticatedUserEffect = (userId: string) =>
-  getUserLogin(userId).pipe(
-    Effect.andThen((userLogin) =>
-      getProfileWithApplication(userLogin.profileId)
-    )
-  );
+  getProfileWithApplicationByUserId(userId);
 
 export const getOrCreateProfileForAuthenticatedUserEffect = (
   userId: string
 ) => {
   return getProfileForAuthenticatedUserEffect(userId).pipe(
-    Effect.catchTag("UnknownUser", () =>
+    Effect.catchTag("ProfileNotFound", () =>
       createNewUserLoginAndProfileForGraphUser(userId).pipe(
         Effect.andThen((profile) =>
           Effect.succeed({
@@ -167,87 +149,84 @@ export const getOrCreateProfileForAuthenticatedUserEffect = (
   );
 };
 
+const createUserLoginAndProfile = (userId: string) => {
+  const profileId = ModelProfileId.make(uuidv4());
+  logTrace(
+    "getProfileForAuthenticatedUser: User login does not exist. Creating new user login and profile. Profile ID: " +
+      profileId
+  );
+
+  return createUserLoginEffect(userId, profileId).pipe(
+    Effect.andThen((createdUserLogin) =>
+      ProfilesRepository.pipe(
+        Effect.andThen((profilesRepository) =>
+          profilesRepository.modelCreateProfile({
+            profileId,
+            displayName: createdUserLogin.displayName,
+            givenName: createdUserLogin.givenName,
+            surname: createdUserLogin.surname,
+            email: createdUserLogin.email,
+            photoIds: [],
+            version: 1,
+          })
+        )
+      )
+    ),
+    Effect.andThen(
+      (persistedProfile) =>
+        ({
+          ...persistedProfile,
+          photoUrl: "",
+        } as ModelProfile)
+    )
+  );
+};
+
 export const getOrCreateProfileForAuthenticatedUser = async (
   userId: string
 ): Promise<ProfileWithCurrentApplication> => {
-  const repositoriesLayer = Layer.merge(
+  const repositoriesLayer = Layer.mergeAll(
     userLoginRepositoryLive,
-    applicationsRepositoryLive
+    applicationsRepositoryLive,
+    profilesRepositoryLive,
+    graphUsersRepositoryLive
   );
 
   const layers = repositoriesLayer.pipe(
     Layer.provide(graphListAccessesLive),
-    Layer.provide(defaultGraphClient)
+    Layer.provide(defaultGraphClient),
+    Layer.provide(wfApiClientLive)
   );
 
-  const userLoginEffect = getUserLogin(userId).pipe(Effect.either);
-  const runnableGetUserLogin = Effect.provide(userLoginEffect, layers);
+  const getAndUpdateExistingApplicationProgram = ProfilesRepository.pipe(
+    Effect.andThen((profilesRepository) =>
+      profilesRepository.modelGetProfileByUserId(userId)
+    ),
+    Effect.andThen((profile) =>
+      getApplicationByProfile(profile).pipe(
+        Effect.andThen(updateApplicationFromProfileIfNeededEffect(profile)),
+        Effect.andThen((application) =>
+          Effect.succeed({ profile, application })
+        ),
+        Effect.catchTag("ApplicationNotFound", () =>
+          Effect.succeed({ profile })
+        )
+      )
+    )
+  ).pipe(
+    Effect.catchTag("ProfileNotFound", () =>
+      createUserLoginAndProfile(userId).pipe(
+        Effect.andThen((profile) => ({ profile }))
+      )
+    )
+  );
 
-  const userLoginEither = await Effect.runPromise(runnableGetUserLogin);
+  const runnable = Effect.provide(
+    getAndUpdateExistingApplicationProgram,
+    layers
+  );
 
-  if (Either.isLeft(userLoginEither)) {
-    const profileId = uuidv4();
-    logTrace(
-      "getProfileForAuthenticatedUser: User login does not exist. Creating new user login and profile. Profile ID: " +
-        profileId
-    );
-
-    const createdUserLogin: UserLogin = await createUserLogin(
-      userId,
-      profileId
-    );
-
-    // Populate basic profile fields from the user login. Users can update these later.
-    const newProfile: AddableProfile = {
-      profileId,
-      displayName: createdUserLogin.displayName,
-      givenName: createdUserLogin.givenName,
-      surname: createdUserLogin.surname,
-      email: createdUserLogin.email,
-      photoIds: [],
-      version: 1,
-    };
-
-    logTrace(
-      "getProfileForAuthenticatedUser: About to create profile: " +
-        JSON.stringify(newProfile)
-    );
-    return {
-      profile: await createProfileListItem(newProfile),
-    };
-  } else {
-    const userLogin = userLoginEither.right;
-    const profileId = userLogin.profileId;
-    const profile = await getProfileByProfileId(profileId);
-    if (!profile) {
-      throw new ProfileServiceError("missing-user-profile");
-    }
-
-    const existingApplicationEffect = getApplicationByProfile(profile).pipe(
-      Effect.match({
-        onSuccess: (application) => application,
-        onFailure: () => null,
-      })
-    );
-
-    const runnable = Effect.provide(existingApplicationEffect, layers);
-
-    const existingApplication = await Effect.runPromise(runnable);
-
-    if (existingApplication) {
-      const updateApplication = await updateApplicationFromProfileIfNeeded(
-        existingApplication,
-        profile
-      );
-
-      return {
-        profile,
-        application: updateApplication,
-      };
-    } else {
-      return { profile };
-    }
-  }
+  return await Effect.runPromise(runnable);
 };
 
 export const updateUserProfile = async (
@@ -305,162 +284,26 @@ export const getProfilePicture = (encodedPhotoId: string) =>
     )
   );
 
-const deleteAllPicturesForProfile = async (profile: Profile): Promise<void> => {
-  const photoIds = profile.photoIds;
-
-  const deletePhotoPromises = photoIds.map((encodedPhotoId) => {
-    const [uniqueId] = encodedPhotoId.split(":");
-    logTrace(
-      "deleteAllPicturesForProfile: Clearing Profile ID on photo: " + uniqueId
-    );
-    return clearProfileIdForPhoto(uniqueId);
-  });
-
-  await Promise.all(deletePhotoPromises);
-
-  logTrace(
-    "deleteAllPicturesForProfile: Photos deleted and user profile updated."
-  );
-};
-
 export const deleteUserProfile = async (profile: Profile) => {
-  await deleteAllPicturesForProfile(profile);
   await deleteUserLoginsByProfileId(profile.profileId);
   await deleteProfileListItem(profile);
 };
 
-export const deleteProfilePicture = async (
-  userId: string
-): Promise<ProfileWithCurrentApplication> => {
-  const userProfileAndApplication =
-    await getOrCreateProfileForAuthenticatedUser(userId);
-
-  if (userProfileAndApplication) {
-    logTrace("deleteProfilePicture: Retrieved existing user profile");
-    const userProfile = userProfileAndApplication.profile;
-
-    const photoIds = userProfile.photoIds;
-    if (photoIds.length > 0) {
-      const encodedDeletePhotoId = photoIds[0];
-      const [uniqueId] = encodedDeletePhotoId.split(":");
-      logTrace(
-        "deleteProfilePicture: Clearing Profile ID on photo: " + uniqueId
-      );
-      const clearPhotoPromise = clearProfileIdForPhoto(uniqueId);
-
-      const remainingPhotoIds = photoIds.slice(1);
-
-      // Update the user profile to reflect the new photo id.
-      const updatedProfile: Profile = {
-        ...userProfile,
-        photoIds: remainingPhotoIds,
-        version: userProfile.version + 1,
-      };
-
-      const updateProfilePromise = updateProfileListItem(updatedProfile);
-      await Promise.all([clearPhotoPromise, updateProfilePromise]);
-
-      const updatedUserProfile = await updateProfilePromise;
-      logTrace("deleteProfilePicture: User profile updated.");
-
-      return {
-        profile: updatedUserProfile,
-        application: userProfileAndApplication.application,
-      };
-    } else {
-      return userProfileAndApplication;
-    }
-  } else {
-    throw new ProfileServiceError("missing-user-profile");
-  }
-};
-
-export const setProfilePicture = async (
+export const setProfilePicture = (
   userId: string,
-  fileExtension: ACCEPTED_IMAGE_EXTENSIONS,
+  fileMimeType: string,
   fileBuffer: Buffer
-): Promise<ProfileWithCurrentApplication> => {
-  const userProfileAndApplication =
-    await getOrCreateProfileForAuthenticatedUser(userId);
-
-  if (userProfileAndApplication) {
-    logTrace("setProfilePicture: Retrieved existing user profile");
-    const userProfile = userProfileAndApplication.profile;
-
-    logTrace(
-      "setProfilePicture: Number of photos that already exist for user: " +
-        userProfile.photoIds.length
-    );
-
-    const photoId = uuidv4();
-    const strippedFileName = userProfile.displayName + " - " + photoId;
-
-    logTrace(
-      "setProfilePicture: Adding photo file with stripped filename: " +
-        strippedFileName
-    );
-    const fileAddResult = await addProfilePhotoFileWithItem(
-      strippedFileName,
-      fileExtension,
-      fileBuffer,
-      userProfile.profileId,
-      userProfile.givenName ?? "",
-      userProfile.surname ?? "",
-      photoId
-    );
-
-    logTrace(
-      "setProfilePicture: File added. UniqueId: " +
-        fileAddResult.data.UniqueId +
-        ". Name: " +
-        fileAddResult.data.Name
-    );
-
-    const encodedPhotoId = fileAddResult.data.UniqueId + ":" + photoId;
-    const allPhotoIds = [encodedPhotoId, ...userProfile.photoIds];
-
-    const keepPhotoIds = allPhotoIds.slice(0, maxPhotosPerPerson);
-    const deletePhotoIds = allPhotoIds.slice(maxPhotosPerPerson);
-
-    // Delete any unused photos. No need to wait for this operation to complete as if it fails then
-    // we end up with a few unused files in the document library which can be cleaned by some other process.
-    deletePhotoIds.forEach((encodedDeletePhotoId) => {
-      const [uniqueId] = encodedDeletePhotoId.split(":");
-      logTrace("setProfilePicture: Deleting photo: " + uniqueId);
-      deletePhotoByUniqueId(uniqueId);
-    });
-
-    // Update the user profile to reflect the new photo id.
-    const updatedProfile: Profile = {
-      ...userProfile,
-      photoIds: keepPhotoIds,
-      version: userProfile.version + 1,
-    };
-
-    const updatedUserProfile = await updateProfileListItem(updatedProfile);
-    logTrace("setProfilePicture: User profile updated.");
-
-    const existingApplication = userProfileAndApplication?.application;
-    if (existingApplication) {
-      logTrace(
-        "setProfilePicture: Updating user's application is reponse to the profile change"
-      );
-      const updateApplication = await updateApplicationFromProfileIfNeeded(
-        existingApplication,
-        updatedUserProfile
-      );
-      logTrace("setProfilePicture: Application updated");
-
-      return {
-        profile: updatedUserProfile,
-        application: updateApplication,
-      };
-    } else {
-      return {
-        profile: updatedUserProfile,
-      };
-    }
-  } else {
-    throw new ProfileServiceError("missing-user-profile");
-  }
-};
+) =>
+  getProfileByUserId(userId).pipe(
+    Effect.andThen((profile) =>
+      ProfilesRepository.pipe(
+        Effect.andThen((profilesRepo) =>
+          profilesRepo.modelSetProfilePhoto(
+            profile.profileId,
+            fileMimeType,
+            fileBuffer
+          )
+        )
+      )
+    )
+  );

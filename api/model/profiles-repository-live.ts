@@ -1,5 +1,6 @@
 import { Effect, Layer } from "effect";
 import { Schema } from "@effect/schema";
+
 import { ProfileNotFound, ProfilesRepository } from "./profiles-repository";
 import { ProfilesGraphListAccess } from "./graph/profiles-graph-list-access";
 import {
@@ -23,32 +24,16 @@ const graphListItemToProfile = (
   return fieldsToProfile(item.fields);
 };
 
-const apiResponseJsonToProfiles = (responseJson: unknown) =>
+const apiSingResponseJsonToProfile = (responseJson: unknown) =>
+  Schema.decodeUnknown(ModelProfile)(responseJson);
+
+const apiArrayResponseJsonToProfiles = (responseJson: unknown) =>
   Schema.decodeUnknown(Schema.Array(ModelProfile))(responseJson);
-
-const modelGetProfileByFilter = (filter: string) => {
-  return ProfilesGraphListAccess.pipe(
-    Effect.flatMap((listAccess) =>
-      listAccess.getProfileGraphListItemsByFilter(filter)
-    ),
-    Effect.head,
-    Effect.catchTag("NoSuchElementException", () =>
-      Effect.fail(new ProfileNotFound())
-    ),
-    Effect.flatMap((item) => graphListItemToProfile(item)),
-    // Parse errors of data from Graph/SharePoint are considered unrecoverable.
-    Effect.catchTag("ParseError", (e) => Effect.die(e))
-  );
-};
-
-const modelGetProfileByProfileId = (profileId: ModelProfileId) => {
-  return modelGetProfileByFilter(`fields/ProfileId eq '${profileId}'`);
-};
 
 const parseProfilesResponse = (
   responseAsJson: unknown
 ): Effect.Effect<readonly ModelProfile[]> =>
-  apiResponseJsonToProfiles(responseAsJson).pipe(
+  apiArrayResponseJsonToProfiles(responseAsJson).pipe(
     // Parse errors of data from the WF API are considered unrecoverable.
     Effect.catchTag("ParseError", (e) => Effect.die(e))
   );
@@ -67,6 +52,13 @@ const modelGetProfileByUserId = (userId: string) =>
       apiClient.getJson("/api/profiles", `userId=${userId}`)
     ),
     Effect.andThen(parseProfilesResponseForSingleProfile)
+  ).pipe(
+    Effect.catchTag("RequestError", (e) =>
+      Effect.die("Failed to set profile photo: " + e)
+    ),
+    Effect.catchTag("ResponseError", (e) =>
+      Effect.die("Failed to set profile photo: " + e)
+    )
   );
 
 const modelCreateProfile = (addableProfile: ModelAddableProfile) => {
@@ -79,6 +71,39 @@ const modelCreateProfile = (addableProfile: ModelAddableProfile) => {
     Effect.andThen(graphListItemToProfile),
     // Parse errors of data from Graph/SharePoint are considered unrecoverable.
     Effect.catchTag("ParseError", (e) => Effect.die(e))
+  );
+};
+
+const prepareProfilePhotoData = (fileMimeType: string, fileBuffer: Buffer) => ({
+  contentBase64: fileBuffer.toString("base64"),
+  contentMimeType: fileMimeType,
+});
+
+const modelSetProfilePhoto = (
+  profileId: ModelProfileId,
+  fileMimeType: string,
+  fileBuffer: Buffer
+) => {
+  return WfApiClient.pipe(
+    Effect.andThen((apiClient) =>
+      apiClient.putJsonDataJsonResponse(`/api/profiles/${profileId}/photo`)(
+        prepareProfilePhotoData(fileMimeType, fileBuffer)
+      )
+    ),
+    Effect.andThen(apiSingResponseJsonToProfile)
+  ).pipe(
+    // Parse errors of data from Graph/SharePoint are considered unrecoverable.
+    Effect.catchTag("ParseError", (e) => Effect.die(e)),
+
+    Effect.catchTag("RequestError", (e) =>
+      Effect.die("Failed to set profile photo: " + e)
+    ),
+    Effect.catchTag("ResponseError", (e) =>
+      Effect.die("Failed to set profile photo: " + e)
+    ),
+    Effect.catchTag("HttpBodyError", (e) =>
+      Effect.die("Failed to set profile photo: " + e)
+    )
   );
 };
 
@@ -96,9 +121,13 @@ export const profilesRepositoryLive = Layer.effect(
           Effect.provideService(ProfilesGraphListAccess, service)
         ),
 
-      modelGetProfileByProfileId: (profileId: ModelProfileId) =>
-        modelGetProfileByProfileId(profileId).pipe(
-          Effect.provideService(ProfilesGraphListAccess, service)
+      modelSetProfilePhoto: (
+        profileId: ModelProfileId,
+        fileMimeType: string,
+        fileBuffer: Buffer
+      ) =>
+        modelSetProfilePhoto(profileId, fileMimeType, fileBuffer).pipe(
+          Effect.provideService(WfApiClient, wfApiClient)
         ),
     }))
   )

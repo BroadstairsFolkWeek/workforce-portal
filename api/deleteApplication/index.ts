@@ -44,7 +44,6 @@ const httpTrigger: AzureFunction = async function (
           Effect.succeed({
             status: 401 as const,
           }),
-        UnknownUser: () => Effect.succeed({ status: 500 as const }),
         ProfileNotFound: () => Effect.succeed({ status: 400 as const }),
         ApplicationNotFound: () =>
           Effect.succeed({

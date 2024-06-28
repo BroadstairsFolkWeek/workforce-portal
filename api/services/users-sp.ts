@@ -1,3 +1,4 @@
+import { Effect } from "effect";
 import { AddableUserLogin, UserLogin } from "../interfaces/user-login";
 import {
   AddableUserLoginListItem,
@@ -49,6 +50,9 @@ export const createUserLoginListItem = async (
   );
   return listItemToUserLogin(addResult.data);
 };
+
+export const createUserLoginListItemEffect = (user: AddableUserLogin) =>
+  Effect.promise(() => createUserLoginListItem(user));
 
 export const updateUserLoginListItem = async (
   user: UserLogin

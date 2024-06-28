@@ -95,7 +95,7 @@ const addableProfileToListItem = (
     Surname: addableProfile.surname,
     Telephone: addableProfile.telephone,
     Address: addableProfile.address,
-    PhotoIds: addableProfile.photoIds.join("\n"),
+    PhotoIds: (addableProfile.photoIds || []).join("\n"),
     Version: addableProfile.version,
   };
 };

@@ -48,6 +48,8 @@ export const ModelProfile = S.Struct({
   telephone: S.optional(S.String),
   version: S.Number,
   photoUrl: S.optional(S.String),
+  photoIds: S.optional(S.Array(S.String)),
+  dbId: S.Number,
 });
 
 export interface ModelAddableProfile

@@ -6,6 +6,7 @@ import {
 import { logError, logTrace } from "../utilties/logging";
 import {
   createUserLoginListItem,
+  createUserLoginListItemEffect,
   deleteUserLogin,
   getUserLoginsByProfileId,
   updateUserLoginListItem,
@@ -168,6 +169,25 @@ export const createUserLogin = async (
     return createUserLoginListItem(newUserLogin);
   }
 };
+
+export const createUserLoginEffect = (userId: string, profileId: string) =>
+  getUserLoginPropertiesFromGraph(userId).pipe(
+    Effect.andThen((graphUser) => ({
+      ...graphUser,
+      profileId,
+    })),
+    Effect.andThen((graphUser) => ({
+      profileId,
+      displayName: graphUser.displayName,
+      identityProviderUserId: userId,
+      identityProviderUserDetails: "unused",
+      givenName: graphUser.givenName,
+      surname: graphUser.surname,
+      email: graphUser.email,
+      identityProvider: "unknown",
+    })),
+    Effect.andThen(createUserLoginListItemEffect)
+  );
 
 export const createUserLoginForGraphUser = (
   userId: string,

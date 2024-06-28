@@ -33,12 +33,6 @@ const httpTrigger: AzureFunction = async function (
       }))
     )
     .pipe(
-      Effect.catchTag("ProfileNotFound", () =>
-        Effect.succeed({
-          status: 404 as const,
-          body: "Profile does not exist",
-        })
-      ),
       Effect.catchTag("GraphUserNotFound", () =>
         Effect.succeed({
           status: 404 as const,

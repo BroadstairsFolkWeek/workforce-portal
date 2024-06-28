@@ -16,11 +16,15 @@ export class ProfilesRepository extends Context.Tag("ProfilesRepository")<
     readonly modelGetProfileByUserId: (
       userId: string
     ) => Effect.Effect<ModelProfile, ProfileNotFound>;
-    readonly modelGetProfileByProfileId: (
-      profileId: ModelProfileId
-    ) => Effect.Effect<ModelPersistedProfile, ProfileNotFound>;
+
     readonly modelCreateProfile: (
       addableProfile: ModelAddableProfile
     ) => Effect.Effect<ModelPersistedProfile>;
+
+    readonly modelSetProfilePhoto: (
+      profileId: ModelProfileId,
+      fileMimeType: string,
+      fileBuffer: Buffer
+    ) => Effect.Effect<ModelProfile>;
   }
 >() {}

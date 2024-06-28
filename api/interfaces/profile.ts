@@ -16,7 +16,8 @@ export type ProfileDto = Static<typeof ProfileUpdateDtoRunType>;
 export type AddableProfile = ProfileDto & {
   profileId: string;
   email?: string | undefined;
-  photoIds: string[];
+  photoIds?: readonly string[] | undefined;
+  photoUrl?: string | undefined;
 };
 
 export type UpdatableProfile = Partial<AddableProfile> & {

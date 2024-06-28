@@ -1,7 +1,13 @@
-import { Config, Effect, Layer, Secret } from "effect";
-import { ConfidentialClientApplication } from "@azure/msal-node";
-import { WfApiClient } from "./wf-client";
 import { URL } from "url";
+import { Config, Effect, Layer, Secret } from "effect";
+import {
+  HttpClient,
+  HttpClientRequest,
+  HttpClientResponse,
+} from "@effect/platform";
+import { ConfidentialClientApplication } from "@azure/msal-node";
+
+import { WfApiClient } from "./wf-client";
 
 const getConfidentialClientApp = (
   clientId: string,
@@ -55,21 +61,53 @@ const apiGetJson =
   (authenticationSupplier: AuthenticationSupplier) =>
   (baseUrl: URL) =>
   (path: string, search?: string) =>
-    authenticationSupplier()
-      .pipe(
-        Effect.andThen((authenticationResult) =>
-          Effect.promise(() =>
-            fetch(generateUrl(baseUrl)(path, search), {
-              headers: {
-                Authorization: `Bearer ${authenticationResult.accessToken}`,
-              },
-            })
-          )
+    authenticationSupplier().pipe(
+      Effect.andThen((authenticationResult) =>
+        HttpClientRequest.get(generateUrl(baseUrl)(path, search), {
+          headers: {
+            Authorization: `Bearer ${authenticationResult.accessToken}`,
+          },
+        }).pipe(HttpClient.fetchOk, HttpClientResponse.json)
+      )
+    );
+
+const apiPutFormData =
+  (authenticationSupplier: AuthenticationSupplier) =>
+  (baseUrl: URL) =>
+  (path: string, search?: string) =>
+  (formData: FormData) =>
+    authenticationSupplier().pipe(
+      Effect.andThen((authenticationResult) =>
+        HttpClientRequest.put(generateUrl(baseUrl)(path, search), {
+          headers: {
+            Authorization: `Bearer ${authenticationResult.accessToken}`,
+          },
+        }).pipe(
+          HttpClientRequest.formDataBody(formData),
+          HttpClient.fetchOk,
+          HttpClientResponse.json
         )
       )
-      .pipe(
-        Effect.andThen((response) => Effect.promise(() => response.json()))
-      );
+    );
+
+const apiPutJsonData =
+  (authenticationSupplier: AuthenticationSupplier) =>
+  (baseUrl: URL) =>
+  (path: string, search?: string) =>
+  (data: unknown) =>
+    authenticationSupplier().pipe(
+      Effect.andThen((authenticationResult) =>
+        HttpClientRequest.put(generateUrl(baseUrl)(path, search), {
+          headers: {
+            Authorization: `Bearer ${authenticationResult.accessToken}`,
+          },
+        }).pipe(
+          HttpClientRequest.jsonBody(data),
+          Effect.andThen(HttpClient.fetchOk),
+          HttpClientResponse.json
+        )
+      )
+    );
 
 export const wfApiClientLive = Layer.effect(
   WfApiClient,
@@ -83,6 +121,24 @@ export const wfApiClientLive = Layer.effect(
     Effect.andThen(([clientId, clientSecret, authority, scope, baseUrl]) =>
       WfApiClient.of({
         getJson: apiGetJson(
+          getAuthenticationSupplier(
+            clientId,
+            Secret.value(clientSecret),
+            authority,
+            [scope]
+          )
+        )(new URL(baseUrl)),
+
+        putFormDataJsonResponse: apiPutFormData(
+          getAuthenticationSupplier(
+            clientId,
+            Secret.value(clientSecret),
+            authority,
+            [scope]
+          )
+        )(new URL(baseUrl)),
+
+        putJsonDataJsonResponse: apiPutJsonData(
           getAuthenticationSupplier(
             clientId,
             Secret.value(clientSecret),

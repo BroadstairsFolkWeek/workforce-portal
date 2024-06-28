@@ -1,11 +1,11 @@
 import { Context, Effect } from "effect";
-import * as Http from "@effect/platform/HttpClient";
+import { HttpClientError } from "@effect/platform";
 
 export class FetchApi extends Context.Tag("FetchApi")<
   FetchApi,
   {
     readonly fetchGet: (
       url: string
-    ) => Effect.Effect<ArrayBuffer, Http.error.HttpClientError>;
+    ) => Effect.Effect<ArrayBuffer, HttpClientError.HttpClientError>;
   }
 >() {}

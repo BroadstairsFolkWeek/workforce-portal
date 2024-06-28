@@ -1,4 +1,3 @@
-import { ParsedFile } from "@anzp/azure-function-multipart/dist/types/parsed-file.type";
 import {
   ApplicationDto,
   ApplicationDtoRunType,
@@ -7,12 +6,6 @@ import {
   ProfileUpdateDtoRunType,
   UpdatableProfile,
 } from "../interfaces/profile";
-import {
-  ACCEPTED_IMAGE_EXTENSIONS,
-  ACCEPTED_IMAGE_MIME_TYPES,
-  ACCEPTED_MIME_TYPE_FILE_EXTENSIONS_MAPPING,
-  isAcceptedMimeType,
-} from "../interfaces/sp-files";
 
 const API_SANITISE_SERVICE_ERROR_TYPE_VAL =
   "sanitise-service-error-5285b9b9-b97e-4585-a0ee-bb4e8e311ea4";
@@ -42,28 +35,6 @@ const removeNullProperties = <T>(obj: T) => {
     if (obj[prop] === null) {
       delete obj[prop];
     }
-  }
-};
-
-// Ensure only approved mimetypes are accepted and provide an appropriate filename extension.
-export const sanitiseImageFromApiClient = (
-  parsedFile: ParsedFile
-): [string, ACCEPTED_IMAGE_EXTENSIONS, Buffer, ACCEPTED_IMAGE_MIME_TYPES] => {
-  if (isAcceptedMimeType(parsedFile.mimeType)) {
-    const acceptedExtension =
-      ACCEPTED_MIME_TYPE_FILE_EXTENSIONS_MAPPING[parsedFile.mimeType];
-
-    return [
-      parsedFile.filename,
-      acceptedExtension,
-      parsedFile.bufferFile,
-      parsedFile.mimeType,
-    ];
-  } else {
-    throw new ApiSantiiseServiceError(
-      "invalid-request",
-      "Non-permitted image format"
-    );
   }
 };
 

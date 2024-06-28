@@ -12,10 +12,6 @@ import {
   updateApplicationListItem,
 } from "./application-sp";
 import {
-  clearApplicationIdForPhotoEffect,
-  setApplicationIdForPhoto,
-} from "./photo-service";
-import {
   getOrCreateProfileForAuthenticatedUser,
   getProfileForAuthenticatedUserEffect,
 } from "./profile-service";
@@ -24,7 +20,10 @@ import { defaultGraphClient } from "../graph/default-graph-client";
 import { ApplicationsRepository } from "../model/applications-repository";
 import { applicationsRepositoryLive } from "../model/applications-repository-graph";
 import { graphListAccessesLive } from "../contexts/graph-list-access-live";
-import { ModelPersistedProfile } from "../model/interfaces/profile";
+import {
+  ModelPersistedProfile,
+  ModelProfile,
+} from "../model/interfaces/profile";
 import {
   ModelApplicationChanges,
   ModelPersistedApplication,
@@ -65,7 +64,7 @@ export function isApplicationServiceError(
 }
 
 export const getApplicationByProfile = (
-  profile: Profile | ModelPersistedProfile
+  profile: Profile | ModelPersistedProfile | ModelProfile
 ) =>
   ApplicationsRepository.pipe(
     Effect.andThen((service) =>
@@ -74,7 +73,7 @@ export const getApplicationByProfile = (
   );
 
 export const getApplicationByProfileAndUpdateIfNeeded = (
-  profile: ModelPersistedProfile
+  profile: ModelProfile
 ) => {
   return getApplicationByProfile(profile).pipe(
     Effect.andThen(updateApplicationFromProfileIfNeededEffect(profile))
@@ -102,7 +101,7 @@ const isValueMissing = (value: any) => {
 
 const determineApplicationStatus = (
   addableApplication: AddableApplication | ModelApplicationChanges,
-  userProfile: Profile | ModelPersistedProfile
+  userProfile: Profile | ModelProfile
 ): AddableApplication["status"] => {
   logTrace(
     "determineApplicationStatus: addableApplication: " +
@@ -156,7 +155,7 @@ const determineApplicationStatus = (
     return "profile-required";
   }
 
-  if (!userProfile.photoIds || userProfile.photoIds.length === 0) {
+  if (!userProfile.photoUrl) {
     return "photo-required";
   }
 
@@ -311,8 +310,8 @@ export const updateApplicationFromProfileIfNeeded = async (
   }
 };
 
-const updateApplicationFromProfileIfNeededEffect =
-  (profile: Profile | ModelPersistedProfile) =>
+export const updateApplicationFromProfileIfNeededEffect =
+  (profile: Profile | ModelProfile) =>
   (existingApplication: ModelPersistedApplication) => {
     const interimUpdatedApplication: ModelApplicationChanges = {
       ...existingApplication,
@@ -361,41 +360,13 @@ const updateApplicationFromProfileIfNeededEffect =
     );
   };
 
-const clearApplicationPhotoLink = (application: ModelPersistedApplication) => {
-  if (application.photoId) {
-    return Effect.logInfo(
-      `Clearing link between ApplicationId ${application.applicationId} and PhotoId ${application.photoId}`
-    ).pipe(
-      Effect.andThen(
-        clearApplicationIdForPhotoEffect(application.photoId).pipe(
-          // No need to return anything.
-          Effect.andThen(Effect.succeedNone)
-        )
-      ),
-      // If the photo cannot be found then we can consider the application-photo link already cleared. Log a warning, though, since
-      // it means we have some inconsistency in our data storage.
-      Effect.catchTag("PhotoNotFound", () =>
-        Effect.logWarning(
-          `PhotoId ${application.photoId} could not be found even though it is referenced by ApplicationId ${application.applicationId}`
-        ).pipe(Effect.andThen(Effect.succeedNone))
-      )
-    );
-  } else {
-    return Effect.succeedNone;
-  }
-};
-
 const deleteApplicationIfVersionMatch =
   (applicationVersion: number) => (application: ModelPersistedApplication) => {
     if (applicationVersion === application.version) {
-      return clearApplicationPhotoLink(application).pipe(
-        Effect.andThen(
-          ApplicationsRepository.pipe(
-            Effect.andThen((service) =>
-              service.modelDeleteApplicationByApplicationId(
-                application.applicationId
-              )
-            )
+      return ApplicationsRepository.pipe(
+        Effect.andThen((service) =>
+          service.modelDeleteApplicationByApplicationId(
+            application.applicationId
           )
         )
       );
@@ -445,13 +416,6 @@ export const deleteApplication = async (
       throw new ApplicationServiceError("version-conflict");
     }
 
-    if (existingApplication.photoId) {
-      const clearAppIdForPhoto = clearApplicationIdForPhotoEffect(
-        existingApplication.photoId
-      ).pipe(Effect.provide(repositoriesLayerLive));
-      await Effect.runPromise(clearAppIdForPhoto);
-    }
-
     await deleteApplicationListItem(existingApplication);
   } else {
     logWarn("deleteApplication: Application not found");
@@ -473,35 +437,11 @@ export const submitApplication = async (
         application.status
     );
     if (application.status === "ready-to-submit") {
-      const profilePhotoId = profileAndApplication.profile.photoIds[0];
-      const currentApplicationPhotoId = application.photoId;
-
       const updatedApplication: Application = {
         ...application,
         status: "submitted",
         version: application.version + 1,
       };
-
-      if (profilePhotoId !== currentApplicationPhotoId) {
-        updatedApplication.photoId = profilePhotoId;
-        await setApplicationIdForPhoto(
-          profilePhotoId,
-          application.applicationId
-        );
-        if (currentApplicationPhotoId) {
-          const clearApplicationIdForPhotoProgram =
-            clearApplicationIdForPhotoEffect(currentApplicationPhotoId).pipe(
-              // If the photo cannot be found then we can consider the application-photo link already cleared.
-              Effect.catchTag("PhotoNotFound", () => Effect.succeedNone)
-            );
-
-          await Effect.runPromise(
-            clearApplicationIdForPhotoProgram.pipe(
-              Effect.provide(repositoriesLayerLive)
-            )
-          );
-        }
-      }
 
       logTrace(
         "submitApplication: Updating application to submitted status. Version: " +

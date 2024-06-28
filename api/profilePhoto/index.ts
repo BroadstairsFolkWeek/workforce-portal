@@ -3,25 +3,16 @@ import { Effect, LogLevel, Logger } from "effect";
 import { Schema as S } from "@effect/schema";
 
 import { getUserInfo, UserInfo } from "@aaronpowell/static-web-apps-api-auth";
-import parseMultipartFormData from "@anzp/azure-function-multipart";
 import {
   createLoggerLayer,
-  logError,
   logTrace,
   logWarn,
   setLoggerFromContext,
 } from "../utilties/logging";
 import {
-  isApiSanitiseServiceError,
-  sanitiseImageFromApiClient,
-} from "../services/api-sanitise-service";
-import {
-  deleteProfilePicture,
   getProfilePicture,
-  isProfileServiceError,
   setProfilePicture,
 } from "../services/profile-service";
-import { isUserServiceError } from "../services/user-service";
 import { ApiGetPhotoRequestQuery } from "../api/profile";
 import { repositoriesLayerLive } from "../contexts/repositories-live";
 
@@ -45,93 +36,45 @@ const handlePostProfilePhoto = async function (
   req: HttpRequest,
   userInfo: UserInfo
 ) {
-  const { files } = await parseMultipartFormData(req);
-  if (files.length === 0) {
-    logWarn("profilePhoto: No files included in request");
+  const photoContent = req.bufferBody;
+  if (!photoContent) {
+    logWarn("profilePhoto: No file content included in request");
     return {
       status: 400,
       body: "No profile image uploaded",
     };
   }
 
-  const imageFile = files[0];
-  try {
-    const [, fileExtension, fileBuffer] = sanitiseImageFromApiClient(imageFile);
-
-    const updatedProfile = await setProfilePicture(
-      userInfo.userId!,
-      fileExtension,
-      fileBuffer
-    );
-
+  const contentType = req.headers["content-type"];
+  if (!contentType) {
+    logWarn("profilePhoto: No content type included in request");
     return {
-      status: 200,
-      body: updatedProfile,
+      status: 400,
+      body: "No content type included in request",
     };
-  } catch (err) {
-    if (isApiSanitiseServiceError(err) && err.error === "invalid-request") {
-      logWarn(
-        "profilePhoto: Invalid MIME-type used for profile image: " +
-          imageFile.mimeType
-      );
-      return {
-        status: 400,
-        body: "Unsupported image file type",
-      };
-    } else {
-      logError("profilePhoto: Unknown error: " + err);
-      return {
-        status: 500,
-        body: "Unknown error",
-      };
-    }
   }
-};
 
-const handleDeleteProfilePhoto = async function (userInfo: UserInfo) {
-  try {
-    const result = await deleteProfilePicture(userInfo.userId!);
-    return {
-      status: 200,
-      body: result,
-    };
-  } catch (err) {
-    if (isProfileServiceError(err)) {
-      if (err.error === "missing-user-profile") {
-        logTrace(`profilePhoto: User profile does not exist.`);
-        return {
-          status: 404,
-          body: "Cannot delete profile picture. User profile does not exist.",
-        };
-      } else {
-        logTrace(`profilePhoto: Unknown user service error.`);
-        return {
-          status: 500,
-          body: "Unknown user service error.",
-        };
-      }
-    } else if (isUserServiceError(err)) {
-      if (err.error === "unauthenticated") {
-        logTrace(`profilePhoto: User is not authenticated.`);
-        return {
-          status: 401,
-          body: "Cannot alter profile photo when not authenticated.",
-        };
-      } else {
-        logTrace(`profilePhoto: Unknown user service error.`);
-        return {
-          status: 500,
-          body: "Unknown user service error.",
-        };
-      }
-    } else {
-      logTrace(`profilePhoto: Unknown service error.`);
-      return {
-        status: 500,
-        body: "Unknown service error.",
-      };
-    }
-  }
+  const setProfilePictureProgram = setProfilePicture(
+    userInfo.userId!,
+    contentType,
+    photoContent
+  ).pipe(
+    Effect.andThen((updatedProfile) =>
+      Effect.succeed({
+        status: 200,
+        body: updatedProfile,
+      })
+    ),
+    Effect.catchTag("ProfileNotFound", () =>
+      Effect.succeed({
+        status: 404,
+      })
+    )
+  );
+
+  return await Effect.runPromise(
+    setProfilePictureProgram.pipe(Effect.provide(repositoriesLayerLive))
+  );
 };
 
 const httpTrigger: AzureFunction = async function (
@@ -141,16 +84,12 @@ const httpTrigger: AzureFunction = async function (
   setLoggerFromContext(context);
   logTrace("profilePhoto: entry. Method: " + req.method);
 
-  if (
-    req.method !== "GET" &&
-    req.method !== "POST" &&
-    req.method !== "DELETE"
-  ) {
+  if (req.method !== "GET" && req.method !== "POST") {
     logTrace(`profilePhoto: Invalid HTTP method: ${req.method}`);
     context.res = {
       status: 405,
       headers: {
-        Allow: "GET, POST, DELETE",
+        Allow: "GET, POST",
       },
     };
     return;
@@ -189,11 +128,7 @@ const httpTrigger: AzureFunction = async function (
         `profilePhoto: User is authenticated. User ID: ${userInfo.userId}/${userInfo.identityProvider}`
       );
 
-      if (req.method === "POST") {
-        context.res = await handlePostProfilePhoto(req, userInfo);
-      } else {
-        context.res = await handleDeleteProfilePhoto(userInfo);
-      }
+      context.res = await handlePostProfilePhoto(req, userInfo);
     } else {
       logTrace(`profilePhoto: User is not authenticated.`);
       context.res = {

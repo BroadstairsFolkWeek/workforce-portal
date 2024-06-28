@@ -11,7 +11,6 @@ import {
 } from "@fluentui/react";
 
 import { useUserProfile } from "./contexts/UserProfileContext";
-import { useUserProfilePhotos } from "./contexts/UserProfilePhotosContext";
 
 import hoodenHorse from "../images/hoodenHorse.jpg";
 
@@ -33,17 +32,16 @@ const contextMenuStyles: IStyleFunctionOrObject<
 const ProfileControl: React.FC = () => {
   const navigate = useNavigate();
   const { loaded, userProfile } = useUserProfile();
-  const { profilePhotoDataSrc } = useUserProfilePhotos();
 
   const profileImage = useMemo(() => {
     return (
       <img
         alt="Profile"
         className="h-10"
-        src={profilePhotoDataSrc ? profilePhotoDataSrc : hoodenHorse}
+        src={userProfile?.photoUrl ? userProfile.photoUrl : hoodenHorse}
       />
     );
-  }, [profilePhotoDataSrc]);
+  }, [userProfile]);
 
   const menuProps = useMemo<IContextualMenuProps>(
     () => ({

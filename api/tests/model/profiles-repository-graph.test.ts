@@ -40,6 +40,7 @@ const wfGetProfileResponse = [
     profileId: "ProfileId",
     photoUrl: "PHOTO_URL",
     version: 2,
+    dbId: 1,
   },
 ];
 
@@ -98,6 +99,8 @@ const mockLayers = Layer.merge(
   }),
   Layer.succeed(WfApiClient, {
     getJson: mockGetJson,
+    putFormDataJsonResponse: () => () => Effect.die("Not implemented"),
+    putJsonDataJsonResponse: () => () => Effect.die("Not implemented"),
   })
 );
 
@@ -135,6 +138,7 @@ test("modelGetProfileByUserId returns a ModelProfile", () => {
     profileId: ModelProfileId.make("ProfileId"),
     photoUrl: "PHOTO_URL",
     version: 2,
+    dbId: 1,
   };
 
   const program = ProfilesRepository.pipe(
