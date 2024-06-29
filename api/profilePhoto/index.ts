@@ -64,11 +64,6 @@ const handlePostProfilePhoto = async function (
         status: 200,
         body: updatedProfile,
       })
-    ),
-    Effect.catchTag("ProfileNotFound", () =>
-      Effect.succeed({
-        status: 404,
-      })
     )
   );
 
