@@ -1,81 +1,76 @@
-import { getUserInfo } from "@aaronpowell/static-web-apps-api-auth";
+import { Effect, LogLevel, Logger, Option } from "effect";
+import { Schema as S } from "@effect/schema";
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
-import { Profile } from "../interfaces/profile";
-import { sanitiseProfileUpdateFromApiClient } from "../services/api-sanitise-service";
 import {
-  isProfileServiceError,
-  updateUserProfile,
+  getOrCreateProfileForAuthenticatedUserEffect,
+  updateUserProfileEffect,
 } from "../services/profile-service";
-import {
-  logError,
-  logInfo,
-  logTrace,
-  setLoggerFromContext,
-} from "../utilties/logging";
+import { createLoggerLayer } from "../utilties/logging";
+import { getAuthenticatedUserId } from "../functions/authenticated-user";
+import { ApiProfileUpdateRequest } from "../api/profile";
+import { repositoriesLayerLive } from "../contexts/repositories-live";
 
 const httpTrigger: AzureFunction = async function (
   context: Context,
   req: HttpRequest
 ): Promise<void> {
-  setLoggerFromContext(context);
-  logTrace("saveProfile: entry");
-
-  const userInfo = getUserInfo(req);
-  if (userInfo) {
-    logTrace(
-      `saveProfile: User is authenticated. User ID: ${userInfo.userId}/${userInfo.identityProvider}`
+  const updateProfileProgram = Effect.logTrace("updateProfile: entry")
+    .pipe(
+      Effect.andThen(getAuthenticatedUserId(req)),
+      Effect.andThen((userId) =>
+        S.decodeUnknown(ApiProfileUpdateRequest)(req.body).pipe(
+          Effect.andThen((updateRequest) =>
+            updateUserProfileEffect(
+              updateRequest.updates,
+              userId,
+              updateRequest.version
+            )
+          ),
+          Effect.andThen((body) => ({
+            status: 200 as const,
+            body,
+          })),
+          Effect.catchTag("ProfileVersionMismatch", () =>
+            getOrCreateProfileForAuthenticatedUserEffect(userId).pipe(
+              Effect.andThen((profileWithOptionalApplication) =>
+                Option.match({
+                  onSome: (application) =>
+                    Effect.succeed({
+                      profile: profileWithOptionalApplication.profile,
+                      application: application,
+                    }),
+                  onNone: () =>
+                    Effect.succeed({
+                      profile: profileWithOptionalApplication.profile,
+                    }),
+                })(profileWithOptionalApplication.application)
+              ),
+              Effect.andThen((body) => ({
+                status: 409 as const,
+                body,
+              }))
+            )
+          )
+        )
+      )
+    )
+    .pipe(
+      Effect.catchTags({
+        ParseError: () => Effect.succeed({ status: 400 as const }),
+        ProfileNotFound: () => Effect.succeed({ status: 404 as const }),
+        UserNotAuthenticated: () => Effect.succeed({ status: 401 as const }),
+      })
     );
 
-    const updatedUserProfile = sanitiseProfileUpdateFromApiClient(req.body);
+  const logLayer = createLoggerLayer(context);
 
-    try {
-      const savedProfile = await updateUserProfile(
-        updatedUserProfile,
-        userInfo.userId!
-      );
-      context.res = { status: 200, body: savedProfile };
-    } catch (err) {
-      if (isProfileServiceError(err)) {
-        if (err.error === "missing-user-profile") {
-          logError(
-            `saveProfile: User profile does not exist for authenticated user. User ID: ${userInfo.userId}/${userInfo.identityProvider}`
-          );
-          context.res = {
-            status: 404,
-            body: "User Profile does not exist, cannot update profile.",
-          };
-        } else if (err.error === "version-conflict") {
-          const latestUserProfile: Profile = err.arg1 as Profile;
-          logInfo(
-            `saveProfile: Version conflict: Attempted to make changes to version ${updatedUserProfile.version} when version ${latestUserProfile.version} already exists.`
-          );
-          context.res = {
-            status: 409,
-            body: latestUserProfile,
-          };
-        } else {
-          logError(
-            `saveProfile: Unrecognised user service error: ${
-              err.error
-            } - ${err.arg1?.toString()}`
-          );
-          context.res = {
-            status: 500,
-            body: "Unknown user service error",
-          };
-        }
-      } else {
-        logError(`saveProfile: Unknown error: ${err}`);
-        throw err;
-      }
-    }
-  } else {
-    logTrace(`saveProfile: User is not authenticated.`);
-    context.res = {
-      status: 401,
-      body: "Cannot update user profile when not authenticated.",
-    };
-  }
+  context.res = await Effect.runPromise(
+    updateProfileProgram.pipe(
+      Effect.provide(repositoriesLayerLive),
+      Logger.withMinimumLogLevel(LogLevel.Debug),
+      Effect.provide(logLayer)
+    )
+  );
 };
 
 export default httpTrigger;

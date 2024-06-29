@@ -52,6 +52,11 @@ export const ModelProfile = S.Struct({
   dbId: S.Number,
 });
 
+export const ModelProfileUpdates = ModelProfile.pipe(
+  S.omit("profileId", "dbId", "photoUrl", "photoIds", "version"),
+  S.partial()
+);
+
 export interface ModelAddableProfile
   extends S.Schema.Type<typeof ModelAddableProfile> {}
 
@@ -65,3 +70,5 @@ export interface ModelEncodedPersistedProfile
   extends S.Schema.Encoded<typeof ModelPersistedProfile> {}
 
 export interface ModelProfile extends S.Schema.Type<typeof ModelProfile> {}
+export interface ModelProfileUpdates
+  extends S.Schema.Type<typeof ModelProfileUpdates> {}

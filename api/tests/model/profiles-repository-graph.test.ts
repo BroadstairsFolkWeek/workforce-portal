@@ -99,6 +99,7 @@ const mockLayers = Layer.merge(
     getJson: mockGetJson,
     putFormDataJsonResponse: () => () => Effect.die("Not implemented"),
     putJsonDataJsonResponse: () => () => Effect.die("Not implemented"),
+    patchJsonDataJsonResponse: () => () => Effect.die("Not implemented"),
   })
 );
 

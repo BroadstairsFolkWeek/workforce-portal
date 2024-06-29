@@ -3,10 +3,15 @@ import {
   ModelAddableProfile,
   ModelPersistedProfile,
   ModelProfile,
+  ModelProfileUpdates,
 } from "./interfaces/profile";
 
 export class ProfileNotFound {
   readonly _tag = "ProfileNotFound";
+}
+
+export class ProfileVersionMismatch {
+  readonly _tag = "ProfileVersionMismatch";
 }
 
 export class ProfilesRepository extends Context.Tag("ProfilesRepository")<
@@ -15,6 +20,12 @@ export class ProfilesRepository extends Context.Tag("ProfilesRepository")<
     readonly modelGetProfileByUserId: (
       userId: string
     ) => Effect.Effect<ModelProfile, ProfileNotFound>;
+
+    readonly modelUpdateProfileByUserId: (
+      userId: string,
+      version: number,
+      updates: ModelProfileUpdates
+    ) => Effect.Effect<ModelProfile, ProfileNotFound | ProfileVersionMismatch>;
 
     readonly modelCreateProfile: (
       addableProfile: ModelAddableProfile

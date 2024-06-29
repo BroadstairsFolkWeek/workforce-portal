@@ -90,6 +90,25 @@ const apiPutFormData =
       )
     );
 
+const apiPatchJsonData =
+  (authenticationSupplier: AuthenticationSupplier) =>
+  (baseUrl: URL) =>
+  (path: string, search?: string) =>
+  (data: unknown) =>
+    authenticationSupplier().pipe(
+      Effect.andThen((authenticationResult) =>
+        HttpClientRequest.patch(generateUrl(baseUrl)(path, search), {
+          headers: {
+            Authorization: `Bearer ${authenticationResult.accessToken}`,
+          },
+        }).pipe(
+          HttpClientRequest.jsonBody(data),
+          Effect.andThen(HttpClient.fetchOk),
+          HttpClientResponse.json
+        )
+      )
+    );
+
 const apiPutJsonData =
   (authenticationSupplier: AuthenticationSupplier) =>
   (baseUrl: URL) =>
@@ -130,6 +149,15 @@ export const wfApiClientLive = Layer.effect(
         )(new URL(baseUrl)),
 
         putFormDataJsonResponse: apiPutFormData(
+          getAuthenticationSupplier(
+            clientId,
+            Secret.value(clientSecret),
+            authority,
+            [scope]
+          )
+        )(new URL(baseUrl)),
+
+        patchJsonDataJsonResponse: apiPatchJsonData(
           getAuthenticationSupplier(
             clientId,
             Secret.value(clientSecret),

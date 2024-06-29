@@ -2,10 +2,6 @@ import {
   ApplicationDto,
   ApplicationDtoRunType,
 } from "../interfaces/application";
-import {
-  ProfileUpdateDtoRunType,
-  UpdatableProfile,
-} from "../interfaces/profile";
 
 const API_SANITISE_SERVICE_ERROR_TYPE_VAL =
   "sanitise-service-error-5285b9b9-b97e-4585-a0ee-bb4e8e311ea4";
@@ -83,21 +79,4 @@ export const sanitiseApplicationFromApiClient = (
   };
 
   return sanitisedApplicationDto;
-};
-
-export const sanitiseProfileUpdateFromApiClient = (
-  maybeUserProfileUpdate: any
-): UpdatableProfile => {
-  const userProfileDto = ProfileUpdateDtoRunType.check(maybeUserProfileUpdate);
-
-  const sanitisedUserLogin: UpdatableProfile = {
-    displayName: userProfileDto.displayName,
-    givenName: userProfileDto.givenName,
-    surname: userProfileDto.surname,
-    telephone: userProfileDto.telephone,
-    address: userProfileDto.address,
-    version: userProfileDto.version,
-  };
-
-  return sanitisedUserLogin;
 };

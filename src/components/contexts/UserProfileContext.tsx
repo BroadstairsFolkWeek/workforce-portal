@@ -12,6 +12,11 @@ export type UserProfileUpdate = Pick<
   "displayName" | "givenName" | "surname" | "telephone" | "address"
 >;
 
+interface UpdateUserProfileRequestBody {
+  version: number;
+  updates: UserProfileUpdate;
+}
+
 export type IUserProfileContext = {
   loaded: boolean;
   userProfile: UserProfile | null;
@@ -66,21 +71,18 @@ const UserProfileContextProvider = ({
     async (updates: UserProfileUpdate) => {
       try {
         if (userProfile) {
-          const updatedProfile: UserProfile = {
-            ...userProfile,
-            ...updates,
+          const updateProfileRequestBody: UpdateUserProfileRequestBody = {
+            version: userProfile.version,
+            updates,
           };
           const saveResponse = await fetch("/api/updateProfile", {
             method: "POST",
-            body: JSON.stringify(updatedProfile),
+            body: JSON.stringify(updateProfileRequestBody),
           });
 
           if (saveResponse.status === 200 || saveResponse.status === 409) {
-            const profileAndApplication = await saveResponse.json();
-            setUserProfile(profileAndApplication.profile);
-            if (profileAndApplication.application) {
-              setCurrentApplication(profileAndApplication.application);
-            }
+            const profile = await saveResponse.json();
+            setUserProfile(profile);
           }
 
           // Return the status code as a way for callers to detect different types of errors.

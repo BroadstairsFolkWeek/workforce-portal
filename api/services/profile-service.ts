@@ -10,11 +10,10 @@ import { logTrace } from "../utilties/logging";
 import {
   getApplicationByProfile,
   getApplicationByProfileAndUpdateIfNeeded,
-  updateApplicationFromProfileIfNeeded,
   updateApplicationFromProfileIfNeededEffect,
 } from "./application-service";
 import { photoIdFromEncodedPhotoId } from "./photo-service";
-import { deleteProfileListItem, updateProfileListItem } from "./profile-sp";
+import { deleteProfileListItem } from "./profile-sp";
 import {
   createUserLoginEffect,
   createUserLoginForGraphUser,
@@ -229,51 +228,25 @@ export const getOrCreateProfileForAuthenticatedUser = async (
   return await Effect.runPromise(runnable);
 };
 
-export const updateUserProfile = async (
-  updatableProfile: UpdatableProfile,
-  userId: string
-): Promise<ProfileWithCurrentApplication> => {
-  // Retrieve the existing user profile
-  const existingProfileAndApplication =
-    await getOrCreateProfileForAuthenticatedUser(userId);
-  const existingProfile = existingProfileAndApplication?.profile;
+interface ProfileUpdates
+  extends Readonly<Omit<UpdatableProfile, "version" | "displayName">> {
+  displayName?: string | undefined;
+}
 
-  if (existingProfile) {
-    // Update the user's profile if the version numbers match.
-    if (existingProfile.version === updatableProfile.version) {
-      const updatedProfile: Profile = {
-        ...existingProfile,
-        ...updatableProfile,
-        version: existingProfile.version + 1,
-      };
-
-      const updatedUserProfile = await updateProfileListItem(updatedProfile);
-
-      const existingApplication = existingProfileAndApplication?.application;
-      if (existingApplication) {
-        const updateApplication = await updateApplicationFromProfileIfNeeded(
-          existingApplication,
-          updatedUserProfile
-        );
-
-        return {
-          profile: updatedUserProfile,
-          application: updateApplication,
-        };
-      } else {
-        return {
-          profile: updatedUserProfile,
-        };
-      }
-    } else {
-      // The profile being saved has a different version number to the existing profile. The user may
-      // have saved the profile from another device.
-      throw new ProfileServiceError("version-conflict", existingProfile);
-    }
-  } else {
-    throw new ProfileServiceError("missing-user-profile");
-  }
-};
+export const updateUserProfileEffect = (
+  updatableProfile: ProfileUpdates,
+  userId: string,
+  version: number
+) =>
+  ProfilesRepository.pipe(
+    Effect.andThen((profilesRepository) =>
+      profilesRepository.modelUpdateProfileByUserId(
+        userId,
+        version,
+        updatableProfile
+      )
+    )
+  );
 
 export const getProfilePicture = (encodedPhotoId: string) =>
   PhotosRepository.pipe(

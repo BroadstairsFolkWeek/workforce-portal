@@ -1,12 +1,17 @@
 import { Effect, Layer } from "effect";
 import { Schema } from "@effect/schema";
 
-import { ProfileNotFound, ProfilesRepository } from "./profiles-repository";
+import {
+  ProfileNotFound,
+  ProfileVersionMismatch,
+  ProfilesRepository,
+} from "./profiles-repository";
 import { ProfilesGraphListAccess } from "./graph/profiles-graph-list-access";
 import {
   ModelAddableProfile,
   ModelPersistedProfile,
   ModelProfile,
+  ModelProfileUpdates,
 } from "./interfaces/profile";
 import {
   PersistedGraphListItem,
@@ -33,16 +38,54 @@ const modelGetProfileByUserId = (userId: string) =>
     ),
     Effect.andThen(apiSingResponseJsonToProfile)
   ).pipe(
-    Effect.catchTag("RequestError", (e) =>
-      Effect.die("Failed to get profile by user id: " + e)
+    Effect.catchTags({
+      RequestError: (e) => Effect.die("Failed to get profile by user id: " + e),
+      ResponseError: (e) => {
+        switch (e.response.status) {
+          case 404:
+            return Effect.fail(new ProfileNotFound());
+          default:
+            return Effect.die("Failed to get profile by user id: " + e);
+        }
+      },
+      // Parse errors of data from the WF API are considered unrecoverable.
+      ParseError: (e) => Effect.die(e),
+    })
+  );
+
+const modelUpdateProfileByUserId = (
+  userId: string,
+  version: number,
+  updates: ModelProfileUpdates
+) =>
+  WfApiClient.pipe(
+    Effect.andThen((apiClient) =>
+      apiClient.patchJsonDataJsonResponse(`/api/users/${userId}/profile`)({
+        version,
+        updates,
+      })
     ),
-    Effect.catchTag("ResponseError", (e) =>
-      e.response.status === 404
-        ? Effect.fail(new ProfileNotFound())
-        : Effect.die("Failed to get profile by user id: " + e)
-    ),
-    // Parse errors of data from the WF API are considered unrecoverable.
-    Effect.catchTag("ParseError", (e) => Effect.die(e))
+    Effect.andThen(apiSingResponseJsonToProfile)
+  ).pipe(
+    Effect.catchTags({
+      RequestError: (e) => Effect.die("Failed to get profile by user id: " + e),
+
+      ResponseError: (e) => {
+        switch (e.response.status) {
+          case 404:
+            return Effect.fail(new ProfileNotFound());
+          case 409:
+            return Effect.fail(new ProfileVersionMismatch());
+          default:
+            return Effect.die("Failed to get profile by user id: " + e);
+        }
+      },
+
+      HttpBodyError: (e) => Effect.die("Failed to set profile photo: " + e),
+
+      // Parse errors of data from the WF API are considered unrecoverable.
+      ParseError: (e) => Effect.die(e),
+    })
   );
 
 const modelCreateProfile = (addableProfile: ModelAddableProfile) => {
@@ -97,6 +140,15 @@ export const profilesRepositoryLive = Layer.effect(
     Effect.andThen(([service, wfApiClient]) => ({
       modelGetProfileByUserId: (userId: string) =>
         modelGetProfileByUserId(userId).pipe(
+          Effect.provideService(WfApiClient, wfApiClient)
+        ),
+
+      modelUpdateProfileByUserId: (
+        userId: string,
+        version: number,
+        updates: ModelProfileUpdates
+      ) =>
+        modelUpdateProfileByUserId(userId, version, updates).pipe(
           Effect.provideService(WfApiClient, wfApiClient)
         ),
 
