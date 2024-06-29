@@ -7,7 +7,6 @@ import {
   ModelAddableProfile,
   ModelPersistedProfile,
   ModelProfile,
-  ModelProfileId,
 } from "./interfaces/profile";
 import {
   PersistedGraphListItem,
@@ -65,13 +64,13 @@ const prepareProfilePhotoData = (fileMimeType: string, fileBuffer: Buffer) => ({
 });
 
 const modelSetProfilePhoto = (
-  profileId: ModelProfileId,
+  userId: string,
   fileMimeType: string,
   fileBuffer: Buffer
 ) => {
   return WfApiClient.pipe(
     Effect.andThen((apiClient) =>
-      apiClient.putJsonDataJsonResponse(`/api/profiles/${profileId}/photo`)(
+      apiClient.putJsonDataJsonResponse(`/api/users/${userId}/profile/photo`)(
         prepareProfilePhotoData(fileMimeType, fileBuffer)
       )
     ),
@@ -107,11 +106,11 @@ export const profilesRepositoryLive = Layer.effect(
         ),
 
       modelSetProfilePhoto: (
-        profileId: ModelProfileId,
+        userId: string,
         fileMimeType: string,
         fileBuffer: Buffer
       ) =>
-        modelSetProfilePhoto(profileId, fileMimeType, fileBuffer).pipe(
+        modelSetProfilePhoto(userId, fileMimeType, fileBuffer).pipe(
           Effect.provideService(WfApiClient, wfApiClient)
         ),
     }))

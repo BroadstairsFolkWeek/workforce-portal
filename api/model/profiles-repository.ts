@@ -3,7 +3,6 @@ import {
   ModelAddableProfile,
   ModelPersistedProfile,
   ModelProfile,
-  ModelProfileId,
 } from "./interfaces/profile";
 
 export class ProfileNotFound {
@@ -22,7 +21,7 @@ export class ProfilesRepository extends Context.Tag("ProfilesRepository")<
     ) => Effect.Effect<ModelPersistedProfile>;
 
     readonly modelSetProfilePhoto: (
-      profileId: ModelProfileId,
+      userId: string,
       fileMimeType: string,
       fileBuffer: Buffer
     ) => Effect.Effect<ModelProfile>;

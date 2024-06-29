@@ -294,16 +294,8 @@ export const setProfilePicture = (
   fileMimeType: string,
   fileBuffer: Buffer
 ) =>
-  getProfileByUserId(userId).pipe(
-    Effect.andThen((profile) =>
-      ProfilesRepository.pipe(
-        Effect.andThen((profilesRepo) =>
-          profilesRepo.modelSetProfilePhoto(
-            profile.profileId,
-            fileMimeType,
-            fileBuffer
-          )
-        )
-      )
+  ProfilesRepository.pipe(
+    Effect.andThen((profilesRepo) =>
+      profilesRepo.modelSetProfilePhoto(userId, fileMimeType, fileBuffer)
     )
   );
