@@ -28,15 +28,17 @@ const graphListItemToProfile = (
   return fieldsToProfile(item.fields);
 };
 
-const apiSingResponseJsonToProfile = (responseJson: unknown) =>
-  Schema.decodeUnknown(ModelProfile)(responseJson);
+const SingleProfileApiResponseSchema = Schema.Struct({
+  data: ModelProfile,
+});
 
 const modelGetProfileByUserId = (userId: string) =>
   WfApiClient.pipe(
     Effect.andThen((apiClient) =>
       apiClient.getJson(`/api/users/${userId}/profile`)
     ),
-    Effect.andThen(apiSingResponseJsonToProfile)
+    Effect.andThen(Schema.decodeUnknown(SingleProfileApiResponseSchema)),
+    Effect.andThen((response) => response.data)
   ).pipe(
     Effect.catchTags({
       RequestError: (e) => Effect.die("Failed to get profile by user id: " + e),
@@ -65,7 +67,8 @@ const modelUpdateProfileByUserId = (
         updates,
       })
     ),
-    Effect.andThen(apiSingResponseJsonToProfile)
+    Effect.andThen(Schema.decodeUnknown(SingleProfileApiResponseSchema)),
+    Effect.andThen((response) => response.data)
   ).pipe(
     Effect.catchTags({
       RequestError: (e) => Effect.die("Failed to get profile by user id: " + e),
@@ -117,7 +120,8 @@ const modelSetProfilePhoto = (
         prepareProfilePhotoData(fileMimeType, fileBuffer)
       )
     ),
-    Effect.andThen(apiSingResponseJsonToProfile)
+    Effect.andThen(Schema.decodeUnknown(SingleProfileApiResponseSchema)),
+    Effect.andThen((response) => response.data)
   ).pipe(
     // Parse errors of data from Graph/SharePoint are considered unrecoverable.
     Effect.catchTag("ParseError", (e) => Effect.die(e)),
