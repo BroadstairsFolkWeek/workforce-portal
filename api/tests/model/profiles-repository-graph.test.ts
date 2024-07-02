@@ -30,16 +30,18 @@ const sharepointItemFields = {
 };
 
 const wfGetProfileResponse = {
-  displayName: "DisplayName",
-  givenName: "GivenName",
-  surname: "Surname",
-  email: "Email",
-  telephone: "Telephone",
-  address: "Address",
-  profileId: "ProfileId",
-  photoUrl: "PHOTO_URL",
-  version: 2,
-  dbId: 1,
+  data: {
+    displayName: "DisplayName",
+    givenName: "GivenName",
+    surname: "Surname",
+    email: "Email",
+    telephone: "Telephone",
+    address: "Address",
+    profileId: "ProfileId",
+    photoUrl: "PHOTO_URL",
+    version: 2,
+    dbId: 1,
+  },
 };
 
 const modelAddableItemFields = {
