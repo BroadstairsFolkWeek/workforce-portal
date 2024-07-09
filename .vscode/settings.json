@@ -28,5 +28,8 @@
   "editor.formatOnSave": true,
   "eslint.experimental.useFlatConfig": true,
   "eslint.workingDirectories": [".", "./api"],
-  "eslint.lintTask.enable": true
+  "eslint.lintTask.enable": true,
+  "[bicep]": {
+    "editor.defaultFormatter": "ms-azuretools.vscode-bicep"
+  }
 }

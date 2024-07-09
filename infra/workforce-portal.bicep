@@ -8,7 +8,9 @@ param environmentName string
 param resourceUniqueNameElement string
 
 @description('Common part of the name of the resources to be created')
-var resourceBaseName = environmentName == 'prod' ? 'workforce-portal' : 'workforce-portal-${environmentName}${resourceUniqueNameElement}'
+var resourceBaseName = environmentName == 'prod'
+  ? 'workforce-portal'
+  : 'workforce-portal-${environmentName}${resourceUniqueNameElement}'
 
 @description('Tags to be applied to all resources in this deployment')
 param tags object = {
@@ -16,11 +18,23 @@ param tags object = {
   environment: environmentName
 }
 
+module monitoring 'modules/azure-monitor.bicep' = {
+  name: 'azure-monitor'
+  params: {
+    resourceBaseName: resourceBaseName
+    location: resourceGroup().location
+    tags: tags
+  }
+}
+
 module swa './modules/azure-swa.bicep' = {
   name: 'swa'
   params: {
     resourceBaseName: resourceBaseName
     location: resourceGroup().location
+    appInsightsId: monitoring.outputs.appInsightsId
+    appInsightsConnectionString: monitoring.outputs.appInsightsConnectionString
+    appInsightsInstrumentationKey: monitoring.outputs.appInsightsInstrumentationKey
     tags: tags
   }
 }
