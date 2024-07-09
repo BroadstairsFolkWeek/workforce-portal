@@ -7,9 +7,14 @@ on:
       - "main"
     paths:
       - "infra/**"
-      - ".github/workflows/provision-dev.yaml"
+      - ".github/workflows/provision-dev.yml"
 
   workflow_dispatch:
+
+env:
+  AZURE_RESOURCE_GROUP_NAME: "${{ vars.AZURE_RESOURCE_GROUP_NAME_DEV }}${{ vars.AZURE_RESOURCE_UNIQUE_NAME_ELEMENT_DEV }}"
+  AZURE_RESOURCE_GROUP_LOCATION: "${{ vars.AZURE_RESOURCE_GROUP_LOCATION_DEV }}"
+  AZURE_RESOURCE_UNIQUE_NAME_ELEMENT: "${{ vars.AZURE_RESOURCE_UNIQUE_NAME_ELEMENT_DEV }}"
 
 permissions:
   id-token: write
@@ -17,7 +22,12 @@ permissions:
 
 jobs:
   provision-azure-resources-dev:
+    permissions:
+      id-token: write
+      contents: read
+
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29
@@ -29,17 +39,17 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Ensure resource group exists
+      - name: Create resource group (if needed)
         run: |
-          az group create --resource-group "${{ vars.AZURE_RESOURCE_GROUP_NAME_DEV }}${{ vars.AZURE_RESOURCE_UNIQUE_NAME_ELEMENT_DEV }}" --location "${{ vars.AZURE_RESOURCE_GROUP_LOCATION_DEV }}"
+          az group create --resource-group "${{ env.AZURE_RESOURCE_GROUP_NAME }}" --location "${{ env.AZURE_RESOURCE_GROUP_LOCATION }}"
 
-      - name: Provision SWA resources
+      - name: Provision workforce-portal resources
         uses: azure/arm-deploy@a1361c2c2cd398621955b16ca32e01c65ea340f5
         with:
           scope: resourcegroup
-          resourceGroupName: ${{ vars.AZURE_RESOURCE_GROUP_NAME_DEV }}${{ vars.AZURE_RESOURCE_UNIQUE_NAME_ELEMENT_DEV }}
+          resourceGroupName: ${{ env.AZURE_RESOURCE_GROUP_NAME }}
           deploymentName: ${{ github.run_number }}
           template: ${{ github.workspace }}/infra/workforce-portal.bicep
           parameters: >-
             environmentName=dev
-            resourceUniqueNameElement=${{ vars.AZURE_RESOURCE_UNIQUE_NAME_ELEMENT_DEV }}
+            resourceUniqueNameElement=${{ env.AZURE_RESOURCE_UNIQUE_NAME_ELEMENT }}
