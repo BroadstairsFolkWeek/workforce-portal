@@ -115,7 +115,7 @@ resource staticSite 'Microsoft.Web/staticSites@2022-09-01' = {
       SIGN_UP_SIGN_IN_AUTHORITY: signUpSignInAuthority
 
       WF_API_URL: wfApiUrl
-      WF_API_CLIENT_AUTH_AUTHORIT: wfApiClientAuthAuthority
+      WF_API_CLIENT_AUTH_AUTHORITY: wfApiClientAuthAuthority
       WF_API_CLIENT_AUTH_CLIENT_ID: wfApiClientAuthClientId
       WF_API_CLIENT_AUTH_CLIENT_SECRET: wfApiClientAuthClientSecret
       WF_API_CLIENT_AUTH_SCOPE: wfApiClientAuthScope
