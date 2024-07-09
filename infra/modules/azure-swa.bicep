@@ -76,8 +76,8 @@ resource staticSite 'Microsoft.Web/staticSites@2022-09-01' = {
     }
   }
   sku: {
-    name: 'Free'
-    size: 'Free'
+    name: 'Standard'
+    size: 'Standard'
   }
 
   resource staticSiteSettings 'config' = {
