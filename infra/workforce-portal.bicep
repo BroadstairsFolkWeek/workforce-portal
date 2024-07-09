@@ -7,12 +7,6 @@ param environmentName string
 @maxLength(10)
 param resourceUniqueNameElement string
 
-@description('URL of the GitHub repository containing the source code for the static site')
-param repositoryUrl string
-
-@description('Access token for the GitHub repository')
-param repositoryToken string
-
 @description('Common part of the name of the resources to be created')
 var resourceBaseName = environmentName == 'prod' ? 'workforce-portal' : 'workforce-portal-${environmentName}${resourceUniqueNameElement}'
 
@@ -28,7 +22,5 @@ module swa './modules/azure-swa.bicep' = {
     resourceBaseName: resourceBaseName
     location: resourceGroup().location
     tags: tags
-    repositoryUrl: repositoryUrl
-    repositoryToken: repositoryToken
   }
 }
