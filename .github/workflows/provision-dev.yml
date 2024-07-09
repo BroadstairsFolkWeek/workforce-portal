@@ -16,10 +16,6 @@ env:
   AZURE_RESOURCE_GROUP_LOCATION: "${{ vars.AZURE_RESOURCE_GROUP_LOCATION_DEV }}"
   AZURE_RESOURCE_UNIQUE_NAME_ELEMENT: "${{ vars.AZURE_RESOURCE_UNIQUE_NAME_ELEMENT_DEV }}"
 
-permissions:
-  id-token: write
-  contents: read
-
 jobs:
   provision-azure-resources-dev:
     permissions:
