@@ -9,8 +9,8 @@ on:
       - "**"
       - "!infra/**"
       - "!.github/workflows/**"
-      - ".github/workflows/deploy-dev.yaml"
-      - ".github/workflows/deploy.yaml"
+      - ".github/workflows/deploy-dev.yml"
+      - ".github/workflows/deploy.yml"
       - "!.devcontainer/**"
 
   workflow_dispatch:
