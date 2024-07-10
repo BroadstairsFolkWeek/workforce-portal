@@ -49,7 +49,7 @@ const httpTrigger: AzureFunction = async function (
   context.res = await Effect.runPromise(
     getProfileEffect.pipe(
       Effect.provide(repositoriesLayerLive),
-      Logger.withMinimumLogLevel(LogLevel.Debug),
+      Logger.withMinimumLogLevel(LogLevel.Trace),
       Effect.provide(logLayer)
     )
   );
