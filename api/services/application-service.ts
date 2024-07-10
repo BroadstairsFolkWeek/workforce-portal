@@ -15,7 +15,7 @@ import {
   getOrCreateProfileForAuthenticatedUser,
   getProfileForAuthenticatedUserEffect,
 } from "./profile-service";
-import { Effect } from "effect";
+import { Effect, Option } from "effect";
 import { ApplicationsRepository } from "../model/applications-repository";
 import {
   ModelPersistedProfile,
@@ -169,6 +169,101 @@ const determineApplicationStatus = (
   }
 };
 
+const isApplicationInfoRequired = (
+  addableApplication: AddableApplication | ModelApplicationChanges
+): Option.Option<"info-required"> => {
+  const mandatoryFields: Array<keyof ModelApplicationChanges> = [
+    "emergencyContactName",
+    "emergencyContactTelephone",
+    "ageGroup",
+    "tShirtSize",
+  ];
+  if (
+    mandatoryFields.some((field) =>
+      isPropertyValueMissing(addableApplication, field)
+    )
+  ) {
+    return Option.some("info-required");
+  }
+
+  if (
+    [
+      addableApplication.teamPreference1,
+      addableApplication.teamPreference2,
+      addableApplication.teamPreference3,
+    ].includes("Children's Events")
+  ) {
+    const mandatoryChildrensTeamFields: Array<keyof ModelApplicationChanges> = [
+      "dbsDisclosureNumber",
+      "dbsDisclosureDate",
+    ];
+    if (
+      mandatoryChildrensTeamFields.some((field) =>
+        isPropertyValueMissing(addableApplication, field)
+      )
+    ) {
+      return Option.some("info-required");
+    }
+  }
+
+  if (!addableApplication.acceptedTermsAndConditions) {
+    return Option.some("info-required");
+  }
+
+  return Option.none();
+};
+
+const isProfileRequired = (
+  userProfile: Profile | ModelProfile
+): Option.Option<"profile-required"> => {
+  const mandatoryProfileFields: Array<keyof Profile> = [
+    "displayName",
+    "telephone",
+    "address",
+  ];
+  if (
+    mandatoryProfileFields.some((field) =>
+      isPropertyValueMissing(userProfile, field)
+    )
+  ) {
+    return Option.some("profile-required");
+  }
+
+  return Option.none();
+};
+
+const isPhotoRequired = (
+  userProfile: Profile | ModelProfile
+): Option.Option<"photo-required"> => {
+  if (!userProfile.photoUrl) {
+    return Option.some("photo-required");
+  }
+  return Option.none();
+};
+
+const determineApplicationStatusEffect = (
+  addableApplication: AddableApplication | ModelApplicationChanges,
+  userProfile: Profile | ModelProfile
+) =>
+  Effect.logTrace(
+    "determineApplicationStatusEffect: addableApplication: " +
+      JSON.stringify(addableApplication, null, 2)
+  ).pipe(
+    Effect.andThen(isApplicationInfoRequired(addableApplication)),
+    Effect.catchTag("NoSuchElementException", () =>
+      isProfileRequired(userProfile)
+    ),
+    Effect.catchTag("NoSuchElementException", () =>
+      isPhotoRequired(userProfile)
+    ),
+    Effect.catchTag("NoSuchElementException", () =>
+      addableApplication.status === "submitted" ||
+      addableApplication.status === "complete"
+        ? Effect.succeed(addableApplication.status)
+        : Effect.succeed("ready-to-submit" as const)
+    )
+  );
+
 export const saveApplication = async (
   applicationDto: ApplicationDto,
   userId: string
@@ -259,16 +354,21 @@ export const updateApplicationFromProfileIfNeededEffect =
       telephone: profile.telephone ?? undefined,
     };
 
-    const updatedApplication: ModelApplicationChanges = {
-      ...interimUpdatedApplication,
-      status: determineApplicationStatus(interimUpdatedApplication, profile),
-    };
-
-    return Effect.log(
-      "updateApplicationFromProfile: Determined application status: " +
-        updatedApplication.status
+    return determineApplicationStatusEffect(
+      interimUpdatedApplication,
+      profile
     ).pipe(
-      Effect.andThen(
+      Effect.tap((status) =>
+        Effect.log(
+          "updateApplicationFromProfile: Determined application status: " +
+            status
+        )
+      ),
+      Effect.andThen((status) => ({
+        ...interimUpdatedApplication,
+        status,
+      })),
+      Effect.andThen((updatedApplication) =>
         Effect.if(
           existingApplication.title !== updatedApplication.title ||
             existingApplication.address !== updatedApplication.address ||
