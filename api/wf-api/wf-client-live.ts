@@ -71,6 +71,25 @@ const apiGetJson =
       )
     );
 
+const apiPostJsonData =
+  (authenticationSupplier: AuthenticationSupplier) =>
+  (baseUrl: URL) =>
+  (path: string, search?: string) =>
+  (data: unknown) =>
+    authenticationSupplier().pipe(
+      Effect.andThen((authenticationResult) =>
+        HttpClientRequest.post(generateUrl(baseUrl)(path, search), {
+          headers: {
+            Authorization: `Bearer ${authenticationResult.accessToken}`,
+          },
+        }).pipe(
+          HttpClientRequest.jsonBody(data),
+          Effect.andThen(HttpClient.fetchOk),
+          HttpClientResponse.json
+        )
+      )
+    );
+
 const apiPutFormData =
   (authenticationSupplier: AuthenticationSupplier) =>
   (baseUrl: URL) =>
@@ -85,25 +104,6 @@ const apiPutFormData =
         }).pipe(
           HttpClientRequest.formDataBody(formData),
           HttpClient.fetchOk,
-          HttpClientResponse.json
-        )
-      )
-    );
-
-const apiPatchJsonData =
-  (authenticationSupplier: AuthenticationSupplier) =>
-  (baseUrl: URL) =>
-  (path: string, search?: string) =>
-  (data: unknown) =>
-    authenticationSupplier().pipe(
-      Effect.andThen((authenticationResult) =>
-        HttpClientRequest.patch(generateUrl(baseUrl)(path, search), {
-          headers: {
-            Authorization: `Bearer ${authenticationResult.accessToken}`,
-          },
-        }).pipe(
-          HttpClientRequest.jsonBody(data),
-          Effect.andThen(HttpClient.fetchOk),
           HttpClientResponse.json
         )
       )
@@ -128,6 +128,39 @@ const apiPutJsonData =
       )
     );
 
+const apiPatchJsonData =
+  (authenticationSupplier: AuthenticationSupplier) =>
+  (baseUrl: URL) =>
+  (path: string, search?: string) =>
+  (data: unknown) =>
+    authenticationSupplier().pipe(
+      Effect.andThen((authenticationResult) =>
+        HttpClientRequest.patch(generateUrl(baseUrl)(path, search), {
+          headers: {
+            Authorization: `Bearer ${authenticationResult.accessToken}`,
+          },
+        }).pipe(
+          HttpClientRequest.jsonBody(data),
+          Effect.andThen(HttpClient.fetchOk),
+          HttpClientResponse.json
+        )
+      )
+    );
+
+const apiDeleteJson =
+  (authenticationSupplier: AuthenticationSupplier) =>
+  (baseUrl: URL) =>
+  (path: string, search?: string) =>
+    authenticationSupplier().pipe(
+      Effect.andThen((authenticationResult) =>
+        HttpClientRequest.del(generateUrl(baseUrl)(path, search), {
+          headers: {
+            Authorization: `Bearer ${authenticationResult.accessToken}`,
+          },
+        }).pipe(HttpClient.fetchOk, HttpClientResponse.json)
+      )
+    );
+
 export const wfApiClientLive = Layer.effect(
   WfApiClient,
   Effect.all([
@@ -140,6 +173,15 @@ export const wfApiClientLive = Layer.effect(
     Effect.andThen(([clientId, clientSecret, authority, scope, baseUrl]) =>
       WfApiClient.of({
         getJson: apiGetJson(
+          getAuthenticationSupplier(
+            clientId,
+            Secret.value(clientSecret),
+            authority,
+            [scope]
+          )
+        )(new URL(baseUrl)),
+
+        postJsonDataJsonResponse: apiPostJsonData(
           getAuthenticationSupplier(
             clientId,
             Secret.value(clientSecret),
@@ -167,6 +209,15 @@ export const wfApiClientLive = Layer.effect(
         )(new URL(baseUrl)),
 
         putJsonDataJsonResponse: apiPutJsonData(
+          getAuthenticationSupplier(
+            clientId,
+            Secret.value(clientSecret),
+            authority,
+            [scope]
+          )
+        )(new URL(baseUrl)),
+
+        deleteJson: apiDeleteJson(
           getAuthenticationSupplier(
             clientId,
             Secret.value(clientSecret),

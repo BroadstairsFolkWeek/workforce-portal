@@ -6,27 +6,9 @@ import {
   ProfileVersionMismatch,
   ProfilesRepository,
 } from "./profiles-repository";
-import { ProfilesGraphListAccess } from "./graph/profiles-graph-list-access";
-import {
-  ModelAddableProfile,
-  ModelPersistedProfile,
-  ModelProfile,
-  ModelProfileUpdates,
-} from "./interfaces/profile";
-import {
-  PersistedGraphListItem,
-  PersistedGraphListItemFields,
-} from "./interfaces/graph/graph-items";
+import { ModelProfile, ModelProfileUpdates } from "./interfaces/profile";
 import { WfApiClient } from "../wf-api/wf-client";
-
-const fieldsToProfile = (fields: PersistedGraphListItemFields) =>
-  Schema.decodeUnknown(ModelPersistedProfile)(fields);
-
-const graphListItemToProfile = (
-  item: PersistedGraphListItem<PersistedGraphListItemFields>
-) => {
-  return fieldsToProfile(item.fields);
-};
+import { ModelCoreUserLogin } from "./interfaces/user-login";
 
 const SingleProfileApiResponseSchema = Schema.Struct({
   data: ModelProfile,
@@ -91,16 +73,25 @@ const modelUpdateProfileByUserId = (
     })
   );
 
-const modelCreateProfile = (addableProfile: ModelAddableProfile) => {
-  return ProfilesGraphListAccess.pipe(
-    Effect.andThen((listAccess) =>
-      Schema.encode(ModelAddableProfile)(addableProfile).pipe(
-        Effect.andThen(listAccess.createProfileGraphListItem)
-      )
+const modelCreateProfileForUserLogin = (userLogin: ModelCoreUserLogin) => {
+  return WfApiClient.pipe(
+    Effect.andThen((apiClient) =>
+      apiClient.postJsonDataJsonResponse("/api/users")(userLogin)
     ),
-    Effect.andThen(graphListItemToProfile),
-    // Parse errors of data from Graph/SharePoint are considered unrecoverable.
-    Effect.catchTag("ParseError", (e) => Effect.die(e))
+    Effect.andThen(Schema.decodeUnknown(SingleProfileApiResponseSchema)),
+    Effect.andThen((response) => response.data)
+  ).pipe(
+    Effect.catchTags({
+      RequestError: (e) =>
+        Effect.die("Failed to create profile for user login: " + e),
+      ResponseError: (e) =>
+        Effect.die("Failed to create profile for user login: " + e),
+      HttpBodyError: (e) =>
+        Effect.die("Failed to create profile for user login: " + e),
+
+      // Parse errors of data from the WF API are considered unrecoverable.
+      ParseError: (e) => Effect.die(e),
+    })
   );
 };
 
@@ -138,10 +129,23 @@ const modelSetProfilePhoto = (
   );
 };
 
+const deleteProfileByUserId = (userId: string) => {
+  return WfApiClient.pipe(
+    Effect.andThen((apiClient) => apiClient.deleteJson(`/api/users/${userId}`))
+  ).pipe(
+    Effect.catchTags({
+      RequestError: (e) =>
+        Effect.die("Failed to delete profile for user login: " + e),
+      ResponseError: (e) =>
+        Effect.die("Failed to delete profile for user login: " + e),
+    })
+  );
+};
+
 export const profilesRepositoryLive = Layer.effect(
   ProfilesRepository,
-  Effect.all([ProfilesGraphListAccess, WfApiClient]).pipe(
-    Effect.andThen(([service, wfApiClient]) => ({
+  Effect.all([WfApiClient]).pipe(
+    Effect.andThen(([wfApiClient]) => ({
       modelGetProfileByUserId: (userId: string) =>
         modelGetProfileByUserId(userId).pipe(
           Effect.provideService(WfApiClient, wfApiClient)
@@ -156,9 +160,9 @@ export const profilesRepositoryLive = Layer.effect(
           Effect.provideService(WfApiClient, wfApiClient)
         ),
 
-      modelCreateProfile: (addableProfile: ModelAddableProfile) =>
-        modelCreateProfile(addableProfile).pipe(
-          Effect.provideService(ProfilesGraphListAccess, service)
+      modelCreateProfileForUserLogin: (userLogin: ModelCoreUserLogin) =>
+        modelCreateProfileForUserLogin(userLogin).pipe(
+          Effect.provideService(WfApiClient, wfApiClient)
         ),
 
       modelSetProfilePhoto: (
@@ -167,6 +171,11 @@ export const profilesRepositoryLive = Layer.effect(
         fileBuffer: Buffer
       ) =>
         modelSetProfilePhoto(userId, fileMimeType, fileBuffer).pipe(
+          Effect.provideService(WfApiClient, wfApiClient)
+        ),
+
+      modelDeleteProfileByUserId: (userId: string) =>
+        deleteProfileByUserId(userId).pipe(
           Effect.provideService(WfApiClient, wfApiClient)
         ),
     }))

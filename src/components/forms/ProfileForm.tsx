@@ -12,13 +12,17 @@ import { Formik } from "formik";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ErrorRenderer } from "../../interfaces/error-renderer";
-import {
-  UserProfileUpdate,
-  useUserProfile,
-} from "../contexts/UserProfileContext";
 import { SaveProfileConflictError } from "../errors/user-profile-errors";
 import PageLayout from "../PageLayout";
 import { TextArea, TextInput } from "./Fields";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  saveProfile,
+  selectProfile,
+} from "../../features/profile/profile-slice";
+import { ProfileUpdate } from "../../interfaces/profile";
+import { AppDispatch } from "../../store";
+import { Either } from "effect";
 
 export interface ProfileFormProps {}
 
@@ -38,11 +42,13 @@ const modalProps = {
 
 const ProfileForm: React.FC<ProfileFormProps> = () => {
   const navigate = useNavigate();
-  const { userProfile, saveUserProfile } = useUserProfile();
   const [error, setError] = useState<ErrorRenderer | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
-  const initialValues: UserProfileUpdate = useMemo(() => {
+  const dispatch: AppDispatch = useDispatch();
+  const userProfile = useSelector(selectProfile);
+
+  const initialValues: ProfileUpdate = useMemo(() => {
     if (userProfile) {
       return {
         displayName: userProfile.displayName ?? "",
@@ -144,26 +150,43 @@ const ProfileForm: React.FC<ProfileFormProps> = () => {
         initialValues={initialValues}
         enableReinitialize
         onSubmit={async (values) => {
-          const saveStatus = await saveUserProfile(values);
-
-          if (saveStatus !== 200) {
-            switch (saveStatus) {
-              case 409:
-                setError(new SaveProfileConflictError());
-                break;
-
-              default:
-                <div className="p-4 bg-red-100 rounded-lg overflow-hidden">
-                  <p>
-                    There was a problem updating your profile. Please try again
-                    later.
-                  </p>
-                </div>;
-                break;
-            }
-          } else {
-            navigate("/");
-          }
+          await dispatch(
+            saveProfile({ version: userProfile.version, updates: values })
+          )
+            .unwrap()
+            .then((resultEither) => {
+              if (Either.isLeft(resultEither)) {
+                const error = resultEither.left;
+                if (error instanceof SaveProfileConflictError) {
+                  setError(new SaveProfileConflictError());
+                } else {
+                  setError({
+                    render: () => (
+                      <div className="p-4 bg-red-100 rounded-lg overflow-hidden">
+                        <p>
+                          There was a problem updating your profile. Please try
+                          again later.
+                        </p>
+                      </div>
+                    ),
+                  });
+                }
+              } else {
+                navigate("/");
+              }
+            })
+            .catch(() => {
+              setError({
+                render: () => (
+                  <div className="p-4 bg-red-100 rounded-lg overflow-hidden">
+                    <p>
+                      There was a problem updating your profile. Please try
+                      again later.
+                    </p>
+                  </div>
+                ),
+              });
+            });
         }}
       >
         {(formik) => {

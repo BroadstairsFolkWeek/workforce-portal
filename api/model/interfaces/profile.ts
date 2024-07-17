@@ -20,14 +20,6 @@ const ModelProfileMetadata = S.Struct({
   profileId: S.propertySignature(ModelProfileId).pipe(S.fromKey("ProfileId")),
 });
 
-const ModelProfilePersistanceData = S.Struct({
-  dbId: S.propertySignature(S.NumberFromString).pipe(S.fromKey("id")),
-  createdDate: S.propertySignature(S.DateFromString).pipe(S.fromKey("Created")),
-  modifiedDate: S.propertySignature(S.DateFromString).pipe(
-    S.fromKey("Modified")
-  ),
-});
-
 export const ModelAddableProfile = S.extend(
   ModelCoreProfile,
   ModelProfileMetadata
@@ -35,8 +27,13 @@ export const ModelAddableProfile = S.extend(
 
 export const ModelPersistedProfile = S.extend(
   ModelCoreProfile,
-  S.extend(ModelProfileMetadata, ModelProfilePersistanceData)
+  ModelProfileMetadata
 );
+
+const ModelProfileMeta = S.Struct({
+  photoRequired: S.Boolean,
+  profileInformationRequired: S.Boolean,
+});
 
 export const ModelProfile = S.Struct({
   profileId: ModelProfileId,
@@ -50,6 +47,7 @@ export const ModelProfile = S.Struct({
   photoUrl: S.optional(S.String),
   photoIds: S.optional(S.Array(S.String)),
   dbId: S.Number,
+  meta: ModelProfileMeta,
 });
 
 export const ModelProfileUpdates = ModelProfile.pipe(

@@ -1,9 +1,11 @@
 import { Effect, LogLevel, Logger, Option } from "effect";
+import { Schema as S } from "@effect/schema";
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import { getOrCreateProfileForAuthenticatedUserEffect } from "../services/profile-service";
 import { createLoggerLayer } from "../utilties/logging";
 import { repositoriesLayerLive } from "../contexts/repositories-live";
 import { getAuthenticatedUserId } from "../functions/authenticated-user";
+import { GetProfileResponse } from "../api/profile";
 
 const httpTrigger: AzureFunction = async function (
   context: Context,
@@ -20,13 +22,17 @@ const httpTrigger: AzureFunction = async function (
             Effect.succeed({
               profile: profileWithOptionalApplication.profile,
               application: application,
+              forms: profileWithOptionalApplication.forms,
             }),
           onNone: () =>
             Effect.succeed({
               profile: profileWithOptionalApplication.profile,
+              forms: profileWithOptionalApplication.forms,
             }),
         })(profileWithOptionalApplication.application)
       ),
+      Effect.andThen((a) => ({ data: a })),
+      Effect.andThen(S.encode(GetProfileResponse)),
       Effect.andThen((body) => ({
         status: 200 as const,
         body,

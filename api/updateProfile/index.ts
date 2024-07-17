@@ -7,7 +7,7 @@ import {
 } from "../services/profile-service";
 import { createLoggerLayer } from "../utilties/logging";
 import { getAuthenticatedUserId } from "../functions/authenticated-user";
-import { ApiProfileUpdateRequest } from "../api/profile";
+import { ApiProfileUpdateRequest, UpdateProfileResponse } from "../api/profile";
 import { repositoriesLayerLive } from "../contexts/repositories-live";
 
 const httpTrigger: AzureFunction = async function (
@@ -26,6 +26,13 @@ const httpTrigger: AzureFunction = async function (
               updateRequest.version
             )
           ),
+          Effect.andThen((updateResult) => ({
+            data: {
+              profile: updateResult.profile,
+              forms: updateResult.forms,
+            },
+          })),
+          Effect.andThen(S.encode(UpdateProfileResponse)),
           Effect.andThen((body) => ({
             status: 200 as const,
             body,
@@ -38,10 +45,12 @@ const httpTrigger: AzureFunction = async function (
                     Effect.succeed({
                       profile: profileWithOptionalApplication.profile,
                       application: application,
+                      forms: profileWithOptionalApplication.forms,
                     }),
                   onNone: () =>
                     Effect.succeed({
                       profile: profileWithOptionalApplication.profile,
+                      forms: profileWithOptionalApplication.forms,
                     }),
                 })(profileWithOptionalApplication.application)
               ),

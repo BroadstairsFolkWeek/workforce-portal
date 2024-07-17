@@ -3,7 +3,6 @@ import { defaultGraphClient } from "../graph/default-graph-client";
 
 import { ProfilesRepository } from "../model/profiles-repository";
 import { profilesRepositoryLive } from "../model/profiles-repository-live";
-import { profilesGraphListAccessLive } from "../model/graph/profiles-graph-list-access-live";
 import { wfApiClientLive } from "../wf-api/wf-client-live";
 
 // These tests are carried out using a dev deployment of the wf-api azure container app.
@@ -24,7 +23,6 @@ test(
     );
 
     const layers = profilesRepositoryLive.pipe(
-      Layer.provide(profilesGraphListAccessLive),
       Layer.provide(defaultGraphClient),
       Layer.provide(wfApiClientLive)
     );

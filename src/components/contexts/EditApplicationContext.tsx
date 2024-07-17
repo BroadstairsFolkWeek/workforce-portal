@@ -1,6 +1,12 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Application } from "../../interfaces/application";
 import { useApplication } from "./ApplicationContext";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  saveNewOrExistingApplication,
+  selectFormsApplicationForm,
+} from "../../features/forms/forms-slice";
+import { AppDispatch } from "../../store";
 
 export type ApplicationUpdate = Pick<
   Application,
@@ -64,12 +70,12 @@ const EditApplicationContextProvider = ({
 }: {
   children: JSX.Element;
 }) => {
+  const dispatch: AppDispatch = useDispatch();
+
+  const existingApplication = useSelector(selectFormsApplicationForm);
+
   const [mode, setMode] = useState<"new" | "edit">("edit");
-  const {
-    application: existingApplication,
-    loaded: existingApplicationLoaded,
-    setApplication: setExistingApplication,
-  } = useApplication();
+  const { loaded: existingApplicationLoaded } = useApplication();
   const [application, setApplication] = useState<Application | null>(null);
 
   const newApplication = useCallback(async () => {
@@ -121,41 +127,19 @@ const EditApplicationContextProvider = ({
   const saveApplication = useCallback(
     async (updates: ApplicationUpdate) => {
       try {
-        if (application) {
-          const updatedApplication: Application = {
-            ...application,
-            ...updates,
-          };
-
-          const saveApplicationResponse = await fetch("/api/saveApplication", {
-            method: "POST",
-            body: JSON.stringify(updatedApplication),
-          });
-
-          if (
-            saveApplicationResponse.status === 200 ||
-            saveApplicationResponse.status === 409
-          ) {
-            const savedApplication: Application =
-              await saveApplicationResponse.json();
-            if (savedApplication) {
-              setApplication(savedApplication);
-              setExistingApplication(savedApplication);
-            }
-          }
-
-          // Return the status code as a way for callers to detect different types of errors.
-          return saveApplicationResponse.status;
-        } else {
-          console.error("No application to update");
-          return -1;
-        }
+        dispatch(
+          saveNewOrExistingApplication({
+            mode: mode === "new" ? "new" : "existing",
+            updates: updates,
+          })
+        );
+        return 0;
       } catch (err: unknown) {
         console.log(err);
         return -1;
       }
     },
-    [application, setExistingApplication]
+    [application]
   );
 
   const deleteApplication = useCallback(async () => {
@@ -167,7 +151,7 @@ const EditApplicationContextProvider = ({
 
       if (deleteApplicationResponse.status === 204) {
         setApplication(null);
-        setExistingApplication(null);
+        // setExistingApplication(null);
       }
 
       return deleteApplicationResponse.status;
@@ -175,7 +159,7 @@ const EditApplicationContextProvider = ({
       console.log(err);
       return -1;
     }
-  }, [existingApplication, setExistingApplication]);
+  }, [existingApplication]);
 
   return (
     <EditApplicationContext.Provider

@@ -8,7 +8,7 @@
   "auth": {
     "identityProviders": {
       "customOpenIdConnectProviders": {
-        "b2cauth": {
+        "bcauth": {
           "registration": {
             "clientIdSettingName": "B2C_CLIENT_ID",
             "clientCredential": {

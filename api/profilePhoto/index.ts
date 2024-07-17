@@ -11,10 +11,13 @@ import {
 } from "../utilties/logging";
 import {
   getProfilePicture,
+  getProfileWithFormsByProfile,
   setProfilePicture,
 } from "../services/profile-service";
 import { ApiGetPhotoRequestQuery } from "../api/profile";
 import { repositoriesLayerLive } from "../contexts/repositories-live";
+import { SetProfilePhotoResponse } from "../api/photo";
+import { logError } from "effect/Effect";
 
 const handleGetProfilePhoto = (photoId: string) =>
   getProfilePicture(photoId).pipe(
@@ -58,14 +61,27 @@ const handlePostProfilePhoto = async function (
     userInfo.userId!,
     contentType,
     photoContent
-  ).pipe(
-    Effect.andThen((updatedProfile) =>
-      Effect.succeed({
-        status: 200,
-        body: updatedProfile,
-      })
+  )
+    .pipe(
+      Effect.andThen(getProfileWithFormsByProfile(userInfo.userId!)),
+      Effect.andThen((data) => ({ data })),
+      Effect.andThen(S.encode(SetProfilePhotoResponse)),
+      Effect.andThen((body) =>
+        Effect.succeed({
+          status: 200,
+          body,
+        })
+      )
     )
-  );
+    .pipe(
+      Effect.catchTags({
+        ParseError: (e) =>
+          Effect.logError(
+            `ParseError when setting profile photo for user ${userInfo.userId}`,
+            e
+          ).pipe(Effect.andThen(Effect.succeed({ status: 500 }))),
+      })
+    );
 
   return await Effect.runPromise(
     setProfilePictureProgram.pipe(Effect.provide(repositoriesLayerLive))

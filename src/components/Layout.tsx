@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
-import { useUserProfile } from "./contexts/UserProfileContext";
 import ApplicationForm from "./forms/ApplicationForm";
 import ProfileForm from "./forms/ProfileForm";
 import Home from "./Home";
@@ -8,6 +7,8 @@ import PhotoPage from "./PhotoPage";
 import PrivacyPolicy from "./PrivacyPolicy";
 import Spinner from "./Spinner";
 import TermsAndConditions from "./TermsAndConditions";
+import { useSelector } from "react-redux";
+import { selectProfileLoadingStatus } from "../features/profile/profile-slice";
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -20,9 +21,9 @@ const ScrollToTop = () => {
 };
 
 const Layout: React.FC = () => {
-  const { loaded } = useUserProfile();
+  const profileStatus = useSelector(selectProfileLoadingStatus);
 
-  if (!loaded) {
+  if (profileStatus === "loading") {
     return (
       <div className="flex flex-col h-screen bg-bfw-yellow">
         <div className="flex-grow" />

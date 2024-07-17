@@ -1,21 +1,22 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import ApplicationDisplayPanel from "./ApplicationDisplayPanel";
-import { useUserProfile } from "./contexts/UserProfileContext";
-import { useUserProfilePhotos } from "./contexts/UserProfilePhotosContext";
 import HomeLayout from "./HomeLayout";
+import { useSelector } from "react-redux";
+import {
+  selectProfile,
+  selectProfileLoadingStatus,
+} from "../features/profile/profile-slice";
 
 export interface WelcomeProps {}
 
 const Home: React.FC<WelcomeProps> = () => {
-  const { userProfile, profileComplete } = useUserProfile();
-  const { loaded: photoContextLoaded, photoUploaded } = useUserProfilePhotos();
+  const profile = useSelector(selectProfile);
+  const profileLoadingStatus = useSelector(selectProfileLoadingStatus);
 
   const profileReminder = useMemo(() => {
-    if (profileComplete) {
-      if (photoContextLoaded && photoUploaded) {
-        return null;
-      } else {
+    if (profileLoadingStatus === "loaded" && profile) {
+      if (profile.meta.photoRequired) {
         return (
           <div className="m-4 p-4 bg-red-200 outline outline-4 outline-yellow-100 rounded-lg">
             Please{" "}
@@ -26,21 +27,25 @@ const Home: React.FC<WelcomeProps> = () => {
             your ID badge.
           </div>
         );
+      } else if (profile.meta.profileInformationRequired) {
+        return (
+          <div className="m-4 p-4 bg-red-200 outline outline-4 outline-yellow-100 rounded-lg">
+            Please{" "}
+            <Link to="/profile" className="underline">
+              fill in your profile
+            </Link>{" "}
+            as it forms part of your workforce application.
+          </div>
+        );
+      } else {
+        return null;
       }
     } else {
-      return (
-        <div className="m-4 p-4 bg-red-200 outline outline-4 outline-yellow-100 rounded-lg">
-          Please{" "}
-          <Link to="/profile" className="underline">
-            fill in your profile
-          </Link>{" "}
-          as it forms part of your workforce application.
-        </div>
-      );
+      return null;
     }
-  }, [profileComplete, photoContextLoaded, photoUploaded]);
+  }, [profileLoadingStatus, profile]);
 
-  if (userProfile) {
+  if (profile) {
     return (
       <HomeLayout>
         {profileReminder}
@@ -65,7 +70,7 @@ const Home: React.FC<WelcomeProps> = () => {
 
         <div className="mt-8">
           <p className="text-xl text-center">
-            <a className="m-1 p-1 underline" href="/.auth/login/b2cauth">
+            <a className="m-1 p-1 underline" href="/.auth/login/bcauth">
               Sign Up or Sign In to get started.
             </a>
           </p>

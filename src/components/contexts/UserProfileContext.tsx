@@ -1,6 +1,6 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import { Application } from "../../../api/interfaces/application";
-import { Profile } from "../../../api/interfaces/profile";
+import { Profile } from "../../interfaces/profile";
 
 /**
  * Provides the user profile for the application by retrieving it from the server api. The API will return profile
@@ -12,21 +12,9 @@ export type UserProfileUpdate = Pick<
   "displayName" | "givenName" | "surname" | "telephone" | "address"
 >;
 
-interface UpdateUserProfileRequestBody {
-  version: number;
-  updates: UserProfileUpdate;
-}
-
 export type IUserProfileContext = {
-  loaded: boolean;
-  userProfile: UserProfile | null;
-  profileComplete: boolean;
   currentApplication: Application | null;
-  saveUserProfile: (userProfile: UserProfileUpdate) => Promise<number>;
-  injectProfileAndApplication: (
-    userProfile: UserProfile,
-    application?: Application
-  ) => void;
+  injectApplication: (application: Application) => void;
 };
 
 const invalidFunction = () => {
@@ -36,12 +24,8 @@ const invalidFunction = () => {
 };
 
 const UserProfileContext = React.createContext<IUserProfileContext>({
-  loaded: false,
-  userProfile: null,
-  profileComplete: false,
   currentApplication: null,
-  saveUserProfile: invalidFunction,
-  injectProfileAndApplication: invalidFunction,
+  injectApplication: invalidFunction,
 });
 
 const UserProfileContextProvider = ({
@@ -49,93 +33,21 @@ const UserProfileContextProvider = ({
 }: {
   children: JSX.Element;
 }) => {
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [profileComplete, setProfileComplete] = useState<boolean>(false);
   const [currentApplication, setCurrentApplication] =
     useState<Application | null>(null);
-  const [loaded, setLoaded] = useState(false);
-
-  const fetchProfile = useCallback(async () => {
-    const fetchResponse = await fetch("/api/profile");
-    if (fetchResponse.ok) {
-      const profileAndApplication = await fetchResponse.json();
-      setUserProfile(profileAndApplication.profile);
-      if (profileAndApplication.application) {
-        setCurrentApplication(profileAndApplication.application);
-      }
-    }
-    setLoaded(true);
-  }, []);
-
-  const saveUserProfile = useCallback(
-    async (updates: UserProfileUpdate) => {
-      try {
-        if (userProfile) {
-          const updateProfileRequestBody: UpdateUserProfileRequestBody = {
-            version: userProfile.version,
-            updates,
-          };
-          const saveResponse = await fetch("/api/updateProfile", {
-            method: "POST",
-            body: JSON.stringify(updateProfileRequestBody),
-          });
-
-          if (saveResponse.status === 200 || saveResponse.status === 409) {
-            const profile = await saveResponse.json();
-            setUserProfile(profile);
-          }
-
-          // Return the status code as a way for callers to detect different types of errors.
-          return saveResponse.status;
-        } else {
-          // Not logged in, can't save.
-          return 401;
-        }
-      } catch (err: unknown) {
-        console.log(err);
-        return -1;
-      }
-    },
-    [userProfile]
-  );
 
   const injectProfileAndApplication = useCallback(
-    (injectedProfile: UserProfile, injectedApplication?: Application) => {
-      setUserProfile(injectedProfile);
-      if (injectedApplication) {
-        setCurrentApplication(injectedApplication);
-      }
+    (injectedApplication: Application) => {
+      setCurrentApplication(injectedApplication);
     },
     []
   );
 
-  useEffect(() => {
-    fetchProfile();
-  }, [fetchProfile]);
-
-  useEffect(() => {
-    if (userProfile) {
-      setProfileComplete(
-        !!userProfile.displayName &&
-          !!userProfile.givenName &&
-          !!userProfile.surname &&
-          !!userProfile.address &&
-          !!userProfile.telephone
-      );
-    } else {
-      setProfileComplete(false);
-    }
-  }, [userProfile]);
-
   return (
     <UserProfileContext.Provider
       value={{
-        loaded,
-        userProfile,
-        profileComplete,
         currentApplication,
-        saveUserProfile,
-        injectProfileAndApplication,
+        injectApplication: injectProfileAndApplication,
       }}
     >
       {children}

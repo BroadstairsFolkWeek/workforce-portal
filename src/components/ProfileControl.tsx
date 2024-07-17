@@ -10,9 +10,13 @@ import {
   IStyleFunctionOrObject,
 } from "@fluentui/react";
 
-import { useUserProfile } from "./contexts/UserProfileContext";
-
 import hoodenHorse from "../images/hoodenHorse.jpg";
+import { useSelector } from "react-redux";
+import {
+  selectProfile,
+  selectProfileLoadingError,
+  selectProfileLoadingStatus,
+} from "../features/profile/profile-slice";
 
 const buttonStyles: IButtonStyles = {
   root: { height: "unset", backgroundColor: "#00000000", color: "#F6C70B" },
@@ -31,17 +35,24 @@ const contextMenuStyles: IStyleFunctionOrObject<
 
 const ProfileControl: React.FC = () => {
   const navigate = useNavigate();
-  const { loaded, userProfile } = useUserProfile();
+
+  const profile = useSelector(selectProfile);
+  const profileStatus = useSelector(selectProfileLoadingStatus);
+  const profileError = useSelector(selectProfileLoadingError);
 
   const profileImage = useMemo(() => {
-    return (
-      <img
-        alt="Profile"
-        className="h-10"
-        src={userProfile?.photoUrl ? userProfile.photoUrl : hoodenHorse}
-      />
-    );
-  }, [userProfile]);
+    if (profile) {
+      return (
+        <img
+          alt="Profile"
+          className="h-10"
+          src={profile?.photoUrl ? profile.photoUrl : hoodenHorse}
+        />
+      );
+    } else {
+      return null;
+    }
+  }, [profile]);
 
   const menuProps = useMemo<IContextualMenuProps>(
     () => ({
@@ -64,29 +75,43 @@ const ProfileControl: React.FC = () => {
     [navigate]
   );
 
-  if (loaded) {
-    if (userProfile) {
+  switch (profileStatus) {
+    case "not-authenticated":
       return (
-        <div className="flex justify-end gap-2">
-          <DefaultButton
-            text={userProfile.displayName}
-            menuProps={menuProps}
-            styles={buttonStyles}
-          />
-          {profileImage}
-        </div>
-      );
-    } else {
-      return (
-        <a className="m-1 p-1 text-bfw-link" href="/.auth/login/b2cauth">
+        <a className="m-1 p-1 text-bfw-link" href="/.auth/login/bcauth">
           Sign In or Create Account
         </a>
       );
-    }
-  } else {
-    return (
-      <p className="text-bfw-link animate-pulse">Checking authentication...</p>
-    );
+
+    case "loading":
+      return (
+        <p className="text-bfw-link animate-pulse">
+          Checking authentication...
+        </p>
+      );
+
+    case "loaded":
+      if (profile) {
+        return (
+          <div className="flex justify-end gap-2">
+            <DefaultButton
+              text={profile.displayName}
+              menuProps={menuProps}
+              styles={buttonStyles}
+            />
+            {profileImage}
+          </div>
+        );
+      }
+      break;
+
+    case "error":
+      return (
+        <p className="text-bfw-link animate-pulse">
+          Error when checking authentication. Please refresh and try again.
+          {profileError}
+        </p>
+      );
   }
 };
 

@@ -10,12 +10,32 @@ export class WfApiClient extends Context.Tag("WfApiClient")<
       search?: string
     ) => Effect.Effect<unknown, HttpClientError.HttpClientError>;
 
+    readonly postJsonDataJsonResponse: (
+      path: string,
+      search?: string
+    ) => (
+      jsonData: unknown
+    ) => Effect.Effect<
+      unknown,
+      HttpClientError.HttpClientError | HttpBodyError
+    >;
+
     readonly putFormDataJsonResponse: (
       path: string,
       search?: string
     ) => (
       formData: FormData
     ) => Effect.Effect<unknown, HttpClientError.HttpClientError>;
+
+    readonly putJsonDataJsonResponse: (
+      path: string,
+      search?: string
+    ) => (
+      jsonData: unknown
+    ) => Effect.Effect<
+      unknown,
+      HttpClientError.HttpClientError | HttpBodyError
+    >;
 
     readonly patchJsonDataJsonResponse: (
       path: string,
@@ -27,14 +47,9 @@ export class WfApiClient extends Context.Tag("WfApiClient")<
       HttpClientError.HttpClientError | HttpBodyError
     >;
 
-    readonly putJsonDataJsonResponse: (
+    readonly deleteJson: (
       path: string,
       search?: string
-    ) => (
-      jsonData: unknown
-    ) => Effect.Effect<
-      unknown,
-      HttpClientError.HttpClientError | HttpBodyError
-    >;
+    ) => Effect.Effect<unknown, HttpClientError.HttpClientError>;
   }
 >() {}

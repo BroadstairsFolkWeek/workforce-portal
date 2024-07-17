@@ -1,11 +1,15 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Application } from "../../interfaces/application";
 import { useUserProfile } from "./UserProfileContext";
+import { useSelector } from "react-redux";
+import {
+  selectFormsApplicationForm,
+  selectFormsLoadingStatus,
+} from "../../features/forms/forms-slice";
 
 export type IApplicationContext = {
   loaded: boolean;
-  application: Application | null;
-  setApplication: (application: Application | null) => void;
+  application: Application | undefined;
   submitApplication: () => Promise<number>;
   retractApplication: () => Promise<number>;
 };
@@ -18,8 +22,7 @@ const invalidFunction = () => {
 
 const ApplicationContext = React.createContext<IApplicationContext>({
   loaded: false,
-  application: null,
-  setApplication: invalidFunction,
+  application: undefined,
   submitApplication: invalidFunction,
   retractApplication: invalidFunction,
 });
@@ -29,9 +32,12 @@ const ApplicationContextProvider = ({
 }: {
   children: JSX.Element;
 }) => {
-  const { userProfile, currentApplication: currentApplicationFromProfile } =
-    useUserProfile();
-  const [application, setApplication] = useState<Application | null>(null);
+  const formsLoadingStatus = useSelector(selectFormsLoadingStatus);
+  const application = useSelector(selectFormsApplicationForm);
+
+  // const { userProfile, currentApplication: currentApplicationFromProfile } =
+  //   useUserProfile();
+  // const [application, setApplication] = useState<Application | null>(null);
   const [loaded, setLoaded] = useState(false);
 
   const submitApplication = useCallback(async () => {
@@ -73,18 +79,16 @@ const ApplicationContextProvider = ({
   }, []);
 
   useEffect(() => {
-    if (userProfile) {
-      setApplication(currentApplicationFromProfile);
+    if (formsLoadingStatus === "loaded") {
       setLoaded(true);
     }
-  }, [userProfile, currentApplicationFromProfile]);
+  }, [formsLoadingStatus]);
 
   return (
     <ApplicationContext.Provider
       value={{
         loaded,
         application,
-        setApplication,
         submitApplication,
         retractApplication,
       }}

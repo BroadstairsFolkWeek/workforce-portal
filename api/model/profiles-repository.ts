@@ -1,10 +1,6 @@
 import { Effect, Context } from "effect";
-import {
-  ModelAddableProfile,
-  ModelPersistedProfile,
-  ModelProfile,
-  ModelProfileUpdates,
-} from "./interfaces/profile";
+import { ModelProfile, ModelProfileUpdates } from "./interfaces/profile";
+import { ModelCoreUserLogin } from "./interfaces/user-login";
 
 export class ProfileNotFound {
   readonly _tag = "ProfileNotFound";
@@ -27,14 +23,18 @@ export class ProfilesRepository extends Context.Tag("ProfilesRepository")<
       updates: ModelProfileUpdates
     ) => Effect.Effect<ModelProfile, ProfileNotFound | ProfileVersionMismatch>;
 
-    readonly modelCreateProfile: (
-      addableProfile: ModelAddableProfile
-    ) => Effect.Effect<ModelPersistedProfile>;
+    readonly modelCreateProfileForUserLogin: (
+      userLogin: ModelCoreUserLogin
+    ) => Effect.Effect<ModelProfile>;
 
     readonly modelSetProfilePhoto: (
       userId: string,
       fileMimeType: string,
       fileBuffer: Buffer
     ) => Effect.Effect<ModelProfile>;
+
+    readonly modelDeleteProfileByUserId: (
+      userId: string
+    ) => Effect.Effect<void>;
   }
 >() {}

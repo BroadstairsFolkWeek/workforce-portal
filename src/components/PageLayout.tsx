@@ -4,6 +4,7 @@ import Header from "./Header";
 
 export interface PageLayoutProps {
   preFooterRender?: () => JSX.Element;
+  children: React.ReactNode;
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({
