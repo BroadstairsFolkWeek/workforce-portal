@@ -1,7 +1,11 @@
 import Footer from "./Footer";
 import Header from "./Header";
 
-const HomeLayout: React.FC = ({ children }) => {
+interface HomeLayoutProps {
+  children: React.ReactNode;
+}
+
+const HomeLayout: React.FC<HomeLayoutProps> = ({ children }) => {
   return (
     <div className="h-screen flex flex-col gap-1">
       <div>
