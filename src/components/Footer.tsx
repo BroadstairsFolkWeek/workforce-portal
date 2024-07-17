@@ -1,12 +1,13 @@
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { useUserProfile } from "./contexts/UserProfileContext";
+import { selectProfile } from "../features/profile/profile-slice";
 
 const Footer: React.FC = () => {
-  const { userProfile } = useUserProfile();
+  const profile = useSelector(selectProfile);
 
   return (
     <>
-      {userProfile ? null : (
+      {profile ? null : (
         <div className="px-2 h-8 text-right">
           <span className="inline-block mr-2 h-full align-middle underline">
             <a href="/api/logout">
