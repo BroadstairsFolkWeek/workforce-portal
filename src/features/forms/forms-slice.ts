@@ -155,3 +155,4 @@ export const selectFormsLoadingStatus = (state: RootState) =>
   state.forms.formsLoadingStatus;
 export const selectFormsApplicationForm = (state: RootState) =>
   state.forms.application;
+export const selectFormSubmissions = (state: RootState) => state.forms.forms;

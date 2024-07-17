@@ -17,7 +17,8 @@ export const FormSubmissionArchiveStatus = S.Literal("active", "archived");
 export const FormSubmissionAvailableActions = S.Literal(
   "save",
   "submit",
-  "retract"
+  "retract",
+  "delete"
 );
 
 export const FormSpecRequirements = S.Struct({
@@ -50,6 +51,7 @@ export const FormSubmissionWithSpecAndActions = S.Struct({
   submissionStatus: FormSubmissionStatus,
   archiveStatus: FormSubmissionArchiveStatus,
   formSpec: FormSpec,
+  availableActions: S.Array(FormSubmissionAvailableActions),
 });
 
 export interface FormSubmissionWithSpecAndActions

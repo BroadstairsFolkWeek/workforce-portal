@@ -7,12 +7,15 @@ import {
   selectProfile,
   selectProfileLoadingStatus,
 } from "../features/profile/profile-slice";
+import FormSubmissionList from "./FormSubmissionsList";
+import { selectFormSubmissions } from "../features/forms/forms-slice";
 
 export interface WelcomeProps {}
 
 const Home: React.FC<WelcomeProps> = () => {
   const profile = useSelector(selectProfile);
   const profileLoadingStatus = useSelector(selectProfileLoadingStatus);
+  const formSubmissions = useSelector(selectFormSubmissions);
 
   const profileReminder = useMemo(() => {
     if (profileLoadingStatus === "loaded" && profile) {
@@ -52,6 +55,11 @@ const Home: React.FC<WelcomeProps> = () => {
         <div className="space-y-2 text-left">
           <h1 className="text-xl">Your application</h1>
           <ApplicationDisplayPanel />
+        </div>
+
+        <div className="space-y-2 text-left">
+          <h1 className="text-xl">Your forms</h1>
+          <FormSubmissionList formSubmissions={formSubmissions} />
         </div>
       </HomeLayout>
     );
