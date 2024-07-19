@@ -1,6 +1,9 @@
 import { Effect } from "effect";
 import { FormsRepository } from "../model/forms-repository";
-import { FormSubmissionWithSpecAndActions } from "../model/interfaces/form";
+import {
+  FormSubmissionId,
+  FormSubmissionWithSpecAndActions,
+} from "../model/interfaces/form";
 
 export const getFormsByUserId = (
   userId: string
@@ -12,3 +15,15 @@ export const getFormsByUserId = (
   FormsRepository.pipe(
     Effect.andThen((formsRepo) => formsRepo.modelGetFormsByUserId(userId))
   );
+
+export const updateFormSubmission =
+  (userId: string) =>
+  (formSubmissionId: FormSubmissionId) =>
+  (
+    answers: unknown
+  ): Effect.Effect<FormSubmissionWithSpecAndActions, never, FormsRepository> =>
+    FormsRepository.pipe(
+      Effect.andThen((formsRepo) =>
+        formsRepo.modelUpdateFormSubmission(userId)(formSubmissionId, answers)
+      )
+    );

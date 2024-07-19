@@ -61,6 +61,8 @@ export const FormSubmission = S.Struct({
   archiveStatus: FormSubmissionArchiveStatus,
   formSpec: FormSpec,
   availableActions: S.Array(FormSubmissionAvailableActions),
+  createdDateTimeUtc: S.String,
+  modifiedDateTimeUtc: S.String,
 });
 
 export interface FormSubmission extends S.Schema.Type<typeof FormSubmission> {}

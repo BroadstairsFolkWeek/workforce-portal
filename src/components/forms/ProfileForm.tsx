@@ -144,7 +144,7 @@ const ProfileForm: React.FC<ProfileFormProps> = () => {
   }
 
   return (
-    <PageLayout preFooterRender={() => preFooter}>
+    <div>
       <h1 className="text-2xl font-black">Modify your profile</h1>
       <Formik
         initialValues={initialValues}
@@ -239,7 +239,7 @@ const ProfileForm: React.FC<ProfileFormProps> = () => {
         }}
       </Formik>
       {messageBoxElement}
-    </PageLayout>
+    </div>
   );
 };
 

@@ -103,7 +103,7 @@ const PhotoPage: React.FC<PhotoPanelProps> = () => {
   }
 
   return (
-    <PageLayout>
+    <div>
       <h1 className="text-2xl font-black">Profile photo</h1>
 
       {profileImage}
@@ -113,7 +113,7 @@ const PhotoPage: React.FC<PhotoPanelProps> = () => {
         height={400}
         disabled={false}
       />
-    </PageLayout>
+    </div>
   );
 };
 

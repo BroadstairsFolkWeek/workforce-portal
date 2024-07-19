@@ -98,11 +98,7 @@ const ApplicationForm: React.FC = () => {
   }, [scrollToTop]);
 
   if (!application) {
-    return (
-      <PageLayout>
-        <div>Loading...</div>
-      </PageLayout>
-    );
+    return <div>Loading...</div>;
   }
 
   let errorComponent: JSX.Element;
@@ -137,7 +133,7 @@ const ApplicationForm: React.FC = () => {
   }
 
   return (
-    <PageLayout>
+    <div>
       <h1 className="text-2xl font-black">Workforce Application Form</h1>
       <Formik
         initialValues={initialValues}
@@ -483,7 +479,7 @@ const ApplicationForm: React.FC = () => {
           );
         }}
       </Formik>
-    </PageLayout>
+    </div>
   );
 };
 export default ApplicationForm;

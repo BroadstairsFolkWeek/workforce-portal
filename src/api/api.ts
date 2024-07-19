@@ -23,3 +23,10 @@ export const apiPostJsonData = (path: string) => (data: unknown) =>
     Effect.andThen(HttpClient.fetchOk),
     HttpClientResponse.json
   );
+
+export const apiPutJsonData = (path: string) => (data: unknown) =>
+  HttpClientRequest.put(path).pipe(
+    HttpClientRequest.jsonBody(data),
+    Effect.andThen(HttpClient.fetchOk),
+    HttpClientResponse.json
+  );

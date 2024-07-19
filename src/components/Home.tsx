@@ -50,7 +50,7 @@ const Home: React.FC<WelcomeProps> = () => {
 
   if (profile) {
     return (
-      <HomeLayout>
+      <div>
         {profileReminder}
         <div className="space-y-2 text-left">
           <h1 className="text-xl">Your application</h1>
@@ -61,11 +61,11 @@ const Home: React.FC<WelcomeProps> = () => {
           <h1 className="text-xl">Your forms</h1>
           <FormSubmissionList formSubmissions={formSubmissions} />
         </div>
-      </HomeLayout>
+      </div>
     );
   } else {
     return (
-      <HomeLayout>
+      <div>
         <div className="space-y-2 text-left">
           <h1 className="text-2xl text-center">
             Welcome to the Broadstairs Folk Week Workforce Portal
@@ -83,7 +83,7 @@ const Home: React.FC<WelcomeProps> = () => {
             </a>
           </p>
         </div>
-      </HomeLayout>
+      </div>
     );
   }
 };

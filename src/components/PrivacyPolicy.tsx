@@ -2,7 +2,7 @@ import PageLayout from "./PageLayout";
 
 const PrivacyPolicy: React.FC = () => {
   return (
-    <PageLayout>
+    <div>
       <h1 className="mt-4 text-2xl font-black">Privacy Policy</h1>
       <p className="my-2">
         This version of our privacy policy was last updated on 2nd November 2023
@@ -374,7 +374,7 @@ const PrivacyPolicy: React.FC = () => {
         prior to enacting any change, ensuring users have opportunity to delete
         their information from the portal if they do not consent to new policy.
       </p>
-    </PageLayout>
+    </div>
   );
 };
 

@@ -1,10 +1,11 @@
 import { Effect } from "effect";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { FormSubmission } from "../../interfaces/form";
+import { FormSubmission, FormSubmissionId } from "../../interfaces/form";
 import { Application } from "../../interfaces/application";
 import { RootState } from "../../store";
 import { ApplicationUpdate } from "../../components/contexts/EditApplicationContext";
-import { apiSaveApplication } from "../../api/forms";
+import { apiSaveApplication, apiSaveForm } from "../../api/forms";
+import { build } from "vite";
 
 type FormsLoadingStatus = "not-authenticated" | "loading" | "loaded" | "error";
 type FormsSavingStatus = "not-authenticated" | "saving" | "saved" | "error";
@@ -34,11 +35,53 @@ type SaveApplicationFullfilledPayload =
       formsSavingError: string;
     };
 
+type SaveExistingFormSubmissionFullfilledPayload =
+  | {
+      result: "success";
+      formSubmission: FormSubmission;
+    }
+  | {
+      result: "failure";
+      formsSavingStatus: FormsSavingStatus;
+      formsSavingError: string;
+    };
+
 const initialState: FormsState = {
   forms: [],
   formsLoadingStatus: "loaded",
   formsSavingStatus: "saved",
 };
+
+export const saveExistingFormSubmission = createAsyncThunk<
+  SaveExistingFormSubmissionFullfilledPayload,
+  { answers: unknown; formSubmissionId: FormSubmissionId }
+>("forms/saveExistingFormSubmission", async ({ formSubmissionId, answers }) => {
+  const program = apiSaveForm(formSubmissionId)(answers)
+    .pipe(
+      Effect.andThen((savedFormSubmission) => ({
+        result: "success" as const,
+        formSubmission: savedFormSubmission,
+      }))
+    )
+    .pipe(
+      Effect.catchTags({
+        NotAuthenticated: () =>
+          Effect.succeed({
+            result: "failure" as const,
+            formsSavingStatus: "not-authenticated" as const,
+            formsSavingError: "Not authenticated",
+          }),
+        ServerError: (e) =>
+          Effect.succeed({
+            result: "failure" as const,
+            formsSavingStatus: "error" as const,
+            formsSavingError: e.responseError.message,
+          }),
+      })
+    );
+
+  return await Effect.runPromise(program);
+});
 
 export const saveNewOrExistingApplication = createAsyncThunk<
   SaveApplicationFullfilledPayload,
@@ -141,6 +184,31 @@ export const formsSlice = createSlice({
     });
 
     builder.addCase(saveNewOrExistingApplication.rejected, (state, action) => {
+      state.formsSavingStatus = "error";
+      state.formsSavingError = action.error.message;
+    });
+
+    builder.addCase(saveExistingFormSubmission.pending, (state) => {
+      state.formsSavingStatus = "saving";
+    });
+
+    builder.addCase(saveExistingFormSubmission.fulfilled, (state, action) => {
+      if (action.payload.result === "success") {
+        const updatedFormSubmission = action.payload.formSubmission;
+        const index = state.forms.findIndex(
+          (f) => f.id === updatedFormSubmission.id
+        );
+        if (index !== -1) {
+          state.forms[index] = updatedFormSubmission;
+        }
+        state.formsSavingStatus = "saved";
+      } else {
+        state.formsSavingStatus = action.payload.formsSavingStatus;
+        state.formsSavingError = action.payload.formsSavingError;
+      }
+    });
+
+    builder.addCase(saveExistingFormSubmission.rejected, (state, action) => {
       state.formsSavingStatus = "error";
       state.formsSavingError = action.error.message;
     });

@@ -1,5 +1,7 @@
 import { PropsWithChildren } from "react";
 import { FormSubmission } from "../interfaces/form";
+import { DateTime } from "luxon";
+import FormListItemControls from "./FormListItemControls";
 
 interface FormSubmissionListItemProps {
   formSubmission: FormSubmission;
@@ -13,9 +15,9 @@ const ListItemHeader = ({
 }>) => {
   return (
     <div className="bg-bfw-yellow">
-      <div className="flex flex-row justify-between p-2 bg-bfw-yellow text-xs whitespace-nowrap">
+      <div className="flex flex-row justify-between p-2 bg-bfw-yellow ">
         <div>{formSubmission.formSpec.fullName}</div>
-        <div>{formSubmission.submissionStatus}</div>
+        <div className="text-xs">{formSubmission.submissionStatus}</div>
       </div>
       <div className="px-2">{children}</div>
     </div>
@@ -38,6 +40,10 @@ const ListItemFooter = ({
   );
 };
 
+const handler = () => {
+  console.log("clicked");
+};
+
 const FormSubmissionListItem: React.FC<FormSubmissionListItemProps> = ({
   formSubmission,
 }) => {
@@ -47,9 +53,22 @@ const FormSubmissionListItem: React.FC<FormSubmissionListItemProps> = ({
 
       <div className="flex flex-row">
         <div className="p-4 flex-grow overflow-hidden">
-          <p>TEST</p>
+          <div className="text-sm">
+            Last saved:{" "}
+            {DateTime.fromISO(
+              formSubmission.modifiedDateTimeUtc
+            ).toLocaleString(DateTime.DATETIME_MED)}
+          </div>
         </div>
-        <div className="py-4 pr-2 w-40">TEST</div>
+        <div className="py-4 pr-2 w-40">
+          <FormListItemControls
+            formSubmission={formSubmission}
+            editButtonClicked={handler}
+            submitButtonClicked={handler}
+            retractButtonClicked={handler}
+            deleteButtonClicked={handler}
+          />
+        </div>
       </div>
       <ListItemFooter formSubmission={formSubmission} />
     </div>

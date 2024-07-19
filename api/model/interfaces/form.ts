@@ -2,7 +2,9 @@ import { Schema as S } from "@effect/schema";
 import { ModelProfileId } from "./profile";
 
 export const FormSubmissionId = S.String.pipe(S.brand("FormSubmissionId"));
+export type FormSubmissionId = S.Schema.Type<typeof FormSubmissionId>;
 export const FormSpecId = S.String.pipe(S.brand("FormSpecId"));
+export type FormSpecId = S.Schema.Type<typeof FormSpecId>;
 
 export const FormSubmissionStatus = S.Literal(
   "draft",
@@ -52,6 +54,8 @@ export const FormSubmissionWithSpecAndActions = S.Struct({
   archiveStatus: FormSubmissionArchiveStatus,
   formSpec: FormSpec,
   availableActions: S.Array(FormSubmissionAvailableActions),
+  createdDateTimeUtc: S.DateFromString,
+  modifiedDateTimeUtc: S.DateFromString,
 });
 
 export interface FormSubmissionWithSpecAndActions
