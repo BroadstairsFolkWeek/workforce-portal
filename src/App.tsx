@@ -3,9 +3,6 @@ import { initializeIcons } from "@fluentui/react";
 import { Provider } from "react-redux";
 
 import RootWithProfileLoading from "./routes/RootWithProfileLoading";
-import { ApplicationContextProvider } from "./components/contexts/ApplicationContext";
-import { EditApplicationContextProvider } from "./components/contexts/EditApplicationContext";
-import { TeamsContextProvider } from "./components/contexts/TeamsContext";
 import store from "./store";
 import { fetchProfile } from "./features/profile/profile-slice";
 import Home from "./components/Home";
@@ -74,13 +71,7 @@ const router = createBrowserRouter([
 function App() {
   return (
     <Provider store={store}>
-      <TeamsContextProvider>
-        <ApplicationContextProvider>
-          <EditApplicationContextProvider>
-            <RouterProvider router={router} />
-          </EditApplicationContextProvider>
-        </ApplicationContextProvider>
-      </TeamsContextProvider>
+      <RouterProvider router={router} />
     </Provider>
   );
 }
