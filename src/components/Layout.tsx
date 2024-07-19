@@ -1,12 +1,5 @@
-import { useEffect } from "react";
-import { Link, Outlet, Route, Routes, useLocation } from "react-router-dom";
-import ApplicationForm from "./forms/ApplicationForm";
-import ProfileForm from "./forms/ProfileForm";
-import Home from "./Home";
-import PhotoPage from "./PhotoPage";
-import PrivacyPolicy from "./PrivacyPolicy";
+import { Link, Outlet } from "react-router-dom";
 import Spinner from "./Spinner";
-import TermsAndConditions from "./TermsAndConditions";
 import { useSelector } from "react-redux";
 import { selectProfileLoadingStatus } from "../features/profile/profile-slice";
 import Header from "./Header";
