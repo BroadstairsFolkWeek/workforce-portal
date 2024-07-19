@@ -224,3 +224,6 @@ export const selectFormsLoadingStatus = (state: RootState) =>
 export const selectFormsApplicationForm = (state: RootState) =>
   state.forms.application;
 export const selectFormSubmissions = (state: RootState) => state.forms.forms;
+export const selectFormSubmission =
+  (formSubmissionId: FormSubmissionId) => (state: RootState) =>
+    state.forms.forms.find((f) => f.id === formSubmissionId);

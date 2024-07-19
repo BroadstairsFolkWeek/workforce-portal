@@ -1,8 +1,6 @@
-import PageLayout from "./PageLayout";
-
 const TermsAndConditions: React.FC = () => {
   return (
-    <PageLayout>
+    <div>
       <h1 className="mt-4 text-2xl font-black">2024 Workforce Information</h1>
       <p className="my-2">
         We need around 250 fabulous people to volunteer for us each year -
@@ -130,7 +128,7 @@ const TermsAndConditions: React.FC = () => {
         We want you to enjoy your volunteering experience and welcome your
         feedback.
       </h1>
-    </PageLayout>
+    </div>
   );
 };
 

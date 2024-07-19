@@ -1,7 +1,7 @@
 import { PropsWithChildren } from "react";
 import { FormSubmission } from "../interfaces/form";
 import { DateTime } from "luxon";
-import FormListItemControls from "./FormListItemControls";
+import FormSubmissionControls from "./FormSubmissionControls";
 
 interface FormSubmissionListItemProps {
   formSubmission: FormSubmission;
@@ -25,7 +25,6 @@ const ListItemHeader = ({
 };
 
 const ListItemFooter = ({
-  formSubmission,
   children,
 }: PropsWithChildren<{
   formSubmission: FormSubmission;
@@ -61,12 +60,11 @@ const FormSubmissionListItem: React.FC<FormSubmissionListItemProps> = ({
           </div>
         </div>
         <div className="py-4 pr-2 w-40">
-          <FormListItemControls
+          <FormSubmissionControls
             formSubmission={formSubmission}
-            editButtonClicked={handler}
-            submitButtonClicked={handler}
-            retractButtonClicked={handler}
-            deleteButtonClicked={handler}
+            submitForm={handler}
+            retractForm={handler}
+            deleteForm={handler}
           />
         </div>
       </div>

@@ -1,7 +1,5 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
-import ApplicationDisplayPanel from "./ApplicationDisplayPanel";
-import HomeLayout from "./HomeLayout";
 import { useSelector } from "react-redux";
 import {
   selectProfile,
@@ -52,11 +50,6 @@ const Home: React.FC<WelcomeProps> = () => {
     return (
       <div>
         {profileReminder}
-        <div className="space-y-2 text-left">
-          <h1 className="text-xl">Your application</h1>
-          <ApplicationDisplayPanel />
-        </div>
-
         <div className="space-y-2 text-left">
           <h1 className="text-xl">Your forms</h1>
           <FormSubmissionList formSubmissions={formSubmissions} />

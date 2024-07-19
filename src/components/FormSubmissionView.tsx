@@ -1,3 +1,9 @@
+import { Model } from "survey-core";
+import { Survey } from "survey-react-ui";
+import { FormSubmission } from "../interfaces/form";
+import { ContrastDark } from "survey-core/themes";
+
+import "survey-core/defaultV2.min.css";
 import {
   DefaultButton,
   Dialog,
@@ -7,9 +13,16 @@ import {
   PrimaryButton,
 } from "@fluentui/react";
 import { useCallback, useMemo, useState } from "react";
-import { FormSubmission } from "../interfaces/form";
 
-interface FormListItemControlsProps {
+interface FormSubmissionViewProps {
+  formSubmission: FormSubmission;
+  editButtonClicked: () => void;
+  submitButtonClicked: () => void;
+  retractButtonClicked: () => void;
+  deleteButtonClicked: () => void;
+}
+
+interface FormSubmissionViewControlsProps {
   formSubmission: FormSubmission;
   editButtonClicked: () => void;
   submitButtonClicked: () => void;
@@ -78,13 +91,13 @@ const ControlsButton: React.FC<ControlsButtonProps> = ({
   );
 };
 
-const FormListItemControls = ({
+const FormSubmissionViewControls = ({
   formSubmission,
   editButtonClicked,
   submitButtonClicked,
   retractButtonClicked,
   deleteButtonClicked,
-}: FormListItemControlsProps) => {
+}: FormSubmissionViewControlsProps) => {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmRetract, setConfirmRetract] = useState(false);
 
@@ -202,4 +215,37 @@ const FormListItemControls = ({
   );
 };
 
-export default FormListItemControls;
+const FormSubmissionView: React.FC<FormSubmissionViewProps> = ({
+  formSubmission,
+  editButtonClicked,
+  deleteButtonClicked,
+  retractButtonClicked,
+  submitButtonClicked,
+}) => {
+  const survey = new Model(formSubmission.formSpec.questions);
+  survey.data = formSubmission.answers;
+  survey.applyTheme(ContrastDark);
+  survey.mode = "display";
+
+  if (!survey) {
+    console.log("No survey model");
+    return null;
+  }
+
+  return (
+    <div>
+      <FormSubmissionViewControls
+        {...{
+          formSubmission,
+          editButtonClicked,
+          deleteButtonClicked,
+          retractButtonClicked,
+          submitButtonClicked,
+        }}
+      />
+      <Survey model={survey} />
+    </div>
+  );
+};
+
+export default FormSubmissionView;

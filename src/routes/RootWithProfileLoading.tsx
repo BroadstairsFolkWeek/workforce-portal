@@ -1,11 +1,11 @@
 import { Link, Outlet } from "react-router-dom";
-import Spinner from "./Spinner";
+import Spinner from "../components/Spinner";
 import { useSelector } from "react-redux";
 import { selectProfileLoadingStatus } from "../features/profile/profile-slice";
-import Header from "./Header";
-import Footer from "./Footer";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 
-const Layout: React.FC = () => {
+const RootWithProfileLoading: React.FC = () => {
   const profileStatus = useSelector(selectProfileLoadingStatus);
 
   if (profileStatus === "loading") {
@@ -36,4 +36,4 @@ const Layout: React.FC = () => {
   );
 };
 
-export default Layout;
+export default RootWithProfileLoading;
