@@ -6,3 +6,7 @@ export const SaveApplicationResponse = S.Unknown;
 export const SaveFormResponse = S.Struct({
   data: FormSubmission,
 });
+
+export const ActionFormResponse = S.Struct({
+  data: FormSubmission,
+});

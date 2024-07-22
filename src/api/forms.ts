@@ -1,15 +1,20 @@
 import { Effect } from "effect";
 import { Schema as S } from "@effect/schema";
 import {
+  apiDelete,
   apiPostJsonData,
   apiPutJsonData,
   NotAuthenticated,
   ServerError,
   VersionConflict,
 } from "./api";
-import { SaveApplicationResponse, SaveFormResponse } from "./interfaces/forms";
+import {
+  ActionFormResponse,
+  SaveApplicationResponse,
+  SaveFormResponse,
+} from "./interfaces/forms";
 import { Application } from "../interfaces/application";
-import { FormSubmissionId } from "../interfaces/form";
+import { FormSubmissionAction, FormSubmissionId } from "../interfaces/form";
 
 export const apiSaveApplication = (application: Application) =>
   apiPostJsonData("/api/saveApplication")(application)
@@ -45,3 +50,31 @@ export const apiSaveForm =
           HttpBodyError: (e) => Effect.die(e),
         })
       );
+
+export const apiActionForm =
+  (formSubmissionId: FormSubmissionId) => (action: FormSubmissionAction) =>
+    apiPostJsonData(`/api/formAction/${formSubmissionId}`)(action)
+      .pipe(Effect.andThen(S.decodeUnknown(ActionFormResponse)))
+      .pipe(Effect.andThen((decoded) => decoded.data))
+      .pipe(
+        Effect.catchTags({
+          ParseError: (e) => Effect.die(e),
+          RequestError: (e) => Effect.die("Failed to action form: " + e),
+          ResponseError: (e) =>
+            e.response.status === 401
+              ? Effect.fail(new NotAuthenticated())
+              : Effect.fail(new ServerError({ responseError: e })),
+          HttpBodyError: (e) => Effect.die(e),
+        })
+      );
+
+export const apiDeleteForm = (formSubmissionId: FormSubmissionId) =>
+  apiDelete(`/api/forms/${formSubmissionId}`).pipe(
+    Effect.catchTags({
+      RequestError: (e) => Effect.die("Failed to action form: " + e),
+      ResponseError: (e) =>
+        e.response.status === 401
+          ? Effect.fail(new NotAuthenticated())
+          : Effect.fail(new ServerError({ responseError: e })),
+    })
+  );

@@ -20,15 +20,8 @@ export type FormSubmissionArchiveStatus = S.Schema.Type<
   typeof FormSubmissionArchiveStatus
 >;
 
-export const FormSubmissionAvailableActions = S.Literal(
-  "save",
-  "submit",
-  "retract",
-  "delete"
-);
-export type FormSubmissionAvailableActions = S.Schema.Type<
-  typeof FormSubmissionAvailableActions
->;
+export const FormSubmissionAction = S.Literal("submit", "retract", "delete");
+export type FormSubmissionAction = S.Schema.Type<typeof FormSubmissionAction>;
 
 export const FormSpecRequirements = S.Struct({
   profileRequirements: S.Struct({
@@ -52,15 +45,30 @@ export const FormSpec = S.Struct({
   status: S.Literal("draft", "active", "archived"),
 });
 
+export const FormAnswersModifiableStatus = S.Literal("modifiable", "locked");
+export type FormAnswersModifiableStatus = S.Schema.Type<
+  typeof FormAnswersModifiableStatus
+>;
+
+export const FormSubmissionDeleteableStatus = S.Literal(
+  "deletable",
+  "not-deletable"
+);
+export type FormSubmissionDeleteableStatus = S.Schema.Type<
+  typeof FormSubmissionDeleteableStatus
+>;
+
 export const FormSubmission = S.Struct({
   id: FormSubmissionId,
   formSpecId: FormSpecId,
   profileId: ModelProfileId,
   answers: S.Unknown,
+  answersModifiable: FormAnswersModifiableStatus,
+  submissionDeletable: FormSubmissionDeleteableStatus,
   submissionStatus: FormSubmissionStatus,
   archiveStatus: FormSubmissionArchiveStatus,
   formSpec: FormSpec,
-  availableActions: S.Array(FormSubmissionAvailableActions),
+  availableActions: S.Array(FormSubmissionAction),
   createdDateTimeUtc: S.String,
   modifiedDateTimeUtc: S.String,
 });

@@ -131,7 +131,9 @@ const modelSetProfilePhoto = (
 
 const deleteProfileByUserId = (userId: string) => {
   return WfApiClient.pipe(
-    Effect.andThen((apiClient) => apiClient.deleteJson(`/api/users/${userId}`))
+    Effect.andThen((apiClient) =>
+      apiClient.deleteJsonResponse(`/api/users/${userId}`)
+    )
   ).pipe(
     Effect.catchTags({
       RequestError: (e) =>

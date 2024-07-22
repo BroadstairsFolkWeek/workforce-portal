@@ -47,9 +47,14 @@ export class WfApiClient extends Context.Tag("WfApiClient")<
       HttpClientError.HttpClientError | HttpBodyError
     >;
 
-    readonly deleteJson: (
+    readonly deleteJsonResponse: (
       path: string,
       search?: string
     ) => Effect.Effect<unknown, HttpClientError.HttpClientError>;
+
+    readonly deleteNoResponse: (
+      path: string,
+      search?: string
+    ) => Effect.Effect<void, HttpClientError.HttpClientError>;
   }
 >() {}

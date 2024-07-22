@@ -1,17 +1,18 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
 import FormSubmissionList from "./FormSubmissionsList";
-import { selectFormSubmissions } from "../features/forms/forms-slice";
 import { Profile } from "../interfaces/profile";
+import { FormSubmission } from "../interfaces/form";
 
 export interface HomeWithProfileProps {
   profile: Profile;
+  formSubmissions: readonly FormSubmission[];
 }
 
-const HomeWithProfile: React.FC<HomeWithProfileProps> = ({ profile }) => {
-  const formSubmissions = useSelector(selectFormSubmissions);
-
+const HomeWithProfile: React.FC<HomeWithProfileProps> = ({
+  profile,
+  formSubmissions,
+}) => {
   const profileReminder = useMemo(() => {
     if (profile.meta.photoRequired) {
       return (

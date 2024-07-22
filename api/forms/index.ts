@@ -14,7 +14,7 @@ const httpTrigger: AzureFunction = async function (
 ): Promise<void> {
   const formSubmissionId: string = req.params["formSubmissionId"];
 
-  const program = Effect.logTrace("profile: forms")
+  const program = Effect.logTrace("forms: entry")
     .pipe(
       Effect.andThen(getAuthenticatedUserId(req)),
       Effect.andThen((userId) =>

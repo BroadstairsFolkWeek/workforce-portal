@@ -30,3 +30,6 @@ export const apiPutJsonData = (path: string) => (data: unknown) =>
     Effect.andThen(HttpClient.fetchOk),
     HttpClientResponse.json
   );
+
+export const apiDelete = (path: string) =>
+  HttpClientRequest.del(path).pipe(HttpClient.fetchOk, Effect.scoped);

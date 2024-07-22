@@ -1,7 +1,10 @@
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, useCallback } from "react";
 import { FormSubmission } from "../interfaces/form";
 import { DateTime } from "luxon";
 import FormSubmissionControls from "./FormSubmissionControls";
+import { useFormSubmissionHandlers } from "../routes/FormSubmissionHandlers";
+import { useSelector } from "react-redux";
+import { selectFormsSavingStatus } from "../features/forms/forms-slice";
 
 interface FormSubmissionListItemProps {
   formSubmission: FormSubmission;
@@ -46,6 +49,31 @@ const handler = () => {
 const FormSubmissionListItem: React.FC<FormSubmissionListItemProps> = ({
   formSubmission,
 }) => {
+  const { viewForm, editForm, submitForm, retractForm, deleteForm } =
+    useFormSubmissionHandlers();
+  const formsSavingStatus = useSelector(selectFormsSavingStatus);
+
+  const viewFormHandler = useCallback(() => {
+    viewForm(formSubmission);
+  }, [viewForm, formSubmission]);
+
+  const editFormHandler = useCallback(() => {
+    editForm(formSubmission);
+  }, [editForm, formSubmission]);
+
+  const submitFormHandler = useCallback(async () => {
+    await submitForm(formSubmission);
+  }, [submitForm, formSubmission]);
+
+  const retractFormHandler = useCallback(async () => {
+    await retractForm(formSubmission);
+    editForm(formSubmission);
+  }, [retractForm, editForm, formSubmission]);
+
+  const deleteFormHandler = useCallback(async () => {
+    await deleteForm(formSubmission);
+  }, [deleteForm, formSubmission]);
+
   return (
     <div className="flex flex-col bg-yellow-100 rounded-lg overflow-hidden">
       <ListItemHeader formSubmission={formSubmission} />
@@ -61,10 +89,12 @@ const FormSubmissionListItem: React.FC<FormSubmissionListItemProps> = ({
         </div>
         <div className="py-4 pr-2 w-40">
           <FormSubmissionControls
+            viewForm={viewFormHandler}
+            editForm={editFormHandler}
             formSubmission={formSubmission}
-            submitForm={handler}
-            retractForm={handler}
-            deleteForm={handler}
+            submitForm={submitFormHandler}
+            retractForm={retractFormHandler}
+            deleteForm={deleteFormHandler}
           />
         </div>
       </div>

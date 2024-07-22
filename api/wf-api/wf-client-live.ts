@@ -147,7 +147,7 @@ const apiPatchJsonData =
       )
     );
 
-const apiDeleteJson =
+const apiDeleteJsonResponse =
   (authenticationSupplier: AuthenticationSupplier) =>
   (baseUrl: URL) =>
   (path: string, search?: string) =>
@@ -158,6 +158,20 @@ const apiDeleteJson =
             Authorization: `Bearer ${authenticationResult.accessToken}`,
           },
         }).pipe(HttpClient.fetchOk, HttpClientResponse.json)
+      )
+    );
+
+const apiDeleteNoResponse =
+  (authenticationSupplier: AuthenticationSupplier) =>
+  (baseUrl: URL) =>
+  (path: string, search?: string) =>
+    authenticationSupplier().pipe(
+      Effect.andThen((authenticationResult) =>
+        HttpClientRequest.del(generateUrl(baseUrl)(path, search), {
+          headers: {
+            Authorization: `Bearer ${authenticationResult.accessToken}`,
+          },
+        }).pipe(HttpClient.fetchOk, HttpClientResponse.void)
       )
     );
 
@@ -217,7 +231,16 @@ export const wfApiClientLive = Layer.effect(
           )
         )(new URL(baseUrl)),
 
-        deleteJson: apiDeleteJson(
+        deleteJsonResponse: apiDeleteJsonResponse(
+          getAuthenticationSupplier(
+            clientId,
+            Secret.value(clientSecret),
+            authority,
+            [scope]
+          )
+        )(new URL(baseUrl)),
+
+        deleteNoResponse: apiDeleteNoResponse(
           getAuthenticationSupplier(
             clientId,
             Secret.value(clientSecret),

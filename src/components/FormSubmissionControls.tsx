@@ -8,11 +8,12 @@ import {
 } from "@fluentui/react";
 import { useCallback, useMemo, useState } from "react";
 import { FormSubmission } from "../interfaces/form";
-import { NavLink } from "react-router-dom";
 
 interface FormSubmissionControlsProps {
   formSubmission: FormSubmission;
   inhibitViewControl?: boolean;
+  viewForm: () => void;
+  editForm: () => void;
   submitForm: () => void;
   retractForm: () => void;
   deleteForm: () => void;
@@ -40,8 +41,10 @@ const modalProps = {
 };
 
 const isEditable = (formSubmission: FormSubmission): boolean =>
-  formSubmission.submissionStatus === "draft" ||
-  formSubmission.submissionStatus === "submittable";
+  formSubmission.answersModifiable === "modifiable";
+
+const isDeletable = (formSubmission: FormSubmission): boolean =>
+  formSubmission.submissionDeletable === "deletable";
 
 const isSubmittable = (formSubmission: FormSubmission): boolean =>
   formSubmission.submissionStatus === "submittable";
@@ -53,12 +56,6 @@ interface ControlsButtonProps {
   text: string;
   className: string;
   onClicked: () => void;
-}
-
-interface ControlsLinkProps {
-  text: string;
-  className: string;
-  href: string;
 }
 
 const ControlsButton: React.FC<ControlsButtonProps> = ({
@@ -85,24 +82,11 @@ const ControlsButton: React.FC<ControlsButtonProps> = ({
   );
 };
 
-const ControlsLink: React.FC<ControlsLinkProps> = ({
-  text,
-  className,
-  href,
-}) => {
-  return (
-    <NavLink
-      to={href}
-      className={`w-full py-2 self-center rounded-full ${className}`}
-    >
-      {text}
-    </NavLink>
-  );
-};
-
 const FormSubmissionControls = ({
   formSubmission,
   inhibitViewControl = false,
+  viewForm,
+  editForm,
   submitForm: submitButtonClicked,
   retractForm: retractButtonClicked,
   deleteForm: deleteButtonClicked,
@@ -115,10 +99,10 @@ const FormSubmissionControls = ({
       return null;
     }
     return (
-      <ControlsLink
+      <ControlsButton
         text="View"
         className="bg-green-400"
-        href={`/formSubmissions/${formSubmission.id}`}
+        onClicked={viewForm}
       />
     );
   }, [formSubmission, inhibitViewControl]);
@@ -126,23 +110,24 @@ const FormSubmissionControls = ({
   const editElement = useMemo(
     () =>
       isEditable(formSubmission) ? (
-        <ControlsLink
+        <ControlsButton
           text="Edit"
           className="bg-yellow-400"
-          href={`/formSubmissions/${formSubmission.id}/edit`}
+          onClicked={editForm}
         />
       ) : null,
     [formSubmission]
   );
 
   const deleteElement = useMemo(
-    () => (
-      <ControlsButton
-        text="Delete"
-        className="bg-red-400"
-        onClicked={() => setConfirmDelete(true)}
-      />
-    ),
+    () =>
+      isDeletable(formSubmission) ? (
+        <ControlsButton
+          text="Delete"
+          className="bg-red-400"
+          onClicked={() => setConfirmDelete(true)}
+        />
+      ) : null,
     [formSubmission]
   );
 

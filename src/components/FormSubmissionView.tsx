@@ -13,6 +13,9 @@ import {
   PrimaryButton,
 } from "@fluentui/react";
 import { useCallback, useMemo, useState } from "react";
+import { useFormSubmissionHandlers } from "../routes/FormSubmissionHandlers";
+import { useSelector } from "react-redux";
+import { selectFormsSavingStatus } from "../features/forms/forms-slice";
 
 interface FormSubmissionViewProps {
   formSubmission: FormSubmission;
@@ -217,11 +220,28 @@ const FormSubmissionViewControls = ({
 
 const FormSubmissionView: React.FC<FormSubmissionViewProps> = ({
   formSubmission,
-  editButtonClicked,
-  deleteButtonClicked,
-  retractButtonClicked,
-  submitButtonClicked,
 }) => {
+  const { editForm, submitForm, retractForm, deleteForm } =
+    useFormSubmissionHandlers();
+  const formsSavingStatus = useSelector(selectFormsSavingStatus);
+
+  const editFormHandler = useCallback(() => {
+    editForm(formSubmission);
+  }, [editForm, formSubmission]);
+
+  const submitFormHandler = useCallback(async () => {
+    await submitForm(formSubmission);
+  }, [submitForm, formSubmission]);
+
+  const retractFormHandler = useCallback(async () => {
+    await retractForm(formSubmission);
+    editForm(formSubmission);
+  }, [retractForm, editForm, formSubmission]);
+
+  const deleteFormHandler = useCallback(async () => {
+    await deleteForm(formSubmission);
+  }, [deleteForm, formSubmission]);
+
   const survey = new Model(formSubmission.formSpec.questions);
   survey.data = formSubmission.answers;
   survey.applyTheme(ContrastDark);
@@ -235,13 +255,11 @@ const FormSubmissionView: React.FC<FormSubmissionViewProps> = ({
   return (
     <div>
       <FormSubmissionViewControls
-        {...{
-          formSubmission,
-          editButtonClicked,
-          deleteButtonClicked,
-          retractButtonClicked,
-          submitButtonClicked,
-        }}
+        formSubmission={formSubmission}
+        editButtonClicked={editFormHandler}
+        submitButtonClicked={submitFormHandler}
+        retractButtonClicked={retractFormHandler}
+        deleteButtonClicked={deleteFormHandler}
       />
       <Survey model={survey} />
     </div>
