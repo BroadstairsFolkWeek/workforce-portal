@@ -33,49 +33,57 @@ export const useFormSubmissionHandlers = () => {
 
   const saveForm = useCallback(
     async (formSubmission: FormSubmission, answers: unknown) => {
-      await dispatch(
+      dispatch(
         saveExistingFormSubmission({
           formSubmissionId: formSubmission.id,
           answers,
         })
       );
+
+      navigateHome();
     },
-    [dispatch]
+    [dispatch, navigateHome]
   );
 
   const submitForm = useCallback(
     async (formSubmission: FormSubmission) => {
-      await dispatch(
+      dispatch(
         actionFormSubmission({
           formSubmissionId: formSubmission.id,
           formSubmissionAction: "submit",
         })
       );
+
+      navigateHome();
     },
-    [dispatch]
+    [dispatch, navigateHome]
   );
 
   const retractForm = useCallback(
     async (formSubmission: FormSubmission) => {
-      await dispatch(
+      dispatch(
         actionFormSubmission({
           formSubmissionId: formSubmission.id,
           formSubmissionAction: "retract",
         })
       );
+
+      editForm(formSubmission);
     },
-    [dispatch]
+    [dispatch, editForm]
   );
 
   const deleteForm = useCallback(
     async (formSubmission: FormSubmission) => {
-      await dispatch(
+      dispatch(
         deleteFormSubmission({
           formSubmissionId: formSubmission.id,
         })
       );
+
+      navigateHome();
     },
-    [dispatch]
+    [dispatch, navigateHome]
   );
 
   return {

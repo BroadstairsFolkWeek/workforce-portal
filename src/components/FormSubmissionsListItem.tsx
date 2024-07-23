@@ -3,8 +3,6 @@ import { FormSubmission } from "../interfaces/form";
 import { DateTime } from "luxon";
 import FormSubmissionControls from "./FormSubmissionControls";
 import { useFormSubmissionHandlers } from "../routes/FormSubmissionHandlers";
-import { useSelector } from "react-redux";
-import { selectFormsSavingStatus } from "../features/forms/forms-slice";
 
 interface FormSubmissionListItemProps {
   formSubmission: FormSubmission;
@@ -42,16 +40,11 @@ const ListItemFooter = ({
   );
 };
 
-const handler = () => {
-  console.log("clicked");
-};
-
 const FormSubmissionListItem: React.FC<FormSubmissionListItemProps> = ({
   formSubmission,
 }) => {
   const { viewForm, editForm, submitForm, retractForm, deleteForm } =
     useFormSubmissionHandlers();
-  const formsSavingStatus = useSelector(selectFormsSavingStatus);
 
   const viewFormHandler = useCallback(() => {
     viewForm(formSubmission);
