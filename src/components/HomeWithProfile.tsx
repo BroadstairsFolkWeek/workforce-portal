@@ -37,8 +37,7 @@ const HomeWithProfile: React.FC<HomeWithProfileProps> = ({
           <Link to="/profilePhoto" className="underline">
             upload a profile photo
           </Link>{" "}
-          as it forms part of your workforce application and will be used on
-          your ID badge.
+          as it may be needed as part of a form submission.
         </div>
       );
     } else if (profile.meta.profileInformationRequired) {
@@ -48,7 +47,7 @@ const HomeWithProfile: React.FC<HomeWithProfileProps> = ({
           <Link to="/profile" className="underline">
             fill in your profile
           </Link>{" "}
-          as it forms part of your workforce application.
+          as it may be needed as part of a form submission.
         </div>
       );
     } else {
