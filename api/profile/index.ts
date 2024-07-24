@@ -11,7 +11,7 @@ const httpTrigger: AzureFunction = async function (
   context: Context,
   req: HttpRequest
 ): Promise<void> {
-  const getProfileEffect = Effect.logTrace("profile: entry")
+  const program = Effect.logTrace("profile: entry")
     .pipe(
       Effect.andThen(getAuthenticatedUserId(req)),
       Effect.andThen(getOrCreateProfileForAuthenticatedUserEffect),
@@ -23,11 +23,13 @@ const httpTrigger: AzureFunction = async function (
               profile: profileWithOptionalApplication.profile,
               application: application,
               forms: profileWithOptionalApplication.forms,
+              creatableForms: profileWithOptionalApplication.creatableForms,
             }),
           onNone: () =>
             Effect.succeed({
               profile: profileWithOptionalApplication.profile,
               forms: profileWithOptionalApplication.forms,
+              creatableForms: profileWithOptionalApplication.creatableForms,
             }),
         })(profileWithOptionalApplication.application)
       ),
@@ -39,26 +41,22 @@ const httpTrigger: AzureFunction = async function (
       }))
     )
     .pipe(
-      Effect.catchTag("GraphUserNotFound", () =>
-        Effect.succeed({
-          status: 404 as const,
-          body: "Graph user does not exist",
-        })
-      ),
-      Effect.catchTag("UserNotAuthenticated", () =>
-        Effect.succeed({ status: 401 as const })
-      )
+      Effect.catchTags({
+        UserNotAuthenticated: () => Effect.succeed({ status: 401 as const }),
+        GraphUserNotFound: () => Effect.succeed({ status: 404 as const }),
+        ParseError: () => Effect.succeed({ status: 500 as const }),
+      })
     );
 
   const logLayer = createLoggerLayer(context);
 
-  context.res = await Effect.runPromise(
-    getProfileEffect.pipe(
-      Effect.provide(repositoriesLayerLive),
-      Logger.withMinimumLogLevel(LogLevel.Trace),
-      Effect.provide(logLayer)
-    )
+  const runnable = program.pipe(
+    Effect.provide(repositoriesLayerLive),
+    Logger.withMinimumLogLevel(LogLevel.Trace),
+    Effect.provide(logLayer)
   );
+
+  context.res = await Effect.runPromise(runnable);
 };
 
 export default httpTrigger;

@@ -35,6 +35,7 @@ export const fetchProfile = createAsyncThunk<FetchProfileFullfilledPayload>(
           dispatch(
             setForms({
               forms: profileFetchResult.forms,
+              creatableForms: profileFetchResult.creatableForms,
               application: profileFetchResult.application as Application,
             })
           )
@@ -73,7 +74,12 @@ export const saveProfile = createAsyncThunk<
   const program = apiSaveProfile(version, updates)
     .pipe(
       Effect.tap((profileFetchResult) =>
-        dispatch(setForms({ forms: profileFetchResult.forms }))
+        dispatch(
+          setForms({
+            forms: profileFetchResult.forms,
+            creatableForms: profileFetchResult.creatableForms,
+          })
+        )
       ),
       Effect.andThen((profileFetchResult) => ({
         profile: profileFetchResult.profile,

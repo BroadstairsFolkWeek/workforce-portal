@@ -33,6 +33,7 @@ const httpTrigger: AzureFunction = async function (
       Effect.catchTags({
         ParseError: (e) => Effect.die(e),
         UserNotAuthenticated: () => Effect.succeed({ status: 401 as const }),
+        FormNotFound: () => Effect.succeed({ status: 404 as const }),
       })
     );
 

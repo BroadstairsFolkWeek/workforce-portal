@@ -20,8 +20,11 @@ import { PhotosRepository } from "../model/photos-repository";
 import { profilesRepositoryLive } from "../model/profiles-repository-live";
 import { wfApiClientLive } from "../wf-api/wf-client-live";
 import { graphUsersRepositoryLive } from "../model/graph-users-repository-graph";
-import { FormSubmissionWithSpecAndActions } from "../model/interfaces/form";
-import { getFormsByUserId } from "./forms-service";
+import {
+  FormSpec,
+  FormSubmissionWithSpecAndActions,
+} from "../model/interfaces/form";
+import { getCreatableFormsByUserId, getFormsByUserId } from "./forms-service";
 
 const PROFILE_SERVICE_ERROR_TYPE_VAL =
   "profile-service-error-b2facf8d-038c-449b-8e24-d6cfe6680bd4";
@@ -73,6 +76,7 @@ type ProfileWithOptionalApplication = {
   profile: ModelProfile;
   application: Option.Option<ModelPersistedApplication>;
   forms: FormSubmissionWithSpecAndActions[];
+  creatableForms: FormSpec[];
 };
 
 const getProfileByUserId = (userId: string) =>
@@ -101,10 +105,15 @@ export const getProfileWithFormsByProfile =
         Effect.andThen((profileWithOptionalApplication) =>
           getFormsByUserId(userId).pipe(
             Effect.andThen((forms) =>
-              Effect.succeed({
-                ...profileWithOptionalApplication,
-                forms,
-              })
+              getCreatableFormsByUserId(userId).pipe(
+                Effect.andThen((creatableForms) =>
+                  Effect.succeed({
+                    ...profileWithOptionalApplication,
+                    forms,
+                    creatableForms,
+                  })
+                )
+              )
             )
           )
         )
@@ -130,6 +139,7 @@ export const getOrCreateProfileForAuthenticatedUserEffect = (
             profile,
             application: Option.none(),
             forms: [],
+            creatableForms: [],
           } as ProfileWithOptionalApplication)
         )
       )
@@ -199,11 +209,15 @@ export const updateUserProfileEffect = (
         .modelUpdateProfileByUserId(userId, version, updatableProfile)
         .pipe(
           Effect.andThen((profile) =>
-            getFormsByUserId(userId).pipe(
-              Effect.andThen((forms) =>
+            Effect.all([
+              getFormsByUserId(userId),
+              getCreatableFormsByUserId(userId),
+            ]).pipe(
+              Effect.andThen(([forms, creatableForms]) =>
                 Effect.succeed({
                   profile,
                   forms,
+                  creatableForms,
                 })
               )
             )

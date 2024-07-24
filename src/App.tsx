@@ -5,7 +5,6 @@ import { Provider } from "react-redux";
 import RootWithProfileLoading from "./routes/RootWithProfileLoading";
 import store from "./store";
 import { fetchProfile } from "./features/profile/profile-slice";
-import Home from "./components/Home";
 import ProfileForm from "./components/forms/ProfileForm";
 import PhotoPage from "./components/PhotoPage";
 import PrivacyPolicy from "./components/PrivacyPolicy";
@@ -19,6 +18,11 @@ import FormSubmissionRoute, {
 import FormSubmissionEditRoute, {
   FormSubmissionEditRouteLoader,
 } from "./routes/FormSubmissionEditRoute";
+import CreatableFormsRoute from "./routes/CreateableFormsRoute";
+import CreatableFormNewRoute, {
+  CreatableFormNewRouteLoader,
+} from "./routes/CreatableFormNewRoute";
+import HomeRoute from "./routes/HomeRoute";
 
 initializeIcons();
 
@@ -30,7 +34,7 @@ const router = createBrowserRouter([
     element: <RootWithProfileLoading />,
     errorElement: <ErrorPage />,
     children: [
-      { index: true, element: <Home /> },
+      { index: true, element: <HomeRoute /> },
       {
         path: "formSubmissions",
         children: [
@@ -50,6 +54,17 @@ const router = createBrowserRouter([
                 loader: FormSubmissionEditRouteLoader,
               },
             ],
+          },
+        ],
+      },
+      {
+        path: "creatableForms",
+        children: [
+          { index: true, element: <CreatableFormsRoute /> },
+          {
+            path: ":creatableFormId",
+            loader: CreatableFormNewRouteLoader,
+            element: <CreatableFormNewRoute />,
           },
         ],
       },

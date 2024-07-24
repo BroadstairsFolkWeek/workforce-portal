@@ -55,6 +55,9 @@ const httpTrigger: AzureFunction = async function (
             UserNotAuthenticated: () =>
               Effect.succeed({ status: 401 as const }),
             ApiInvalidRequest: () => Effect.succeed({ status: 400 as const }),
+            FormNotFound: () => Effect.succeed({ status: 404 as const }),
+            UnprocessableFormAction: () =>
+              Effect.succeed({ status: 422 as const }),
           })
         )
     )

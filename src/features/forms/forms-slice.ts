@@ -1,13 +1,20 @@
 import { Effect } from "effect";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
+  FormSpec,
+  FormSpecId,
   FormSubmission,
   FormSubmissionAction,
   FormSubmissionId,
 } from "../../interfaces/form";
 import { Application } from "../../interfaces/application";
 import { RootState } from "../../store";
-import { apiActionForm, apiDeleteForm, apiSaveForm } from "../../api/forms";
+import {
+  apiActionForm,
+  apiCreateForm,
+  apiDeleteForm,
+  apiSaveForm,
+} from "../../api/forms";
 
 export type FormsLoadingStatus =
   | "not-authenticated"
@@ -22,6 +29,7 @@ export type FormsSavingStatus =
 
 interface FormsState {
   forms: readonly FormSubmission[];
+  creatableForms: readonly FormSpec[];
   application?: Application;
   formsLoadingStatus: FormsLoadingStatus;
   formsLoadingEror?: string;
@@ -31,6 +39,7 @@ interface FormsState {
 
 interface SetFormsPayload {
   forms: readonly FormSubmission[];
+  creatableForms: readonly FormSpec[];
   application?: Application;
 }
 
@@ -38,6 +47,18 @@ type SaveExistingFormSubmissionFullfilledPayload =
   | {
       result: "success";
       formSubmission: FormSubmission;
+    }
+  | {
+      result: "failure";
+      formsSavingStatus: FormsSavingStatus;
+      formsSavingError: string;
+    };
+
+type NewFormFullfilledPayload =
+  | {
+      result: "success";
+      formSubmission: FormSubmission;
+      creatableForms: readonly FormSpec[];
     }
   | {
       result: "failure";
@@ -60,6 +81,7 @@ type DeleteFormSubmissionFullfilledPayload =
   | {
       result: "success";
       deletedFormSubmissionId: FormSubmissionId;
+      creatableForms: readonly FormSpec[];
     }
   | {
       result: "failure";
@@ -69,6 +91,7 @@ type DeleteFormSubmissionFullfilledPayload =
 
 const initialState: FormsState = {
   forms: [],
+  creatableForms: [],
   formsLoadingStatus: "loaded",
   formsSavingStatus: "saved",
 };
@@ -82,6 +105,38 @@ export const saveExistingFormSubmission = createAsyncThunk<
       Effect.andThen((savedFormSubmission) => ({
         result: "success" as const,
         formSubmission: savedFormSubmission,
+      }))
+    )
+    .pipe(
+      Effect.catchTags({
+        NotAuthenticated: () =>
+          Effect.succeed({
+            result: "failure" as const,
+            formsSavingStatus: "not-authenticated" as const,
+            formsSavingError: "Not authenticated",
+          }),
+        ServerError: (e) =>
+          Effect.succeed({
+            result: "failure" as const,
+            formsSavingStatus: "error" as const,
+            formsSavingError: e.responseError.message,
+          }),
+      })
+    );
+
+  return await Effect.runPromise(program);
+});
+
+export const createFormSubmission = createAsyncThunk<
+  NewFormFullfilledPayload,
+  { answers: unknown; formSpecId: FormSpecId }
+>("forms/createFormSubmission", async ({ formSpecId, answers }) => {
+  const program = apiCreateForm(formSpecId)(answers)
+    .pipe(
+      Effect.andThen((newFormResult) => ({
+        result: "success" as const,
+        formSubmission: newFormResult.form,
+        creatableForms: newFormResult.creatableForms,
       }))
     )
     .pipe(
@@ -149,10 +204,11 @@ export const deleteFormSubmission = createAsyncThunk<
 >("forms/deleteFormSubmission", async ({ formSubmissionId }) => {
   const program = apiDeleteForm(formSubmissionId)
     .pipe(
-      Effect.andThen({
+      Effect.andThen((deleteResult) => ({
         result: "success" as const,
         deletedFormSubmissionId: formSubmissionId,
-      })
+        creatableForms: deleteResult.creatableForms,
+      }))
     )
     .pipe(
       Effect.catchTags({
@@ -180,6 +236,7 @@ export const formsSlice = createSlice({
   reducers: {
     setForms: (state, action: PayloadAction<SetFormsPayload>) => {
       state.forms = [...action.payload.forms];
+      state.creatableForms = [...action.payload.creatableForms];
       if (action.payload.application) {
         state.application = action.payload.application;
       }
@@ -187,6 +244,26 @@ export const formsSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    builder.addCase(createFormSubmission.pending, (state) => {
+      state.formsSavingStatus = "saving";
+    });
+
+    builder.addCase(createFormSubmission.fulfilled, (state, action) => {
+      if (action.payload.result == "success") {
+        state.forms.push(action.payload.formSubmission);
+        state.creatableForms = [...action.payload.creatableForms];
+        state.formsSavingStatus = "saved";
+      } else {
+        state.formsSavingStatus = action.payload.formsSavingStatus;
+        state.formsSavingError = action.payload.formsSavingError;
+      }
+    });
+
+    builder.addCase(createFormSubmission.rejected, (state, action) => {
+      state.formsSavingStatus = "error";
+      state.formsSavingError = action.error.message;
+    });
+
     builder.addCase(saveExistingFormSubmission.pending, (state) => {
       state.formsSavingStatus = "saving";
     });
@@ -248,6 +325,7 @@ export const formsSlice = createSlice({
         state.forms = state.forms.filter(
           (f) => f.id !== action.payload.deletedFormSubmissionId
         );
+        state.creatableForms = [...action.payload.creatableForms];
       } else {
         state.formsSavingStatus = action.payload.formsSavingStatus;
         state.formsSavingError = action.payload.formsSavingError;
@@ -267,6 +345,11 @@ export const selectFormsSavingStatus = (state: RootState) =>
 export const selectFormsApplicationForm = (state: RootState) =>
   state.forms.application;
 export const selectFormSubmissions = (state: RootState) => state.forms.forms;
+export const selectCreatableForms = (state: RootState) =>
+  state.forms.creatableForms;
 export const selectFormSubmission =
   (formSubmissionId: FormSubmissionId) => (state: RootState) =>
     state.forms.forms.find((f) => f.id === formSubmissionId);
+export const selectCreatableForm =
+  (formSpecId: FormSpecId) => (state: RootState) =>
+    state.forms.creatableForms.find((f) => f.id === formSpecId);

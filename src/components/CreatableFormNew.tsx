@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux";
 import { Model } from "survey-core";
 import { Survey } from "survey-react-ui";
-import { FormSubmission } from "../interfaces/form";
+import { FormSpec } from "../interfaces/form";
 import { ContrastDark } from "survey-core/themes";
 
 import { useFormSubmissionHandlers } from "../routes/FormSubmissionHandlers";
@@ -11,14 +11,14 @@ import { selectFormsSavingStatus } from "../features/forms/forms-slice";
 
 import "survey-core/defaultV2.min.css";
 
-interface FormSubmissionEditProps {
-  formSubmission: FormSubmission;
+interface CreatableFormNewProps {
+  creatableForm: FormSpec;
 }
 
-const FormSubmissionEdit: React.FC<FormSubmissionEditProps> = ({
-  formSubmission,
+const CreatableFormNew: React.FC<CreatableFormNewProps> = ({
+  creatableForm,
 }) => {
-  const { saveForm } = useFormSubmissionHandlers();
+  const { createNewForm, cancelNewForm } = useFormSubmissionHandlers();
 
   const formsSavingStatus = useSelector(selectFormsSavingStatus);
 
@@ -32,13 +32,12 @@ const FormSubmissionEdit: React.FC<FormSubmissionEditProps> = ({
 
   const saveFormHandler = useCallback(
     async (answers: unknown) => {
-      saveForm(formSubmission, answers);
+      createNewForm(creatableForm, answers);
     },
-    [saveForm, formSubmission]
+    [createNewForm, creatableForm]
   );
 
-  const survey = new Model(formSubmission.formSpec.questions);
-  survey.data = formSubmission.answers;
+  const survey = new Model(creatableForm.questions);
   survey.applyTheme(ContrastDark);
 
   survey.onComplete.add((sender) => saveFormHandler(sender.data));
@@ -58,4 +57,4 @@ const FormSubmissionEdit: React.FC<FormSubmissionEditProps> = ({
   );
 };
 
-export default FormSubmissionEdit;
+export default CreatableFormNew;

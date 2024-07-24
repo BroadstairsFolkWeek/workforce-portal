@@ -44,6 +44,7 @@ export const FormSpec = S.Struct({
   requirements: FormSpecRequirements,
   status: S.Literal("draft", "active", "archived"),
 });
+export type FormSpec = S.Schema.Type<typeof FormSpec>;
 
 export const FormAnswersModifiableStatus = S.Literal("modifiable", "locked");
 export type FormAnswersModifiableStatus = S.Schema.Type<

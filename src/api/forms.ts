@@ -1,7 +1,7 @@
 import { Effect } from "effect";
 import { Schema as S } from "@effect/schema";
 import {
-  apiDelete,
+  apiDeleteJsonResponse,
   apiPostJsonData,
   apiPutJsonData,
   NotAuthenticated,
@@ -10,11 +10,17 @@ import {
 } from "./api";
 import {
   ActionFormResponse,
+  CreateFormResponse,
+  DeleteFormResponse,
   SaveApplicationResponse,
   SaveFormResponse,
 } from "./interfaces/forms";
 import { Application } from "../interfaces/application";
-import { FormSubmissionAction, FormSubmissionId } from "../interfaces/form";
+import {
+  FormSpecId,
+  FormSubmissionAction,
+  FormSubmissionId,
+} from "../interfaces/form";
 
 export const apiSaveApplication = (application: Application) =>
   apiPostJsonData("/api/saveApplication")(application)
@@ -43,10 +49,14 @@ export const apiSaveForm =
         Effect.catchTags({
           ParseError: (e) => Effect.die(e),
           RequestError: (e) => Effect.die("Failed to save form: " + e),
-          ResponseError: (e) =>
-            e.response.status === 401
-              ? Effect.fail(new NotAuthenticated())
-              : Effect.fail(new ServerError({ responseError: e })),
+          ResponseError: (e) => {
+            switch (e.response.status) {
+              case 401:
+                return Effect.fail(new NotAuthenticated());
+              default:
+                return Effect.fail(new ServerError({ responseError: e }));
+            }
+          },
           HttpBodyError: (e) => Effect.die(e),
         })
       );
@@ -69,12 +79,34 @@ export const apiActionForm =
       );
 
 export const apiDeleteForm = (formSubmissionId: FormSubmissionId) =>
-  apiDelete(`/api/forms/${formSubmissionId}`).pipe(
+  apiDeleteJsonResponse(`/api/formDelete/${formSubmissionId}`).pipe(
+    Effect.andThen(S.decodeUnknown(DeleteFormResponse)),
+    Effect.andThen((decoded) => decoded.data),
     Effect.catchTags({
-      RequestError: (e) => Effect.die("Failed to action form: " + e),
+      RequestError: (e) => Effect.die("Failed to delete form: " + e),
       ResponseError: (e) =>
         e.response.status === 401
           ? Effect.fail(new NotAuthenticated())
           : Effect.fail(new ServerError({ responseError: e })),
     })
   );
+
+export const apiCreateForm = (formSpecId: FormSpecId) => (answers: unknown) =>
+  apiPostJsonData(`/api/formNew/${formSpecId}`)({ answers })
+    .pipe(Effect.andThen(S.decodeUnknown(CreateFormResponse)))
+    .pipe(Effect.andThen((decoded) => decoded.data))
+    .pipe(
+      Effect.catchTags({
+        ParseError: (e) => Effect.die(e),
+        RequestError: (e) => Effect.die("Failed to save form: " + e),
+        ResponseError: (e) => {
+          switch (e.response.status) {
+            case 401:
+              return Effect.fail(new NotAuthenticated());
+            default:
+              return Effect.fail(new ServerError({ responseError: e }));
+          }
+        },
+        HttpBodyError: (e) => Effect.die(e),
+      })
+    );

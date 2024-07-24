@@ -14,7 +14,7 @@ const httpTrigger: AzureFunction = async function (
   context: Context,
   req: HttpRequest
 ): Promise<void> {
-  const updateProfileProgram = Effect.logTrace("updateProfile: entry")
+  const program = Effect.logTrace("updateProfile: entry")
     .pipe(
       Effect.andThen(getAuthenticatedUserId(req)),
       Effect.andThen((userId) =>
@@ -30,6 +30,7 @@ const httpTrigger: AzureFunction = async function (
             data: {
               profile: updateResult.profile,
               forms: updateResult.forms,
+              creatableForms: updateResult.creatableForms,
             },
           })),
           Effect.andThen(S.encode(UpdateProfileResponse)),
@@ -68,13 +69,14 @@ const httpTrigger: AzureFunction = async function (
         ParseError: () => Effect.succeed({ status: 400 as const }),
         ProfileNotFound: () => Effect.succeed({ status: 404 as const }),
         UserNotAuthenticated: () => Effect.succeed({ status: 401 as const }),
+        GraphUserNotFound: () => Effect.succeed({ status: 404 as const }),
       })
     );
 
   const logLayer = createLoggerLayer(context);
 
   context.res = await Effect.runPromise(
-    updateProfileProgram.pipe(
+    program.pipe(
       Effect.provide(repositoriesLayerLive),
       Logger.withMinimumLogLevel(LogLevel.Debug),
       Effect.provide(logLayer)

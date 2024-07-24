@@ -37,12 +37,16 @@ export const apiSaveProfile = (version: number, updates: ProfileUpdate) =>
       Effect.catchTags({
         ParseError: (e) => Effect.die(e),
         RequestError: (e) => Effect.die("Failed to save profile: " + e),
-        ResponseError: (e) =>
-          e.response.status === 401
-            ? Effect.fail(new NotAuthenticated())
-            : e.response.status === 409
-            ? Effect.fail(new VersionConflict())
-            : Effect.fail(new ServerError({ responseError: e })),
+        ResponseError: (e) => {
+          switch (e.response.status) {
+            case 401:
+              return Effect.fail(new NotAuthenticated());
+            case 409:
+              return Effect.fail(new VersionConflict());
+            default:
+              return Effect.fail(new ServerError({ responseError: e }));
+          }
+        },
         HttpBodyError: (e) => Effect.die(e),
       })
     );

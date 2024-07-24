@@ -1,5 +1,5 @@
 import { Schema as S } from "@effect/schema";
-import { FormSubmission } from "../../interfaces/form";
+import { FormSpec, FormSubmission } from "../../interfaces/form";
 
 export const SaveApplicationResponse = S.Unknown;
 
@@ -9,4 +9,17 @@ export const SaveFormResponse = S.Struct({
 
 export const ActionFormResponse = S.Struct({
   data: FormSubmission,
+});
+
+export const CreateFormResponse = S.Struct({
+  data: S.Struct({
+    form: FormSubmission,
+    creatableForms: S.Array(FormSpec),
+  }),
+});
+
+export const DeleteFormResponse = S.Struct({
+  data: S.Struct({
+    creatableForms: S.Array(FormSpec),
+  }),
 });
