@@ -165,7 +165,13 @@ const FormSubmissionControls = ({
           modalProps={modalProps}
         >
           <DialogFooter>
-            <PrimaryButton onClick={deleteButtonClicked} text="Delete" />
+            <PrimaryButton
+              onClick={() => {
+                setConfirmDelete(false);
+                deleteButtonClicked();
+              }}
+              text="Delete"
+            />
             <DefaultButton
               onClick={() => setConfirmDelete(false)}
               text="Cancel"
