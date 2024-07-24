@@ -4,13 +4,16 @@ import FormSubmissionListItem from "./FormSubmissionsListItem";
 import SpinnerOverlay from "./SpinnerOverlay";
 import { selectFormsSavingStatus } from "../features/forms/forms-slice";
 import { useMemo } from "react";
+import { Profile } from "../interfaces/profile";
 
 interface FormSubmissionListProps {
   formSubmissions: readonly FormSubmission[];
+  profile: Profile;
 }
 
 const FormSubmissionList: React.FC<FormSubmissionListProps> = ({
   formSubmissions,
+  profile,
 }) => {
   const formsSavingStatus = useSelector(selectFormsSavingStatus);
 
@@ -26,6 +29,7 @@ const FormSubmissionList: React.FC<FormSubmissionListProps> = ({
           <FormSubmissionListItem
             key={formSubmission.id}
             formSubmission={formSubmission}
+            profile={profile}
           />
         ))}
       </div>

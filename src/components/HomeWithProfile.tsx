@@ -85,7 +85,10 @@ const HomeWithProfile: React.FC<HomeWithProfileProps> = ({
       {formSubmissions.length > 0 ? (
         <div className="space-y-2 text-left">
           <h1 className="text-xl">Your forms</h1>
-          <FormSubmissionList formSubmissions={formSubmissions} />
+          <FormSubmissionList
+            formSubmissions={formSubmissions}
+            profile={profile}
+          />
         </div>
       ) : null}
       {creatableForms.length > 0 ? (
