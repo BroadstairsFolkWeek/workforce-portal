@@ -40,6 +40,7 @@ const FormSubmissionEdit: React.FC<FormSubmissionEditProps> = ({
   const survey = new Model(formSubmission.formSpec.questions);
   survey.data = formSubmission.answers;
   survey.applyTheme(ContrastDark);
+  survey.validate();
 
   survey.onComplete.add((sender) => saveFormHandler(sender.data));
 
