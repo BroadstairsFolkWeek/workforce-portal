@@ -4,7 +4,6 @@ import { Profile, ProfileUpdate } from "../../interfaces/profile";
 import { apiFetchProfile, apiSaveProfile } from "../../api/profile";
 import { setForms } from "../forms/forms-slice";
 import { RootState } from "../../store";
-import { Application } from "../../interfaces/application";
 
 type ProfileLoadingStatus =
   | "not-authenticated"
@@ -36,7 +35,6 @@ export const fetchProfile = createAsyncThunk<FetchProfileFullfilledPayload>(
             setForms({
               forms: profileFetchResult.forms,
               creatableForms: profileFetchResult.creatableForms,
-              application: profileFetchResult.application as Application,
             })
           )
         ),

@@ -7,7 +7,6 @@ import {
   FormSubmissionAction,
   FormSubmissionId,
 } from "../../interfaces/form";
-import { Application } from "../../interfaces/application";
 import { RootState } from "../../store";
 import {
   apiActionForm,
@@ -30,7 +29,6 @@ export type FormsSavingStatus =
 interface FormsState {
   forms: readonly FormSubmission[];
   creatableForms: readonly FormSpec[];
-  application?: Application;
   formsLoadingStatus: FormsLoadingStatus;
   formsLoadingEror?: string;
   formsSavingStatus: FormsSavingStatus;
@@ -40,7 +38,6 @@ interface FormsState {
 interface SetFormsPayload {
   forms: readonly FormSubmission[];
   creatableForms: readonly FormSpec[];
-  application?: Application;
 }
 
 type SaveExistingFormSubmissionFullfilledPayload =
@@ -237,9 +234,6 @@ export const formsSlice = createSlice({
     setForms: (state, action: PayloadAction<SetFormsPayload>) => {
       state.forms = [...action.payload.forms];
       state.creatableForms = [...action.payload.creatableForms];
-      if (action.payload.application) {
-        state.application = action.payload.application;
-      }
       state.formsLoadingStatus = "loaded";
     },
   },
@@ -342,8 +336,6 @@ export const selectFormsLoadingStatus = (state: RootState) =>
   state.forms.formsLoadingStatus;
 export const selectFormsSavingStatus = (state: RootState) =>
   state.forms.formsSavingStatus;
-export const selectFormsApplicationForm = (state: RootState) =>
-  state.forms.application;
 export const selectFormSubmissions = (state: RootState) => state.forms.forms;
 export const selectCreatableForms = (state: RootState) =>
   state.forms.creatableForms;

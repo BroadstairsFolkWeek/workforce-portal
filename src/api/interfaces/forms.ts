@@ -1,8 +1,6 @@
 import { Schema as S } from "@effect/schema";
 import { FormSpec, FormSubmission } from "../../interfaces/form";
 
-export const SaveApplicationResponse = S.Unknown;
-
 export const SaveFormResponse = S.Struct({
   data: FormSubmission,
 });
