@@ -15,7 +15,8 @@ const CreatableFormsList: React.FC<CreatableFormsListProps> = ({
   const formsSavingStatus = useSelector(selectFormsSavingStatus);
 
   const spinnerOverlay = useMemo(
-    () => (formsSavingStatus === "saving" ? <SpinnerOverlay /> : null),
+    () =>
+      formsSavingStatus === "saving" ? <SpinnerOverlay size="md" /> : null,
     [formsSavingStatus]
   );
 

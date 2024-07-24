@@ -30,9 +30,7 @@ const ListItemFooter = ({
 }>) => {
   return (
     <div className="bg-bfw-yellow">
-      <div className="flex flex-col justify-between p-2 bg-black text-xs text-white">
-        <div>TODO</div>
-      </div>
+      <div className="flex flex-col justify-between p-2 bg-black text-xs text-white"></div>
       <div className="px-2">{children}</div>
     </div>
   );

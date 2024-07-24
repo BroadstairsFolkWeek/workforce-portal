@@ -13,7 +13,7 @@ const SpinnerOverlay: React.FC<SpinnerOverlayProps> = ({
   const vpos = useMemo(() => verticalPosition ?? "centre", [verticalPosition]);
 
   return (
-    <div className="absolute w-full h-full top-0 left-0 p-10 flex flex-col bg-white bg-opacity-70">
+    <div className="absolute w-full h-full top-0 left-0 p-2 flex flex-col bg-white bg-opacity-70">
       {vpos === "centre" || vpos === "bottom" ? (
         <div className="flex-grow" />
       ) : null}
