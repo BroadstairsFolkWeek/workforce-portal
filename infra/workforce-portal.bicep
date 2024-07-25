@@ -7,6 +7,9 @@ param environmentName string
 @maxLength(10)
 param resourceUniqueNameElement string
 
+@description('Custom domain name for the Static Web App')
+param customDomainName string
+
 @description('Client ID of the application registration in Azure AD B2C')
 param b2cClientId string
 @description('Client secret of the application registration in Azure AD B2C')
@@ -82,6 +85,7 @@ module swa './modules/azure-swa.bicep' = {
     appInsightsId: monitoring.outputs.appInsightsId
     appInsightsConnectionString: monitoring.outputs.appInsightsConnectionString
     appInsightsInstrumentationKey: monitoring.outputs.appInsightsInstrumentationKey
+    customDomainName: customDomainName
     tags: tags
 
     b2cClientId: b2cClientId

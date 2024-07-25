@@ -2,6 +2,9 @@ param resourceBaseName string
 param location string
 param tags object
 
+@description('Custom domain name for the Static Web App')
+param customDomainName string
+
 @description('Resource ID of the Application Insights instance that SWA will use')
 param appInsightsId string
 @description('Connection string for Application Insights')
@@ -120,5 +123,9 @@ resource staticSite 'Microsoft.Web/staticSites@2022-09-01' = {
       WF_API_CLIENT_AUTH_CLIENT_SECRET: wfApiClientAuthClientSecret
       WF_API_CLIENT_AUTH_SCOPE: wfApiClientAuthScope
     }
+  }
+
+  resource customDomain 'customDomains' = {
+    name: customDomainName
   }
 }

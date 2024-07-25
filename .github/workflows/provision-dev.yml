@@ -49,6 +49,7 @@ jobs:
           parameters: >-
             environmentName=dev
             resourceUniqueNameElement="${{ env.AZURE_RESOURCE_UNIQUE_NAME_ELEMENT }}"
+            customDomainName="${{ secrets.CUSTOM_DOMAIN_NAME_DEV }}"
             b2cClientId="${{ secrets.B2C_CLIENT_ID_DEV }}"
             b2cClientSecret="${{ secrets.B2C_CLIENT_SECRET_DEV }}"
             b2cTenantId="${{ secrets.B2C_TENANT_ID_DEV }}"
