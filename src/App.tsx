@@ -12,16 +12,7 @@ import TermsAndConditions from "./components/TermsAndConditions";
 import RootWithoutProfileLoading from "./routes/RootWithoutProfileLoading";
 import ErrorPage from "./components/ErrorPage";
 import FormSubmissionsRoute from "./routes/FormSubmissionsRoute";
-import FormSubmissionRoute, {
-  FormSubmissionRouteLoader,
-} from "./routes/FormSubmissionRoute";
-import FormSubmissionEditRoute, {
-  FormSubmissionEditRouteLoader,
-} from "./routes/FormSubmissionEditRoute";
 import CreatableFormsRoute from "./routes/CreateableFormsRoute";
-import CreatableFormNewRoute, {
-  CreatableFormNewRouteLoader,
-} from "./routes/CreatableFormNewRoute";
 import HomeRoute from "./routes/HomeRoute";
 
 initializeIcons();
@@ -45,13 +36,11 @@ const router = createBrowserRouter([
             children: [
               {
                 index: true,
-                element: <FormSubmissionRoute />,
-                loader: FormSubmissionRouteLoader,
+                lazy: () => import("./routes/FormSubmissionRoute"),
               },
               {
                 path: "edit",
-                element: <FormSubmissionEditRoute />,
-                loader: FormSubmissionEditRouteLoader,
+                lazy: () => import("./routes/FormSubmissionEditRoute"),
               },
             ],
           },
@@ -63,8 +52,7 @@ const router = createBrowserRouter([
           { index: true, element: <CreatableFormsRoute /> },
           {
             path: ":creatableFormId",
-            loader: CreatableFormNewRouteLoader,
-            element: <CreatableFormNewRoute />,
+            lazy: () => import("./routes/CreatableFormNewRoute"),
           },
         ],
       },

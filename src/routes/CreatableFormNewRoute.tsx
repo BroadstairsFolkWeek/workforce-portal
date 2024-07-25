@@ -5,18 +5,14 @@ import { selectCreatableForm } from "../features/forms/forms-slice";
 import { FormSpecId } from "../interfaces/form";
 import CreatableFormNew from "../components/CreatableFormNew";
 
-export async function CreatableFormNewRouteLoader({
-  params,
-}: {
-  params: Params;
-}) {
+export async function loader({ params }: { params: Params }) {
   const creatableFormId = params.creatableFormId;
   return { creatableFormId };
 }
 
-const CreatableFormNewRoute = () => {
+export const Component = () => {
   const { creatableFormId } = useLoaderData() as Awaited<
-    ReturnType<typeof CreatableFormNewRouteLoader>
+    ReturnType<typeof loader>
   >;
 
   if (creatableFormId) {
@@ -33,4 +29,4 @@ const CreatableFormNewRoute = () => {
   }
 };
 
-export default CreatableFormNewRoute;
+Component.displayName = "CreatableFormNewRoute";

@@ -6,18 +6,14 @@ import { useLoaderData } from "react-router-dom";
 import { FormSubmissionId } from "../interfaces/form";
 import FormSubmissionEdit from "../components/FormSubmissionEdit";
 
-export async function FormSubmissionEditRouteLoader({
-  params,
-}: {
-  params: Params;
-}) {
+export async function loader({ params }: { params: Params }) {
   const formSubmissionId = params.formSubmissionId;
   return { formSubmissionId };
 }
 
-const FormSubmissionEditRoute = () => {
+export const Component = () => {
   const { formSubmissionId } = useLoaderData() as Awaited<
-    ReturnType<typeof FormSubmissionEditRouteLoader>
+    ReturnType<typeof loader>
   >;
 
   if (formSubmissionId) {
@@ -34,4 +30,4 @@ const FormSubmissionEditRoute = () => {
   }
 };
 
-export default FormSubmissionEditRoute;
+Component.displayName = "FormSubmissionEditRoute";

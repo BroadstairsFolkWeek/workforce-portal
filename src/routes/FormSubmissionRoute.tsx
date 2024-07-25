@@ -7,18 +7,14 @@ import { FormSubmissionId } from "../interfaces/form";
 import { Params } from "react-router-dom";
 import { useCallback } from "react";
 
-export async function FormSubmissionRouteLoader({
-  params,
-}: {
-  params: Params;
-}) {
+export async function loader({ params }: { params: Params }) {
   const formSubmissionId = params.formSubmissionId;
   return { formSubmissionId };
 }
 
-const FormSubmissionRoute = () => {
+export const Component = () => {
   const { formSubmissionId } = useLoaderData() as Awaited<
-    ReturnType<typeof FormSubmissionRouteLoader>
+    ReturnType<typeof loader>
   >;
 
   const navigate = useNavigate();
@@ -51,4 +47,4 @@ const FormSubmissionRoute = () => {
   }
 };
 
-export default FormSubmissionRoute;
+Component.displayName = "FormSubmissionRoute";
