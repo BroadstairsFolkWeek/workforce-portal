@@ -4,7 +4,6 @@ import { graphUsersRepositoryLive } from "../model/graph-users-repository-graph"
 import { profilesRepositoryLive } from "../model/profiles-repository-live";
 import { graphListAccessesLive } from "./graph-list-access-live";
 import { defaultGraphClient } from "../graph/default-graph-client";
-import { teamsRepositoryLive } from "../model/teams-repository-graph";
 import { photosRepositoryLive } from "../model/photos-repository-graph";
 import { fetchApiLive } from "../fetch/fetch-api-live";
 import { wfApiClientLive } from "../wf-api/wf-client-live";
@@ -17,7 +16,6 @@ const graphUsersLayer = graphUsersRepositoryLive.pipe(
 export const repositoriesLayerLive = Layer.mergeAll(
   graphUsersLayer,
   profilesRepositoryLive,
-  teamsRepositoryLive,
   photosRepositoryLive,
   formsRepositoryLive
 ).pipe(
