@@ -8,7 +8,7 @@ import {
 } from "./profiles-repository";
 import { ModelProfile, ModelProfileUpdates } from "./interfaces/profile";
 import { WfApiClient } from "../wf-api/wf-client";
-import { ModelCoreUserLogin } from "./interfaces/user-login";
+import { ModelUser } from "./interfaces/user";
 
 const SingleProfileApiResponseSchema = Schema.Struct({
   data: ModelProfile,
@@ -73,10 +73,10 @@ const modelUpdateProfileByUserId = (
     })
   );
 
-const modelCreateProfileForUserLogin = (userLogin: ModelCoreUserLogin) => {
+const modelCreateProfileForUserLogin = (user: ModelUser) => {
   return WfApiClient.pipe(
     Effect.andThen((apiClient) =>
-      apiClient.postJsonDataJsonResponse("/api/users")(userLogin)
+      apiClient.postJsonDataJsonResponse("/api/users")(user)
     ),
     Effect.andThen(Schema.decodeUnknown(SingleProfileApiResponseSchema)),
     Effect.andThen((response) => response.data)
@@ -162,8 +162,8 @@ export const profilesRepositoryLive = Layer.effect(
           Effect.provideService(WfApiClient, wfApiClient)
         ),
 
-      modelCreateProfileForUserLogin: (userLogin: ModelCoreUserLogin) =>
-        modelCreateProfileForUserLogin(userLogin).pipe(
+      modelCreateProfileForUserLogin: (user: ModelUser) =>
+        modelCreateProfileForUserLogin(user).pipe(
           Effect.provideService(WfApiClient, wfApiClient)
         ),
 

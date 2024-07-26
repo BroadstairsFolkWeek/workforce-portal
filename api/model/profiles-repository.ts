@@ -1,6 +1,6 @@
 import { Effect, Context } from "effect";
 import { ModelProfile, ModelProfileUpdates } from "./interfaces/profile";
-import { ModelCoreUserLogin } from "./interfaces/user-login";
+import { ModelUser } from "./interfaces/user";
 
 export class ProfileNotFound {
   readonly _tag = "ProfileNotFound";
@@ -24,7 +24,7 @@ export class ProfilesRepository extends Context.Tag("ProfilesRepository")<
     ) => Effect.Effect<ModelProfile, ProfileNotFound | ProfileVersionMismatch>;
 
     readonly modelCreateProfileForUserLogin: (
-      userLogin: ModelCoreUserLogin
+      user: ModelUser
     ) => Effect.Effect<ModelProfile>;
 
     readonly modelSetProfilePhoto: (
