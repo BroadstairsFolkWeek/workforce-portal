@@ -23,3 +23,15 @@ Ealier versions of the portal also had Azure AD B2C configured to authenticate u
 ## Infrastructure
 
 Infrastructure to support running of the Workforce Portal as an Azure Static Web App is implemented in Bicep files under the infra directory. The bicep files are run from GitHub Workflows.
+
+## Related projects
+
+https://github.com/BroadstairsFolkWeek/workforce-api - Provides the Workforce Services API used to persist data and apply business rules to forms.
+
+https://github.com/BroadstairsFolkWeek/workforce-backoffice - A Microsoft Teams application used by Broadstairs Folk Week staff to process submitted application forms.
+
+## Future work
+
+It is intended for the Workforce Portal to be used to communicate assigned shifts to workforce members.
+
+The portal can be used to provide the contact information of key people involved in running the festival. This would allow workforce members to contact their shift manager if they have any issues.
