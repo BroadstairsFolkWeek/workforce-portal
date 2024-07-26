@@ -5,7 +5,6 @@ import {
 } from "../interfaces/profile";
 import { getUserLoginPropertiesFromGraph } from "./user-service";
 import { defaultGraphClient } from "../graph/default-graph-client";
-import { graphListAccessesLive } from "../contexts/graph-list-access-live";
 import { ModelProfile } from "../model/interfaces/profile";
 import { ProfilesRepository } from "../model/profiles-repository";
 import { profilesRepositoryLive } from "../model/profiles-repository-live";
@@ -127,7 +126,6 @@ export const getOrCreateProfileForAuthenticatedUser = async (
   );
 
   const layers = repositoriesLayer.pipe(
-    Layer.provide(graphListAccessesLive),
     Layer.provide(defaultGraphClient),
     Layer.provide(wfApiClientLive)
   );

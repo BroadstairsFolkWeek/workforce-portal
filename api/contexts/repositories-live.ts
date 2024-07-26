@@ -2,7 +2,6 @@ import { Layer } from "effect";
 import { b2cGraphClient } from "../graph/b2c-graph-client";
 import { graphUsersRepositoryLive } from "../model/graph-users-repository-graph";
 import { profilesRepositoryLive } from "../model/profiles-repository-live";
-import { graphListAccessesLive } from "./graph-list-access-live";
 import { defaultGraphClient } from "../graph/default-graph-client";
 import { fetchApiLive } from "../fetch/fetch-api-live";
 import { wfApiClientLive } from "../wf-api/wf-client-live";
@@ -17,7 +16,6 @@ export const repositoriesLayerLive = Layer.mergeAll(
   profilesRepositoryLive,
   formsRepositoryLive
 ).pipe(
-  Layer.provide(graphListAccessesLive),
   Layer.provide(defaultGraphClient),
   Layer.provide(fetchApiLive),
   Layer.provide(wfApiClientLive)
