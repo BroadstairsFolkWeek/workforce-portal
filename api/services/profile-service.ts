@@ -53,7 +53,7 @@ const createNewUserLoginAndProfileForGraphUser = (graphUserId: string) => {
         Effect.andThen((userProps) =>
           ProfilesRepository.pipe(
             Effect.andThen((profilesRepository) =>
-              profilesRepository.modelCreateProfileForUserLogin(userProps)
+              profilesRepository.modelCreateProfileForUser(userProps)
             )
           )
         )

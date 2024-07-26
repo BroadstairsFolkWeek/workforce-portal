@@ -23,7 +23,7 @@ export class ProfilesRepository extends Context.Tag("ProfilesRepository")<
       updates: ModelProfileUpdates
     ) => Effect.Effect<ModelProfile, ProfileNotFound | ProfileVersionMismatch>;
 
-    readonly modelCreateProfileForUserLogin: (
+    readonly modelCreateProfileForUser: (
       user: ModelUser
     ) => Effect.Effect<ModelProfile>;
 

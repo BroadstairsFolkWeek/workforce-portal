@@ -73,7 +73,7 @@ const modelUpdateProfileByUserId = (
     })
   );
 
-const modelCreateProfileForUserLogin = (user: ModelUser) => {
+const modelCreateProfileForUser = (user: ModelUser) => {
   return WfApiClient.pipe(
     Effect.andThen((apiClient) =>
       apiClient.postJsonDataJsonResponse("/api/users")(user)
@@ -83,11 +83,11 @@ const modelCreateProfileForUserLogin = (user: ModelUser) => {
   ).pipe(
     Effect.catchTags({
       RequestError: (e) =>
-        Effect.die("Failed to create profile for user login: " + e),
+        Effect.die("Failed to create profile for user: " + e),
       ResponseError: (e) =>
-        Effect.die("Failed to create profile for user login: " + e),
+        Effect.die("Failed to create profile for user: " + e),
       HttpBodyError: (e) =>
-        Effect.die("Failed to create profile for user login: " + e),
+        Effect.die("Failed to create profile for user: " + e),
 
       // Parse errors of data from the WF API are considered unrecoverable.
       ParseError: (e) => Effect.die(e),
@@ -162,8 +162,8 @@ export const profilesRepositoryLive = Layer.effect(
           Effect.provideService(WfApiClient, wfApiClient)
         ),
 
-      modelCreateProfileForUserLogin: (user: ModelUser) =>
-        modelCreateProfileForUserLogin(user).pipe(
+      modelCreateProfileForUser: (user: ModelUser) =>
+        modelCreateProfileForUser(user).pipe(
           Effect.provideService(WfApiClient, wfApiClient)
         ),
 
