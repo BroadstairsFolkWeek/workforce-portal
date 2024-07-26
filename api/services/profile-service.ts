@@ -3,13 +3,11 @@ import {
   ProfileWithCurrentApplication,
   UpdatableProfile,
 } from "../interfaces/profile";
-import { photoIdFromEncodedPhotoId } from "./photo-service";
 import { getUserLoginPropertiesFromGraph } from "./user-service";
 import { defaultGraphClient } from "../graph/default-graph-client";
 import { graphListAccessesLive } from "../contexts/graph-list-access-live";
 import { ModelProfile } from "../model/interfaces/profile";
 import { ProfilesRepository } from "../model/profiles-repository";
-import { PhotosRepository } from "../model/photos-repository";
 import { profilesRepositoryLive } from "../model/profiles-repository-live";
 import { wfApiClientLive } from "../wf-api/wf-client-live";
 import { graphUsersRepositoryLive } from "../model/graph-users-repository-graph";
@@ -185,15 +183,6 @@ export const updateUserProfileEffect = (
             )
           )
         )
-    )
-  );
-
-export const getProfilePicture = (encodedPhotoId: string) =>
-  PhotosRepository.pipe(
-    Effect.andThen((photoRepository) =>
-      photoRepository.modelGetPhotoContentByPhotoId(
-        photoIdFromEncodedPhotoId(encodedPhotoId)
-      )
     )
   );
 
