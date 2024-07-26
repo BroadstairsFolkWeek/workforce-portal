@@ -1,7 +1,6 @@
 import { Effect, Option } from "effect";
-import { UpdatableProfile } from "../interfaces/profile";
 import { getUserLoginPropertiesFromGraph } from "./user-service";
-import { ModelProfile } from "../model/interfaces/profile";
+import { ModelProfile, ModelProfileUpdates } from "../model/interfaces/profile";
 import { ProfilesRepository } from "../model/profiles-repository";
 import {
   FormSpec,
@@ -110,13 +109,8 @@ export const getOrCreateProfileForAuthenticatedUserEffect = (
   );
 };
 
-interface ProfileUpdates
-  extends Readonly<Omit<UpdatableProfile, "version" | "displayName">> {
-  displayName?: string | undefined;
-}
-
 export const updateUserProfileEffect = (
-  updatableProfile: ProfileUpdates,
+  updatableProfile: ModelProfileUpdates,
   userId: string,
   version: number
 ) =>

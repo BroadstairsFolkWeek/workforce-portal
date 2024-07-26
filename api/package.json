@@ -47,7 +47,6 @@
     "fast-check": "^3.17.1",
     "formdata-node": "^6.0.3",
     "isomorphic-fetch": "^3.0.0",
-    "runtypes": "^6.5.0",
     "uuid": "^8.3.2"
   }
 }
