@@ -3,19 +3,12 @@ import {
   ProfileWithCurrentApplication,
   UpdatableProfile,
 } from "../interfaces/profile";
-import {
-  getApplicationByProfile,
-  getApplicationByProfileAndUpdateIfNeeded,
-  updateApplicationFromProfileIfNeededEffect,
-} from "./application-service";
 import { photoIdFromEncodedPhotoId } from "./photo-service";
 import { getUserLoginPropertiesFromGraph } from "./user-service";
 import { defaultGraphClient } from "../graph/default-graph-client";
-import { applicationsRepositoryLive } from "../model/applications-repository-graph";
 import { graphListAccessesLive } from "../contexts/graph-list-access-live";
 import { ModelProfile } from "../model/interfaces/profile";
 import { ProfilesRepository } from "../model/profiles-repository";
-import { ModelPersistedApplication } from "../model/interfaces/application";
 import { PhotosRepository } from "../model/photos-repository";
 import { profilesRepositoryLive } from "../model/profiles-repository-live";
 import { wfApiClientLive } from "../wf-api/wf-client-live";
@@ -72,9 +65,8 @@ const createNewUserLoginAndProfileForGraphUser = (graphUserId: string) => {
   );
 };
 
-type ProfileWithOptionalApplication = {
+type ProfileWithForms = {
   profile: ModelProfile;
-  application: Option.Option<ModelPersistedApplication>;
   forms: FormSubmissionWithSpecAndActions[];
   creatableForms: FormSpec[];
 };
@@ -86,47 +78,28 @@ const getProfileByUserId = (userId: string) =>
 
 export const getProfileWithFormsByProfile =
   (userId: string) => (profile: ModelProfile) =>
-    getApplicationByProfileAndUpdateIfNeeded(profile)
-      .pipe(
-        Effect.andThen((application) =>
-          Effect.succeed({
-            profile,
-            application: Option.some(application),
-          } as ProfileWithOptionalApplication)
-        ),
-        Effect.catchTag("ApplicationNotFound", () =>
-          Effect.succeed({
-            profile,
-            application: Option.none(),
-          } as ProfileWithOptionalApplication)
-        )
-      )
-      .pipe(
-        Effect.andThen((profileWithOptionalApplication) =>
-          getFormsByUserId(userId).pipe(
-            Effect.andThen((forms) =>
-              getCreatableFormsByUserId(userId).pipe(
-                Effect.andThen((creatableForms) =>
-                  Effect.succeed({
-                    ...profileWithOptionalApplication,
-                    forms,
-                    creatableForms,
-                  })
-                )
-              )
-            )
+    getFormsByUserId(userId).pipe(
+      Effect.andThen((forms) =>
+        getCreatableFormsByUserId(userId).pipe(
+          Effect.andThen((creatableForms) =>
+            Effect.succeed({
+              profile,
+              forms,
+              creatableForms,
+            })
           )
         )
-      );
+      )
+    );
 
-const getProfileWithApplicationByUserId = (userId: string) => {
+const getProfileWithFormsByUserId = (userId: string) => {
   return getProfileByUserId(userId).pipe(
     Effect.andThen(getProfileWithFormsByProfile(userId))
   );
 };
 
 export const getProfileForAuthenticatedUserEffect = (userId: string) =>
-  getProfileWithApplicationByUserId(userId);
+  getProfileWithFormsByUserId(userId);
 
 export const getOrCreateProfileForAuthenticatedUserEffect = (
   userId: string
@@ -140,7 +113,7 @@ export const getOrCreateProfileForAuthenticatedUserEffect = (
             application: Option.none(),
             forms: [],
             creatableForms: [],
-          } as ProfileWithOptionalApplication)
+          } as ProfileWithForms)
         )
       )
     )
@@ -151,7 +124,6 @@ export const getOrCreateProfileForAuthenticatedUser = async (
   userId: string
 ): Promise<ProfileWithCurrentApplication> => {
   const repositoriesLayer = Layer.mergeAll(
-    applicationsRepositoryLive,
     profilesRepositoryLive,
     graphUsersRepositoryLive
   );
@@ -166,17 +138,7 @@ export const getOrCreateProfileForAuthenticatedUser = async (
     Effect.andThen((profilesRepository) =>
       profilesRepository.modelGetProfileByUserId(userId)
     ),
-    Effect.andThen((profile) =>
-      getApplicationByProfile(profile).pipe(
-        Effect.andThen(updateApplicationFromProfileIfNeededEffect(profile)),
-        Effect.andThen((application) =>
-          Effect.succeed({ profile, application })
-        ),
-        Effect.catchTag("ApplicationNotFound", () =>
-          Effect.succeed({ profile })
-        )
-      )
-    )
+    Effect.andThen((profile) => ({ profile }))
   ).pipe(
     Effect.catchTag("ProfileNotFound", () =>
       createNewUserLoginAndProfileForGraphUser(userId).pipe(

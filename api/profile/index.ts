@@ -1,4 +1,4 @@
-import { Effect, LogLevel, Logger, Option } from "effect";
+import { Effect, LogLevel, Logger } from "effect";
 import { Schema as S } from "@effect/schema";
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import { getOrCreateProfileForAuthenticatedUserEffect } from "../services/profile-service";
@@ -16,23 +16,6 @@ const httpTrigger: AzureFunction = async function (
       Effect.andThen(getAuthenticatedUserId(req)),
       Effect.andThen(getOrCreateProfileForAuthenticatedUserEffect),
       Effect.tap(Effect.logDebug("Got or created a profile")),
-      Effect.andThen((profileWithOptionalApplication) =>
-        Option.match({
-          onSome: (application) =>
-            Effect.succeed({
-              profile: profileWithOptionalApplication.profile,
-              application: application,
-              forms: profileWithOptionalApplication.forms,
-              creatableForms: profileWithOptionalApplication.creatableForms,
-            }),
-          onNone: () =>
-            Effect.succeed({
-              profile: profileWithOptionalApplication.profile,
-              forms: profileWithOptionalApplication.forms,
-              creatableForms: profileWithOptionalApplication.creatableForms,
-            }),
-        })(profileWithOptionalApplication.application)
-      ),
       Effect.andThen((a) => ({ data: a })),
       Effect.andThen(S.encode(GetProfileResponse)),
       Effect.andThen((body) => ({

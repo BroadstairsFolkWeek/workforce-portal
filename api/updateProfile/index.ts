@@ -1,4 +1,4 @@
-import { Effect, LogLevel, Logger, Option } from "effect";
+import { Effect, LogLevel, Logger } from "effect";
 import { Schema as S } from "@effect/schema";
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import {
@@ -40,21 +40,6 @@ const httpTrigger: AzureFunction = async function (
           })),
           Effect.catchTag("ProfileVersionMismatch", () =>
             getOrCreateProfileForAuthenticatedUserEffect(userId).pipe(
-              Effect.andThen((profileWithOptionalApplication) =>
-                Option.match({
-                  onSome: (application) =>
-                    Effect.succeed({
-                      profile: profileWithOptionalApplication.profile,
-                      application: application,
-                      forms: profileWithOptionalApplication.forms,
-                    }),
-                  onNone: () =>
-                    Effect.succeed({
-                      profile: profileWithOptionalApplication.profile,
-                      forms: profileWithOptionalApplication.forms,
-                    }),
-                })(profileWithOptionalApplication.application)
-              ),
               Effect.andThen((body) => ({
                 status: 409 as const,
                 body,

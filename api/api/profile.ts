@@ -45,7 +45,6 @@ export const ApiProfileWithForms = S.Struct({
   profile: ApiProfile,
   forms: S.Array(FormSubmissionWithSpecAndActions),
   creatableForms: S.Array(FormSpec),
-  application: S.optional(S.Any),
 });
 
 export const GetProfileResponse = S.Struct({
