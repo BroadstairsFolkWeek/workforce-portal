@@ -1,14 +1,18 @@
 import { Link, Outlet } from "react-router-dom";
 import Spinner from "../components/Spinner";
 import { useSelector } from "react-redux";
-import { selectProfileLoadingStatus } from "../features/profile/profile-slice";
+import {
+  selectProfileLoadingStatus,
+  selectProfileSavingStatus,
+} from "../features/profile/profile-slice";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
 const RootWithProfileLoading: React.FC = () => {
-  const profileStatus = useSelector(selectProfileLoadingStatus);
+  const profileLoadingStatus = useSelector(selectProfileLoadingStatus);
+  const profileSavingStatus = useSelector(selectProfileSavingStatus);
 
-  if (profileStatus === "loading") {
+  if (profileLoadingStatus === "loading" || profileSavingStatus === "saving") {
     return (
       <div className="flex flex-col h-screen bg-bfw-yellow">
         <div className="flex-grow" />

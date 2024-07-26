@@ -56,7 +56,7 @@ const router = createBrowserRouter([
           },
         ],
       },
-      { path: "profile", element: <ProfileForm /> },
+      { path: "profile", lazy: () => import("./routes/ProfileEditRoute") },
       { path: "profilePhoto", element: <PhotoPage /> },
     ],
   },

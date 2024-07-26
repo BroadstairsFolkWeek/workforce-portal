@@ -1,0 +1,47 @@
+{
+  "title": "Your Profile",
+  "pages": [
+    {
+      "name": "page1",
+      "elements": [
+        {
+          "type": "text",
+          "name": "displayName",
+          "title": "Display name"
+        },
+        {
+          "type": "panel",
+          "name": "panel1",
+          "elements": [
+            {
+              "type": "text",
+              "name": "givenName",
+              "title": "Given (first) name"
+            },
+            {
+              "type": "text",
+              "name": "surname",
+              "title": "Surname"
+            }
+          ]
+        },
+        {
+          "type": "comment",
+          "name": "address",
+          "title": "Address"
+        },
+        {
+          "type": "text",
+          "name": "telephone",
+          "title": "Telephone"
+        }
+      ]
+    }
+  ],
+  "showTitle": false,
+  "showPageTitles": false,
+  "showCompletedPage": false,
+  "showQuestionNumbers": "off",
+  "completeText": "Save",
+  "questionsOnPageMode": "singlePage"
+}
