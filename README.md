@@ -35,3 +35,7 @@ https://github.com/BroadstairsFolkWeek/workforce-backoffice - A Microsoft Teams 
 It is intended for the Workforce Portal to be used to communicate assigned shifts to workforce members.
 
 The portal can be used to provide the contact information of key people involved in running the festival. This would allow workforce members to contact their shift manager if they have any issues.
+
+## Contributors
+
+Created by [Watford Consulting](https://watfordconsulting.com/)
