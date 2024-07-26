@@ -1,5 +1,4 @@
 import { Number, String, Record, Static, Optional } from "runtypes";
-import { Application } from "./application";
 
 //  Data Transfer Object for data posted to the API.
 export const ProfileUpdateDtoRunType = Record({
@@ -30,5 +29,4 @@ export type Profile = AddableProfile & {
 
 export type ProfileWithCurrentApplication = {
   profile: Profile;
-  application?: Application | undefined;
 };

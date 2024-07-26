@@ -1,15 +1,8 @@
-import { Effect, Option, Layer } from "effect";
-import {
-  ProfileWithCurrentApplication,
-  UpdatableProfile,
-} from "../interfaces/profile";
+import { Effect, Option } from "effect";
+import { UpdatableProfile } from "../interfaces/profile";
 import { getUserLoginPropertiesFromGraph } from "./user-service";
-import { defaultGraphClient } from "../graph/default-graph-client";
 import { ModelProfile } from "../model/interfaces/profile";
 import { ProfilesRepository } from "../model/profiles-repository";
-import { profilesRepositoryLive } from "../model/profiles-repository-live";
-import { wfApiClientLive } from "../wf-api/wf-client-live";
-import { graphUsersRepositoryLive } from "../model/graph-users-repository-graph";
 import {
   FormSpec,
   FormSubmissionWithSpecAndActions,
@@ -115,40 +108,6 @@ export const getOrCreateProfileForAuthenticatedUserEffect = (
       )
     )
   );
-};
-
-export const getOrCreateProfileForAuthenticatedUser = async (
-  userId: string
-): Promise<ProfileWithCurrentApplication> => {
-  const repositoriesLayer = Layer.mergeAll(
-    profilesRepositoryLive,
-    graphUsersRepositoryLive
-  );
-
-  const layers = repositoriesLayer.pipe(
-    Layer.provide(defaultGraphClient),
-    Layer.provide(wfApiClientLive)
-  );
-
-  const getAndUpdateExistingApplicationProgram = ProfilesRepository.pipe(
-    Effect.andThen((profilesRepository) =>
-      profilesRepository.modelGetProfileByUserId(userId)
-    ),
-    Effect.andThen((profile) => ({ profile }))
-  ).pipe(
-    Effect.catchTag("ProfileNotFound", () =>
-      createNewUserLoginAndProfileForGraphUser(userId).pipe(
-        Effect.andThen((profile) => ({ profile }))
-      )
-    )
-  );
-
-  const runnable = Effect.provide(
-    getAndUpdateExistingApplicationProgram,
-    layers
-  );
-
-  return await Effect.runPromise(runnable);
 };
 
 interface ProfileUpdates
