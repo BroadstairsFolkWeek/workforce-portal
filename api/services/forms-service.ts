@@ -7,59 +7,49 @@ import {
 import {
   Template,
   TemplateId,
-  FormSubmissionAction,
-  FormSubmissionId,
-  FormSubmissionWithTemplateAndActions,
+  FormAction,
+  FormId,
+  Form,
 } from "../model/interfaces/form";
 import { ProfileNotFound } from "../model/profiles-repository";
 
 export const getFormsByUserId = (
   userId: string
-): Effect.Effect<
-  readonly FormSubmissionWithTemplateAndActions[],
-  ProfileNotFound,
-  FormsRepository
-> =>
+): Effect.Effect<readonly Form[], ProfileNotFound, FormsRepository> =>
   FormsRepository.pipe(
     Effect.andThen((formsRepo) => formsRepo.modelGetFormsByUserId(userId))
   );
 
 export const updateFormSubmission =
   (userId: string) =>
-  (formSubmissionId: FormSubmissionId) =>
-  (
-    answers: unknown
-  ): Effect.Effect<
-    FormSubmissionWithTemplateAndActions,
-    FormNotFound,
-    FormsRepository
-  > =>
+  (formId: FormId) =>
+  (answers: unknown): Effect.Effect<Form, FormNotFound, FormsRepository> =>
     FormsRepository.pipe(
       Effect.andThen((formsRepo) =>
-        formsRepo.modelUpdateFormSubmission(userId)(formSubmissionId, answers)
+        formsRepo.modelUpdateFormSubmission(userId)(formId, answers)
       )
     );
 
 export const actionFormSubmission =
   (userId: string) =>
-  (formSubmissionId: FormSubmissionId) =>
+  (formId: FormId) =>
   (
-    action: FormSubmissionAction
+    action: FormAction
   ): Effect.Effect<
-    FormSubmissionWithTemplateAndActions,
+    Form,
     FormNotFound | UnprocessableFormAction,
     FormsRepository
   > =>
     FormsRepository.pipe(
       Effect.andThen((formsRepo) =>
-        formsRepo.modelActionFormSubmission(userId)(formSubmissionId)(action)
+        formsRepo.modelActionFormSubmission(userId)(formId)(action)
       )
     );
 
 export const deleteFormSubmission =
   (userId: string) =>
   (
-    formSubmissionId: FormSubmissionId
+    formId: FormId
   ): Effect.Effect<
     readonly Template[],
     FormNotFound | ProfileNotFound,
@@ -67,7 +57,7 @@ export const deleteFormSubmission =
   > =>
     FormsRepository.pipe(
       Effect.andThen((formsRepo) =>
-        formsRepo.modelDeleteFormSubmission(userId)(formSubmissionId)
+        formsRepo.modelDeleteFormSubmission(userId)(formId)
       ),
       Effect.andThen(() => getCreatableFormsByUserId(userId))
     );

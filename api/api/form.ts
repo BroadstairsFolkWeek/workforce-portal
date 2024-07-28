@@ -1,15 +1,12 @@
 import { Schema as S } from "@effect/schema";
-import {
-  Template,
-  FormSubmissionWithTemplateAndActions,
-} from "../model/interfaces/form";
+import { Template, Form } from "../model/interfaces/form";
 
 export const PutProfileResponse = S.Struct({
-  data: FormSubmissionWithTemplateAndActions,
+  data: Form,
 });
 
 export const PostFormSubmissionActionResponse = S.Struct({
-  data: FormSubmissionWithTemplateAndActions,
+  data: Form,
 });
 
 export const PostNewFormRequestBody = S.Struct({
@@ -18,7 +15,7 @@ export const PostNewFormRequestBody = S.Struct({
 
 export const PostNewFormResponseBody = S.Struct({
   data: S.Struct({
-    form: FormSubmissionWithTemplateAndActions,
+    form: Form,
     creatableForms: S.Array(Template),
   }),
 });

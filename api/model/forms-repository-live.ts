@@ -11,20 +11,20 @@ import {
 import {
   Template,
   TemplateId,
-  FormSubmissionAction,
-  FormSubmissionId,
-  FormSubmissionWithTemplateAndActions,
+  FormAction,
+  FormId,
+  Form,
 } from "./interfaces/form";
 import { ProfileNotFound } from "./profiles-repository";
 
 type WfApiClientType = Context.Tag.Service<WfApiClient>;
 
 const FormApiResponseSchema = Schema.Struct({
-  data: FormSubmissionWithTemplateAndActions,
+  data: Form,
 });
 
 const FormsApiResponseSchema = Schema.Struct({
-  data: Schema.Array(FormSubmissionWithTemplateAndActions),
+  data: Schema.Array(Form),
 });
 
 const CreatableFormsApiResponseSchema = Schema.Struct({
@@ -57,11 +57,11 @@ const getFormsByUserId = (apiClient: WfApiClientType) => (userId: string) =>
 const updateFormSubmission =
   (apiClient: WfApiClientType) =>
   (userId: string) =>
-  (formSubmissionId: FormSubmissionId, answers: unknown) =>
+  (formId: FormId, answers: unknown) =>
     apiClient
-      .putJsonDataJsonResponse(
-        `/api/users/${userId}/profile/forms/${formSubmissionId}`
-      )(answers)
+      .putJsonDataJsonResponse(`/api/users/${userId}/profile/forms/${formId}`)(
+        answers
+      )
       .pipe(
         Effect.andThen(Schema.decodeUnknown(FormApiResponseSchema)),
         Effect.andThen((response) => response.data)
@@ -84,13 +84,9 @@ const updateFormSubmission =
       );
 
 const deleteFormSubmission =
-  (apiClient: WfApiClientType) =>
-  (userId: string) =>
-  (formSubmissionId: FormSubmissionId) =>
+  (apiClient: WfApiClientType) => (userId: string) => (formId: FormId) =>
     apiClient
-      .deleteNoResponse(
-        `/api/users/${userId}/profile/forms/${formSubmissionId}`
-      )
+      .deleteNoResponse(`/api/users/${userId}/profile/forms/${formId}`)
       .pipe(
         Effect.catchTags({
           RequestError: (e) => Effect.die("Failed to delete form: " + e),
@@ -108,11 +104,11 @@ const deleteFormSubmission =
 const actionFormSubmission =
   (apiClient: WfApiClientType) =>
   (userId: string) =>
-  (formSubmissionId: FormSubmissionId) =>
-  (action: FormSubmissionAction) =>
+  (formId: FormId) =>
+  (action: FormAction) =>
     apiClient
       .postJsonDataJsonResponse(
-        `/api/users/${userId}/profile/forms/${formSubmissionId}/action`
+        `/api/users/${userId}/profile/forms/${formId}/action`
       )(action)
       .pipe(
         Effect.andThen(Schema.decodeUnknown(FormApiResponseSchema)),

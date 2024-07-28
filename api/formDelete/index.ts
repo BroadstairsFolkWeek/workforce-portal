@@ -3,7 +3,7 @@ import { Schema } from "@effect/schema";
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import { createLoggerLayer } from "../utilties/logging";
 import { getAuthenticatedUserId } from "../functions/authenticated-user";
-import { FormSubmissionId } from "../model/interfaces/form";
+import { FormId } from "../model/interfaces/form";
 import { repositoriesLayerLive } from "../contexts/repositories-live";
 import { ApiInvalidRequest } from "../api/api";
 import { deleteFormSubmission } from "../services/forms-service";
@@ -13,7 +13,7 @@ const httpTrigger: AzureFunction = async function (
   context: Context,
   req: HttpRequest
 ): Promise<void> {
-  const formSubmissionIdEffect = Schema.decodeUnknown(FormSubmissionId)(
+  const formSubmissionIdEffect = Schema.decodeUnknown(FormId)(
     req.params["formSubmissionId"]
   ).pipe(
     Effect.catchTag("ParseError", () => Effect.fail(new ApiInvalidRequest()))

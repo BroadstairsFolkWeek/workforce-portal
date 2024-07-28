@@ -2,10 +2,7 @@ import { Effect, Option } from "effect";
 import { getUserLoginPropertiesFromGraph } from "./user-service";
 import { ModelProfile, ModelProfileUpdates } from "../model/interfaces/profile";
 import { ProfilesRepository } from "../model/profiles-repository";
-import {
-  Template,
-  FormSubmissionWithTemplateAndActions,
-} from "../model/interfaces/form";
+import { Template, Form } from "../model/interfaces/form";
 import { getCreatableFormsByUserId, getFormsByUserId } from "./forms-service";
 
 const PROFILE_SERVICE_ERROR_TYPE_VAL =
@@ -56,7 +53,7 @@ const createNewUserLoginAndProfileForGraphUser = (graphUserId: string) => {
 
 type ProfileWithForms = {
   profile: ModelProfile;
-  forms: FormSubmissionWithTemplateAndActions[];
+  forms: Form[];
   creatableForms: Template[];
 };
 

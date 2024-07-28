@@ -1,8 +1,5 @@
 import { Schema as S } from "@effect/schema";
-import {
-  Template,
-  FormSubmissionWithTemplateAndActions,
-} from "../model/interfaces/form";
+import { Template, Form } from "../model/interfaces/form";
 
 export const ApiGetPhotoRequestQuery = S.Struct({
   id: S.String,
@@ -43,7 +40,7 @@ export const ApiProfile = S.Struct({
 
 export const ApiProfileWithForms = S.Struct({
   profile: ApiProfile,
-  forms: S.Array(FormSubmissionWithTemplateAndActions),
+  forms: S.Array(Form),
   creatableForms: S.Array(Template),
 });
 

@@ -2,9 +2,9 @@ import { Effect, Context } from "effect";
 import {
   Template,
   TemplateId,
-  FormSubmissionAction,
-  FormSubmissionId,
-  FormSubmissionWithTemplateAndActions,
+  FormAction,
+  FormId,
+  Form,
 } from "./interfaces/form";
 import { ProfileNotFound } from "./profiles-repository";
 
@@ -25,34 +25,26 @@ export class FormsRepository extends Context.Tag("FormsRepository")<
   {
     readonly modelGetFormsByUserId: (
       userId: string
-    ) => Effect.Effect<
-      readonly FormSubmissionWithTemplateAndActions[],
-      ProfileNotFound
-    >;
+    ) => Effect.Effect<readonly Form[], ProfileNotFound>;
 
     readonly modelUpdateFormSubmission: (
       userId: string
     ) => (
-      formSubmissionId: FormSubmissionId,
+      formId: FormId,
       answers: unknown
-    ) => Effect.Effect<FormSubmissionWithTemplateAndActions, FormNotFound>;
+    ) => Effect.Effect<Form, FormNotFound>;
 
     readonly modelDeleteFormSubmission: (
       userId: string
-    ) => (
-      formSubmissionId: FormSubmissionId
-    ) => Effect.Effect<void, FormNotFound>;
+    ) => (formId: FormId) => Effect.Effect<void, FormNotFound>;
 
     readonly modelActionFormSubmission: (
       userId: string
     ) => (
-      formSubmissionId: FormSubmissionId
+      formId: FormId
     ) => (
-      action: FormSubmissionAction
-    ) => Effect.Effect<
-      FormSubmissionWithTemplateAndActions,
-      FormNotFound | UnprocessableFormAction
-    >;
+      action: FormAction
+    ) => Effect.Effect<Form, FormNotFound | UnprocessableFormAction>;
 
     readonly modelGetCreatableFormSpecsByUserId: (
       userId: string
@@ -63,6 +55,6 @@ export class FormsRepository extends Context.Tag("FormsRepository")<
     ) => (
       templateId: TemplateId,
       answers: unknown
-    ) => Effect.Effect<FormSubmissionWithTemplateAndActions, TemplateNotFound>;
+    ) => Effect.Effect<Form, TemplateNotFound>;
   }
 >() {}
