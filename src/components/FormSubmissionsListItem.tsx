@@ -1,14 +1,14 @@
 import { PropsWithChildren, useCallback, useMemo } from "react";
 import { DateTime } from "luxon";
 import { Model, Question } from "survey-core";
-import { FormSubmission } from "../interfaces/form";
+import { Form } from "../interfaces/form";
 import FormSubmissionControls from "./FormSubmissionControls";
 import { useFormSubmissionHandlers } from "../routes/FormSubmissionHandlers";
 import { Profile } from "../interfaces/profile";
 import { Link } from "react-router-dom";
 
 interface FormSubmissionListItemProps {
-  formSubmission: FormSubmission;
+  formSubmission: Form;
   profile: Profile;
 }
 
@@ -16,7 +16,7 @@ const ListItemHeader = ({
   formSubmission,
   children,
 }: PropsWithChildren<{
-  formSubmission: FormSubmission;
+  formSubmission: Form;
 }>) => {
   return (
     <div className="bg-bfw-yellow">

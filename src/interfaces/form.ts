@@ -1,29 +1,27 @@
 import { Schema as S } from "@effect/schema";
 import { ModelProfileId } from "./profile";
 
-export const FormSubmissionId = S.String.pipe(S.brand("FormSubmissionId"));
-export type FormSubmissionId = S.Schema.Type<typeof FormSubmissionId>;
+export const FormId = S.String.pipe(S.brand("FormSubmissionId"));
+export type FormId = S.Schema.Type<typeof FormId>;
 
 export const TemplateId = S.String.pipe(S.brand("TemplateId"));
 export type TemplateId = S.Schema.Type<typeof TemplateId>;
 
-export const FormSubmissionStatus = S.Literal(
+export const FormAnswersStatus = S.Literal(
   "draft",
   "submittable",
   "submitted",
   "accepted"
 );
-export type FormSubmissionStatus = S.Schema.Type<typeof FormSubmissionStatus>;
+export type FormAnswersStatus = S.Schema.Type<typeof FormAnswersStatus>;
 
-export const FormSubmissionArchiveStatus = S.Literal("active", "archived");
-export type FormSubmissionArchiveStatus = S.Schema.Type<
-  typeof FormSubmissionArchiveStatus
->;
+export const FormArchiveStatus = S.Literal("active", "archived");
+export type FormArchiveStatus = S.Schema.Type<typeof FormArchiveStatus>;
 
-export const FormSubmissionAction = S.Literal("submit", "retract", "delete");
-export type FormSubmissionAction = S.Schema.Type<typeof FormSubmissionAction>;
+export const FormAction = S.Literal("submit", "retract", "delete");
+export type FormAction = S.Schema.Type<typeof FormAction>;
 
-export const FormSpecRequirements = S.Struct({
+export const TemplateRequirements = S.Struct({
   profileRequirements: S.Struct({
     firstName: S.optional(S.Boolean),
     surname: S.optional(S.Boolean),
@@ -41,7 +39,7 @@ export const Template = S.Struct({
   fullName: S.String,
   description: S.String,
   questions: S.Unknown,
-  requirements: FormSpecRequirements,
+  requirements: TemplateRequirements,
   status: S.Literal("draft", "active", "archived"),
 });
 export type Template = S.Schema.Type<typeof Template>;
@@ -51,27 +49,22 @@ export type FormAnswersModifiableStatus = S.Schema.Type<
   typeof FormAnswersModifiableStatus
 >;
 
-export const FormSubmissionDeleteableStatus = S.Literal(
-  "deletable",
-  "not-deletable"
-);
-export type FormSubmissionDeleteableStatus = S.Schema.Type<
-  typeof FormSubmissionDeleteableStatus
->;
+export const FormDeleteableStatus = S.Literal("deletable", "not-deletable");
+export type FormDeleteableStatus = S.Schema.Type<typeof FormDeleteableStatus>;
 
-export const FormSubmission = S.Struct({
-  id: FormSubmissionId,
+export const Form = S.Struct({
+  id: FormId,
   templateId: TemplateId,
   profileId: ModelProfileId,
   answers: S.Unknown,
   answersModifiable: FormAnswersModifiableStatus,
-  submissionDeletable: FormSubmissionDeleteableStatus,
-  submissionStatus: FormSubmissionStatus,
-  archiveStatus: FormSubmissionArchiveStatus,
+  submissionDeletable: FormDeleteableStatus,
+  submissionStatus: FormAnswersStatus,
+  archiveStatus: FormArchiveStatus,
   template: Template,
-  availableActions: S.Array(FormSubmissionAction),
+  availableActions: S.Array(FormAction),
   createdDateTimeUtc: S.String,
   modifiedDateTimeUtc: S.String,
 });
 
-export interface FormSubmission extends S.Schema.Type<typeof FormSubmission> {}
+export interface Form extends S.Schema.Type<typeof Form> {}

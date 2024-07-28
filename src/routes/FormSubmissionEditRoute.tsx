@@ -3,7 +3,7 @@ import { Params } from "react-router-dom";
 
 import { selectFormSubmission } from "../features/forms/forms-slice";
 import { useLoaderData } from "react-router-dom";
-import { FormSubmissionId } from "../interfaces/form";
+import { FormId } from "../interfaces/form";
 import FormSubmissionEdit from "../components/FormSubmissionEdit";
 
 export async function loader({ params }: { params: Params }) {
@@ -18,7 +18,7 @@ export const Component = () => {
 
   if (formSubmissionId) {
     const formSubmission = useSelector(
-      selectFormSubmission(FormSubmissionId.make(formSubmissionId))
+      selectFormSubmission(FormId.make(formSubmissionId))
     );
     if (formSubmission) {
       return <FormSubmissionEdit formSubmission={formSubmission} />;

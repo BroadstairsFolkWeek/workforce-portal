@@ -7,10 +7,10 @@ import {
   PrimaryButton,
 } from "@fluentui/react";
 import { useCallback, useMemo, useState } from "react";
-import { FormSubmission } from "../interfaces/form";
+import { Form } from "../interfaces/form";
 
 interface FormSubmissionControlsProps {
-  formSubmission: FormSubmission;
+  formSubmission: Form;
   inhibitViewControl?: boolean;
   viewForm: () => void;
   editForm: () => void;
@@ -40,17 +40,17 @@ const modalProps = {
   dragOptions: undefined,
 };
 
-const isEditable = (formSubmission: FormSubmission): boolean =>
-  formSubmission.answersModifiable === "modifiable";
+const isEditable = (form: Form): boolean =>
+  form.answersModifiable === "modifiable";
 
-const isDeletable = (formSubmission: FormSubmission): boolean =>
-  formSubmission.submissionDeletable === "deletable";
+const isDeletable = (form: Form): boolean =>
+  form.submissionDeletable === "deletable";
 
-const isSubmittable = (formSubmission: FormSubmission): boolean =>
-  formSubmission.submissionStatus === "submittable";
+const isSubmittable = (form: Form): boolean =>
+  form.submissionStatus === "submittable";
 
-const isRetractable = (formSubmission: FormSubmission): boolean =>
-  formSubmission.submissionStatus === "submitted";
+const isRetractable = (form: Form): boolean =>
+  form.submissionStatus === "submitted";
 
 interface ControlsButtonProps {
   text: string;

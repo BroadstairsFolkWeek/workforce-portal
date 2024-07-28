@@ -3,9 +3,9 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
   Template,
   TemplateId,
-  FormSubmission,
-  FormSubmissionAction,
-  FormSubmissionId,
+  Form,
+  FormAction,
+  FormId,
 } from "../../interfaces/form";
 import { RootState } from "../../store";
 import {
@@ -27,7 +27,7 @@ export type FormsSavingStatus =
   | "error";
 
 interface FormsState {
-  forms: readonly FormSubmission[];
+  forms: readonly Form[];
   creatableForms: readonly Template[];
   formsLoadingStatus: FormsLoadingStatus;
   formsLoadingEror?: string;
@@ -36,14 +36,14 @@ interface FormsState {
 }
 
 interface SetFormsPayload {
-  forms: readonly FormSubmission[];
+  forms: readonly Form[];
   creatableForms: readonly Template[];
 }
 
 type SaveExistingFormSubmissionFullfilledPayload =
   | {
       result: "success";
-      formSubmission: FormSubmission;
+      formSubmission: Form;
     }
   | {
       result: "failure";
@@ -54,7 +54,7 @@ type SaveExistingFormSubmissionFullfilledPayload =
 type NewFormFullfilledPayload =
   | {
       result: "success";
-      formSubmission: FormSubmission;
+      formSubmission: Form;
       creatableForms: readonly Template[];
     }
   | {
@@ -66,7 +66,7 @@ type NewFormFullfilledPayload =
 type ActionFormSubmissionFullfilledPayload =
   | {
       result: "success";
-      formSubmission: FormSubmission;
+      formSubmission: Form;
     }
   | {
       result: "failure";
@@ -77,7 +77,7 @@ type ActionFormSubmissionFullfilledPayload =
 type DeleteFormSubmissionFullfilledPayload =
   | {
       result: "success";
-      deletedFormSubmissionId: FormSubmissionId;
+      deletedFormSubmissionId: FormId;
       creatableForms: readonly Template[];
     }
   | {
@@ -95,7 +95,7 @@ const initialState: FormsState = {
 
 export const saveExistingFormSubmission = createAsyncThunk<
   SaveExistingFormSubmissionFullfilledPayload,
-  { answers: unknown; formSubmissionId: FormSubmissionId }
+  { answers: unknown; formSubmissionId: FormId }
 >("forms/saveExistingFormSubmission", async ({ formSubmissionId, answers }) => {
   const program = apiSaveForm(formSubmissionId)(answers)
     .pipe(
@@ -159,8 +159,8 @@ export const createFormSubmission = createAsyncThunk<
 export const actionFormSubmission = createAsyncThunk<
   ActionFormSubmissionFullfilledPayload,
   {
-    formSubmissionAction: FormSubmissionAction;
-    formSubmissionId: FormSubmissionId;
+    formSubmissionAction: FormAction;
+    formSubmissionId: FormId;
   }
 >(
   "forms/actionFormSubmission",
@@ -196,7 +196,7 @@ export const actionFormSubmission = createAsyncThunk<
 export const deleteFormSubmission = createAsyncThunk<
   DeleteFormSubmissionFullfilledPayload,
   {
-    formSubmissionId: FormSubmissionId;
+    formSubmissionId: FormId;
   }
 >("forms/deleteFormSubmission", async ({ formSubmissionId }) => {
   const program = apiDeleteForm(formSubmissionId)

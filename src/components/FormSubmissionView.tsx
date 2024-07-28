@@ -1,6 +1,6 @@
 import { Model } from "survey-core";
 import { Survey } from "survey-react-ui";
-import { FormSubmission } from "../interfaces/form";
+import { Form } from "../interfaces/form";
 import { ContrastDark } from "survey-core/themes";
 
 import "survey-core/defaultV2.min.css";
@@ -18,7 +18,7 @@ import { useSelector } from "react-redux";
 import { selectFormsSavingStatus } from "../features/forms/forms-slice";
 
 interface FormSubmissionViewProps {
-  formSubmission: FormSubmission;
+  formSubmission: Form;
   editButtonClicked: () => void;
   submitButtonClicked: () => void;
   retractButtonClicked: () => void;
@@ -26,7 +26,7 @@ interface FormSubmissionViewProps {
 }
 
 interface FormSubmissionViewControlsProps {
-  formSubmission: FormSubmission;
+  formSubmission: Form;
   editButtonClicked: () => void;
   submitButtonClicked: () => void;
   retractButtonClicked: () => void;
@@ -54,14 +54,14 @@ const modalProps = {
   dragOptions: undefined,
 };
 
-const isEditable = (formSubmission: FormSubmission): boolean =>
+const isEditable = (formSubmission: Form): boolean =>
   formSubmission.submissionStatus === "draft" ||
   formSubmission.submissionStatus === "submittable";
 
-const isSubmittable = (formSubmission: FormSubmission): boolean =>
+const isSubmittable = (formSubmission: Form): boolean =>
   formSubmission.submissionStatus === "submittable";
 
-const isRetractable = (formSubmission: FormSubmission): boolean =>
+const isRetractable = (formSubmission: Form): boolean =>
   formSubmission.submissionStatus === "submitted";
 
 interface ControlsButtonProps {

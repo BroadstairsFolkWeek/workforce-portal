@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import FormSubmissionList from "./FormSubmissionsList";
 import { Profile } from "../interfaces/profile";
-import { Template, FormSubmission } from "../interfaces/form";
+import { Template, Form } from "../interfaces/form";
 import CreatableFormsList from "./CreatableFormsList";
 import { MessageBar, MessageBarType } from "@fluentui/react";
 import { useSelector } from "react-redux";
@@ -16,7 +16,7 @@ import { LoadProfileError } from "./errors/user-profile-errors";
 
 export interface HomeWithProfileProps {
   profile: Profile;
-  formSubmissions: readonly FormSubmission[];
+  formSubmissions: readonly Form[];
   creatableForms: readonly Template[];
 }
 

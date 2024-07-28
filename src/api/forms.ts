@@ -13,52 +13,46 @@ import {
   DeleteFormResponse,
   SaveFormResponse,
 } from "./interfaces/forms";
-import {
-  TemplateId,
-  FormSubmissionAction,
-  FormSubmissionId,
-} from "../interfaces/form";
+import { TemplateId, FormAction, FormId } from "../interfaces/form";
 
-export const apiSaveForm =
-  (formSubmissionId: FormSubmissionId) => (answers: unknown) =>
-    apiPutJsonData(`/api/forms/${formSubmissionId}`)(answers)
-      .pipe(Effect.andThen(S.decodeUnknown(SaveFormResponse)))
-      .pipe(Effect.andThen((decoded) => decoded.data))
-      .pipe(
-        Effect.catchTags({
-          ParseError: (e) => Effect.die(e),
-          RequestError: (e) => Effect.die("Failed to save form: " + e),
-          ResponseError: (e) => {
-            switch (e.response.status) {
-              case 401:
-                return Effect.fail(new NotAuthenticated());
-              default:
-                return Effect.fail(new ServerError({ responseError: e }));
-            }
-          },
-          HttpBodyError: (e) => Effect.die(e),
-        })
-      );
+export const apiSaveForm = (formId: FormId) => (answers: unknown) =>
+  apiPutJsonData(`/api/forms/${formId}`)(answers)
+    .pipe(Effect.andThen(S.decodeUnknown(SaveFormResponse)))
+    .pipe(Effect.andThen((decoded) => decoded.data))
+    .pipe(
+      Effect.catchTags({
+        ParseError: (e) => Effect.die(e),
+        RequestError: (e) => Effect.die("Failed to save form: " + e),
+        ResponseError: (e) => {
+          switch (e.response.status) {
+            case 401:
+              return Effect.fail(new NotAuthenticated());
+            default:
+              return Effect.fail(new ServerError({ responseError: e }));
+          }
+        },
+        HttpBodyError: (e) => Effect.die(e),
+      })
+    );
 
-export const apiActionForm =
-  (formSubmissionId: FormSubmissionId) => (action: FormSubmissionAction) =>
-    apiPostJsonData(`/api/formAction/${formSubmissionId}`)(action)
-      .pipe(Effect.andThen(S.decodeUnknown(ActionFormResponse)))
-      .pipe(Effect.andThen((decoded) => decoded.data))
-      .pipe(
-        Effect.catchTags({
-          ParseError: (e) => Effect.die(e),
-          RequestError: (e) => Effect.die("Failed to action form: " + e),
-          ResponseError: (e) =>
-            e.response.status === 401
-              ? Effect.fail(new NotAuthenticated())
-              : Effect.fail(new ServerError({ responseError: e })),
-          HttpBodyError: (e) => Effect.die(e),
-        })
-      );
+export const apiActionForm = (formId: FormId) => (action: FormAction) =>
+  apiPostJsonData(`/api/formAction/${formId}`)(action)
+    .pipe(Effect.andThen(S.decodeUnknown(ActionFormResponse)))
+    .pipe(Effect.andThen((decoded) => decoded.data))
+    .pipe(
+      Effect.catchTags({
+        ParseError: (e) => Effect.die(e),
+        RequestError: (e) => Effect.die("Failed to action form: " + e),
+        ResponseError: (e) =>
+          e.response.status === 401
+            ? Effect.fail(new NotAuthenticated())
+            : Effect.fail(new ServerError({ responseError: e })),
+        HttpBodyError: (e) => Effect.die(e),
+      })
+    );
 
-export const apiDeleteForm = (formSubmissionId: FormSubmissionId) =>
-  apiDeleteJsonResponse(`/api/formDelete/${formSubmissionId}`).pipe(
+export const apiDeleteForm = (formId: FormId) =>
+  apiDeleteJsonResponse(`/api/formDelete/${formId}`).pipe(
     Effect.andThen(S.decodeUnknown(DeleteFormResponse)),
     Effect.andThen((decoded) => decoded.data),
     Effect.catchTags({

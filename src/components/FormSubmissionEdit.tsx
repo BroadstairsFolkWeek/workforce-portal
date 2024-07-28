@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux";
 import { Model } from "survey-core";
 import { Survey } from "survey-react-ui";
-import { FormSubmission } from "../interfaces/form";
+import { Form } from "../interfaces/form";
 import { ContrastDark } from "survey-core/themes";
 
 import { useFormSubmissionHandlers } from "../routes/FormSubmissionHandlers";
@@ -12,7 +12,7 @@ import { selectFormsSavingStatus } from "../features/forms/forms-slice";
 import "survey-core/defaultV2.min.css";
 
 interface FormSubmissionEditProps {
-  formSubmission: FormSubmission;
+  formSubmission: Form;
 }
 
 const FormSubmissionEdit: React.FC<FormSubmissionEditProps> = ({

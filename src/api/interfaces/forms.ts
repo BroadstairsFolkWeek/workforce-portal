@@ -1,17 +1,17 @@
 import { Schema as S } from "@effect/schema";
-import { Template, FormSubmission } from "../../interfaces/form";
+import { Template, Form } from "../../interfaces/form";
 
 export const SaveFormResponse = S.Struct({
-  data: FormSubmission,
+  data: Form,
 });
 
 export const ActionFormResponse = S.Struct({
-  data: FormSubmission,
+  data: Form,
 });
 
 export const CreateFormResponse = S.Struct({
   data: S.Struct({
-    form: FormSubmission,
+    form: Form,
     creatableForms: S.Array(Template),
   }),
 });

@@ -2,7 +2,7 @@ import { useSelector } from "react-redux";
 import { selectFormSubmission } from "../features/forms/forms-slice";
 import { useLoaderData, useNavigate } from "react-router-dom";
 import FormSubmissionView from "../components/FormSubmissionView";
-import { FormSubmissionId } from "../interfaces/form";
+import { FormId } from "../interfaces/form";
 
 import { Params } from "react-router-dom";
 import { useCallback } from "react";
@@ -27,7 +27,7 @@ export const Component = () => {
 
   if (formSubmissionId) {
     const formSubmission = useSelector(
-      selectFormSubmission(FormSubmissionId.make(formSubmissionId))
+      selectFormSubmission(FormId.make(formSubmissionId))
     );
     if (formSubmission) {
       return (

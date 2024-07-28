@@ -1,5 +1,5 @@
 import { useSelector } from "react-redux";
-import { FormSubmission } from "../interfaces/form";
+import { Form } from "../interfaces/form";
 import FormSubmissionListItem from "./FormSubmissionsListItem";
 import SpinnerOverlay from "./SpinnerOverlay";
 import { selectFormsSavingStatus } from "../features/forms/forms-slice";
@@ -7,7 +7,7 @@ import { useMemo } from "react";
 import { Profile } from "../interfaces/profile";
 
 interface FormSubmissionListProps {
-  formSubmissions: readonly FormSubmission[];
+  formSubmissions: readonly Form[];
   profile: Profile;
 }
 
