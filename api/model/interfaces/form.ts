@@ -3,8 +3,8 @@ import { ModelProfileId } from "./profile";
 
 export const FormSubmissionId = S.String.pipe(S.brand("FormSubmissionId"));
 export type FormSubmissionId = S.Schema.Type<typeof FormSubmissionId>;
-export const FormSpecId = S.String.pipe(S.brand("FormSpecId"));
-export type FormSpecId = S.Schema.Type<typeof FormSpecId>;
+export const TemplateId = S.String.pipe(S.brand("TemplateId"));
+export type TemplateId = S.Schema.Type<typeof TemplateId>;
 
 export const FormSubmissionStatus = S.Literal(
   "draft",
@@ -19,7 +19,7 @@ export const FormSubmissionArchiveStatus = S.Literal("active", "archived");
 export const FormSubmissionAction = S.Literal("submit", "retract");
 export type FormSubmissionAction = S.Schema.Type<typeof FormSubmissionAction>;
 
-export const FormSpecRequirements = S.Struct({
+export const TemplateRequirements = S.Struct({
   profileRequirements: S.Struct({
     firstName: S.optional(S.Boolean),
     surname: S.optional(S.Boolean),
@@ -31,16 +31,16 @@ export const FormSpecRequirements = S.Struct({
   }),
 });
 
-export const FormSpec = S.Struct({
-  id: FormSpecId,
+export const Template = S.Struct({
+  id: TemplateId,
   shortName: S.String,
   fullName: S.String,
   description: S.String,
   questions: S.Unknown,
-  requirements: FormSpecRequirements,
+  requirements: TemplateRequirements,
   status: S.Literal("draft", "active", "archived"),
 });
-export type FormSpec = S.Schema.Type<typeof FormSpec>;
+export type Template = S.Schema.Type<typeof Template>;
 
 export const FormAnswersModifiableStatus = S.Literal("modifiable", "locked");
 export type FormAnswersModifiableStatus = S.Schema.Type<
@@ -55,20 +55,20 @@ export type FormSubmissionDeleteableStatus = S.Schema.Type<
   typeof FormSubmissionDeleteableStatus
 >;
 
-export const FormSubmissionWithSpecAndActions = S.Struct({
+export const FormSubmissionWithTemplateAndActions = S.Struct({
   id: FormSubmissionId,
-  templateId: FormSpecId,
+  templateId: TemplateId,
   profileId: ModelProfileId,
   answers: S.Unknown,
   answersModifiable: FormAnswersModifiableStatus,
   submissionDeletable: FormSubmissionDeleteableStatus,
   submissionStatus: FormSubmissionStatus,
   archiveStatus: FormSubmissionArchiveStatus,
-  template: FormSpec,
+  template: Template,
   availableActions: S.Array(FormSubmissionAction),
   createdDateTimeUtc: S.DateFromString,
   modifiedDateTimeUtc: S.DateFromString,
 });
 
-export interface FormSubmissionWithSpecAndActions
-  extends S.Schema.Type<typeof FormSubmissionWithSpecAndActions> {}
+export interface FormSubmissionWithTemplateAndActions
+  extends S.Schema.Type<typeof FormSubmissionWithTemplateAndActions> {}

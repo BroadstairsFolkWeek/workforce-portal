@@ -4,31 +4,31 @@ import { Schema } from "@effect/schema";
 import { WfApiClient } from "../wf-api/wf-client";
 import {
   FormNotFound,
-  FormSpecNotFound,
+  TemplateNotFound,
   FormsRepository,
   UnprocessableFormAction,
 } from "./forms-repository";
 import {
-  FormSpec,
-  FormSpecId,
+  Template,
+  TemplateId,
   FormSubmissionAction,
   FormSubmissionId,
-  FormSubmissionWithSpecAndActions,
+  FormSubmissionWithTemplateAndActions,
 } from "./interfaces/form";
 import { ProfileNotFound } from "./profiles-repository";
 
 type WfApiClientType = Context.Tag.Service<WfApiClient>;
 
 const FormApiResponseSchema = Schema.Struct({
-  data: FormSubmissionWithSpecAndActions,
+  data: FormSubmissionWithTemplateAndActions,
 });
 
 const FormsApiResponseSchema = Schema.Struct({
-  data: Schema.Array(FormSubmissionWithSpecAndActions),
+  data: Schema.Array(FormSubmissionWithTemplateAndActions),
 });
 
 const CreatableFormsApiResponseSchema = Schema.Struct({
-  data: Schema.Array(FormSpec),
+  data: Schema.Array(Template),
 });
 
 const getFormsByUserId = (apiClient: WfApiClientType) => (userId: string) =>
@@ -164,10 +164,10 @@ const getCreatableFormSpecsByUserId =
 const createFormSubmission =
   (apiClient: WfApiClientType) =>
   (userId: string) =>
-  (formSpecId: FormSpecId, answers: unknown) =>
+  (templateId: TemplateId, answers: unknown) =>
     apiClient
       .postJsonDataJsonResponse(
-        `/api/users/${userId}/profile/creatableforms/${formSpecId}/create`
+        `/api/users/${userId}/profile/creatableforms/${templateId}/create`
       )(answers)
       .pipe(
         Effect.andThen(Schema.decodeUnknown(FormApiResponseSchema)),
@@ -179,7 +179,7 @@ const createFormSubmission =
           ResponseError: (e) => {
             switch (e.response.status) {
               case 404:
-                return Effect.fail(new FormSpecNotFound());
+                return Effect.fail(new TemplateNotFound());
               default:
                 return Effect.die("Failed to create form: " + e);
             }

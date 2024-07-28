@@ -1,8 +1,8 @@
 import { Effect } from "effect";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
-  FormSpec,
-  FormSpecId,
+  Template,
+  TemplateId,
   FormSubmission,
   FormSubmissionAction,
   FormSubmissionId,
@@ -28,7 +28,7 @@ export type FormsSavingStatus =
 
 interface FormsState {
   forms: readonly FormSubmission[];
-  creatableForms: readonly FormSpec[];
+  creatableForms: readonly Template[];
   formsLoadingStatus: FormsLoadingStatus;
   formsLoadingEror?: string;
   formsSavingStatus: FormsSavingStatus;
@@ -37,7 +37,7 @@ interface FormsState {
 
 interface SetFormsPayload {
   forms: readonly FormSubmission[];
-  creatableForms: readonly FormSpec[];
+  creatableForms: readonly Template[];
 }
 
 type SaveExistingFormSubmissionFullfilledPayload =
@@ -55,7 +55,7 @@ type NewFormFullfilledPayload =
   | {
       result: "success";
       formSubmission: FormSubmission;
-      creatableForms: readonly FormSpec[];
+      creatableForms: readonly Template[];
     }
   | {
       result: "failure";
@@ -78,7 +78,7 @@ type DeleteFormSubmissionFullfilledPayload =
   | {
       result: "success";
       deletedFormSubmissionId: FormSubmissionId;
-      creatableForms: readonly FormSpec[];
+      creatableForms: readonly Template[];
     }
   | {
       result: "failure";
@@ -126,8 +126,8 @@ export const saveExistingFormSubmission = createAsyncThunk<
 
 export const createFormSubmission = createAsyncThunk<
   NewFormFullfilledPayload,
-  { answers: unknown; formSpecId: FormSpecId }
->("forms/createFormSubmission", async ({ formSpecId, answers }) => {
+  { answers: unknown; templateId: TemplateId }
+>("forms/createFormSubmission", async ({ templateId: formSpecId, answers }) => {
   const program = apiCreateForm(formSpecId)(answers)
     .pipe(
       Effect.andThen((newFormResult) => ({
@@ -343,5 +343,5 @@ export const selectFormSubmission =
   (formSubmissionId: FormSubmissionId) => (state: RootState) =>
     state.forms.forms.find((f) => f.id === formSubmissionId);
 export const selectCreatableForm =
-  (formSpecId: FormSpecId) => (state: RootState) =>
+  (formSpecId: TemplateId) => (state: RootState) =>
     state.forms.creatableForms.find((f) => f.id === formSpecId);

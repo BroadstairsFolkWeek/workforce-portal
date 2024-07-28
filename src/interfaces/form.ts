@@ -4,8 +4,8 @@ import { ModelProfileId } from "./profile";
 export const FormSubmissionId = S.String.pipe(S.brand("FormSubmissionId"));
 export type FormSubmissionId = S.Schema.Type<typeof FormSubmissionId>;
 
-export const FormSpecId = S.String.pipe(S.brand("FormSpecId"));
-export type FormSpecId = S.Schema.Type<typeof FormSpecId>;
+export const TemplateId = S.String.pipe(S.brand("TemplateId"));
+export type TemplateId = S.Schema.Type<typeof TemplateId>;
 
 export const FormSubmissionStatus = S.Literal(
   "draft",
@@ -35,8 +35,8 @@ export const FormSpecRequirements = S.Struct({
   }),
 });
 
-export const FormSpec = S.Struct({
-  id: FormSpecId,
+export const Template = S.Struct({
+  id: TemplateId,
   shortName: S.String,
   fullName: S.String,
   description: S.String,
@@ -44,7 +44,7 @@ export const FormSpec = S.Struct({
   requirements: FormSpecRequirements,
   status: S.Literal("draft", "active", "archived"),
 });
-export type FormSpec = S.Schema.Type<typeof FormSpec>;
+export type Template = S.Schema.Type<typeof Template>;
 
 export const FormAnswersModifiableStatus = S.Literal("modifiable", "locked");
 export type FormAnswersModifiableStatus = S.Schema.Type<
@@ -61,14 +61,14 @@ export type FormSubmissionDeleteableStatus = S.Schema.Type<
 
 export const FormSubmission = S.Struct({
   id: FormSubmissionId,
-  templateId: FormSpecId,
+  templateId: TemplateId,
   profileId: ModelProfileId,
   answers: S.Unknown,
   answersModifiable: FormAnswersModifiableStatus,
   submissionDeletable: FormSubmissionDeleteableStatus,
   submissionStatus: FormSubmissionStatus,
   archiveStatus: FormSubmissionArchiveStatus,
-  template: FormSpec,
+  template: Template,
   availableActions: S.Array(FormSubmissionAction),
   createdDateTimeUtc: S.String,
   modifiedDateTimeUtc: S.String,

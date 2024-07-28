@@ -1,17 +1,17 @@
 import { PropsWithChildren, useCallback } from "react";
-import { FormSpec } from "../interfaces/form";
+import { Template } from "../interfaces/form";
 import { useFormSubmissionHandlers } from "../routes/FormSubmissionHandlers";
 import CreatableFormControls from "./CreatableFormControls";
 
 interface CreatableFormsListItemProps {
-  creatableForm: FormSpec;
+  creatableForm: Template;
 }
 
 const ListItemHeader = ({
   creatableForm,
   children,
 }: PropsWithChildren<{
-  creatableForm: FormSpec;
+  creatableForm: Template;
 }>) => {
   return (
     <div className="bg-bfw-yellow">
@@ -26,7 +26,7 @@ const ListItemHeader = ({
 const ListItemFooter = ({
   children,
 }: PropsWithChildren<{
-  creatableForm: FormSpec;
+  creatableForm: Template;
 }>) => {
   return (
     <div className="bg-bfw-yellow">

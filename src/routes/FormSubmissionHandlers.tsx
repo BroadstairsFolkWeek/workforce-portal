@@ -6,7 +6,7 @@ import {
   saveExistingFormSubmission,
 } from "../features/forms/forms-slice";
 import { useCallback } from "react";
-import { FormSpec, FormSubmission } from "../interfaces/form";
+import { Template, FormSubmission } from "../interfaces/form";
 import { AppDispatch } from "../store";
 import { useNavigate } from "react-router-dom";
 
@@ -88,8 +88,8 @@ export const useFormSubmissionHandlers = () => {
   );
 
   const displayNewForm = useCallback(
-    (formSpec: FormSpec) => {
-      navigate(`/creatableForms/${formSpec.id}`);
+    (template: Template) => {
+      navigate(`/creatableForms/${template.id}`);
     },
     [navigate]
   );
@@ -99,8 +99,8 @@ export const useFormSubmissionHandlers = () => {
   }, [navigateHome]);
 
   const createNewForm = useCallback(
-    async (formSpec: FormSpec, answers: unknown) => {
-      dispatch(createFormSubmission({ formSpecId: formSpec.id, answers }));
+    async (template: Template, answers: unknown) => {
+      dispatch(createFormSubmission({ templateId: template.id, answers }));
       navigateHome();
     },
     [dispatch, navigateHome]

@@ -9,7 +9,6 @@ import "@uppy/core/dist/style.min.css";
 import "@uppy/dashboard/dist/style.min.css";
 import "@uppy/webcam/dist/style.min.css";
 
-import PageLayout from "./PageLayout";
 import { useDispatch, useSelector } from "react-redux";
 import { selectProfile, setProfile } from "../features/profile/profile-slice";
 import { UploadPhotoResponse } from "../api/interfaces/photo";
@@ -57,7 +56,12 @@ const PhotoPage: React.FC<PhotoPanelProps> = () => {
               profileLoadingError: "",
             })
           );
-          dispatch(setForms({ forms: photoUploadResponse.data.forms }));
+          dispatch(
+            setForms({
+              forms: photoUploadResponse.data.forms,
+              creatableForms: photoUploadResponse.data.creatableForms,
+            })
+          );
         }
       }
     },

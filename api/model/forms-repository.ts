@@ -1,10 +1,10 @@
 import { Effect, Context } from "effect";
 import {
-  FormSpec,
-  FormSpecId,
+  Template,
+  TemplateId,
   FormSubmissionAction,
   FormSubmissionId,
-  FormSubmissionWithSpecAndActions,
+  FormSubmissionWithTemplateAndActions,
 } from "./interfaces/form";
 import { ProfileNotFound } from "./profiles-repository";
 
@@ -12,8 +12,8 @@ export class FormNotFound {
   readonly _tag = "FormNotFound";
 }
 
-export class FormSpecNotFound {
-  readonly _tag = "FormSpecNotFound";
+export class TemplateNotFound {
+  readonly _tag = "TemplateNotFound";
 }
 
 export class UnprocessableFormAction {
@@ -26,7 +26,7 @@ export class FormsRepository extends Context.Tag("FormsRepository")<
     readonly modelGetFormsByUserId: (
       userId: string
     ) => Effect.Effect<
-      readonly FormSubmissionWithSpecAndActions[],
+      readonly FormSubmissionWithTemplateAndActions[],
       ProfileNotFound
     >;
 
@@ -35,7 +35,7 @@ export class FormsRepository extends Context.Tag("FormsRepository")<
     ) => (
       formSubmissionId: FormSubmissionId,
       answers: unknown
-    ) => Effect.Effect<FormSubmissionWithSpecAndActions, FormNotFound>;
+    ) => Effect.Effect<FormSubmissionWithTemplateAndActions, FormNotFound>;
 
     readonly modelDeleteFormSubmission: (
       userId: string
@@ -50,19 +50,19 @@ export class FormsRepository extends Context.Tag("FormsRepository")<
     ) => (
       action: FormSubmissionAction
     ) => Effect.Effect<
-      FormSubmissionWithSpecAndActions,
+      FormSubmissionWithTemplateAndActions,
       FormNotFound | UnprocessableFormAction
     >;
 
     readonly modelGetCreatableFormSpecsByUserId: (
       userId: string
-    ) => Effect.Effect<readonly FormSpec[], ProfileNotFound>;
+    ) => Effect.Effect<readonly Template[], ProfileNotFound>;
 
     readonly modelCreateFormSubmission: (
       userId: string
     ) => (
-      formSpecId: FormSpecId,
+      templateId: TemplateId,
       answers: unknown
-    ) => Effect.Effect<FormSubmissionWithSpecAndActions, FormSpecNotFound>;
+    ) => Effect.Effect<FormSubmissionWithTemplateAndActions, TemplateNotFound>;
   }
 >() {}

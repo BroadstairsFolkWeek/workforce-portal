@@ -1,12 +1,12 @@
 import { useMemo } from "react";
 import { useSelector } from "react-redux";
-import { FormSpec } from "../interfaces/form";
+import { Template } from "../interfaces/form";
 import SpinnerOverlay from "./SpinnerOverlay";
 import { selectFormsSavingStatus } from "../features/forms/forms-slice";
 import CreatableFormsListItem from "./CreatableFormsListItem";
 
 interface CreatableFormsListProps {
-  creatableForms: readonly FormSpec[];
+  creatableForms: readonly Template[];
 }
 
 const CreatableFormsList: React.FC<CreatableFormsListProps> = ({

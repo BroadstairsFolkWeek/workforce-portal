@@ -5,18 +5,18 @@ import {
   UnprocessableFormAction,
 } from "../model/forms-repository";
 import {
-  FormSpec,
-  FormSpecId,
+  Template,
+  TemplateId,
   FormSubmissionAction,
   FormSubmissionId,
-  FormSubmissionWithSpecAndActions,
+  FormSubmissionWithTemplateAndActions,
 } from "../model/interfaces/form";
 import { ProfileNotFound } from "../model/profiles-repository";
 
 export const getFormsByUserId = (
   userId: string
 ): Effect.Effect<
-  readonly FormSubmissionWithSpecAndActions[],
+  readonly FormSubmissionWithTemplateAndActions[],
   ProfileNotFound,
   FormsRepository
 > =>
@@ -30,7 +30,7 @@ export const updateFormSubmission =
   (
     answers: unknown
   ): Effect.Effect<
-    FormSubmissionWithSpecAndActions,
+    FormSubmissionWithTemplateAndActions,
     FormNotFound,
     FormsRepository
   > =>
@@ -46,7 +46,7 @@ export const actionFormSubmission =
   (
     action: FormSubmissionAction
   ): Effect.Effect<
-    FormSubmissionWithSpecAndActions,
+    FormSubmissionWithTemplateAndActions,
     FormNotFound | UnprocessableFormAction,
     FormsRepository
   > =>
@@ -61,7 +61,7 @@ export const deleteFormSubmission =
   (
     formSubmissionId: FormSubmissionId
   ): Effect.Effect<
-    readonly FormSpec[],
+    readonly Template[],
     FormNotFound | ProfileNotFound,
     FormsRepository
   > =>
@@ -74,7 +74,7 @@ export const deleteFormSubmission =
 
 export const getCreatableFormsByUserId = (
   userId: string
-): Effect.Effect<readonly FormSpec[], ProfileNotFound, FormsRepository> =>
+): Effect.Effect<readonly Template[], ProfileNotFound, FormsRepository> =>
   FormsRepository.pipe(
     Effect.andThen((formsRepo) =>
       formsRepo.modelGetCreatableFormSpecsByUserId(userId)
@@ -82,7 +82,7 @@ export const getCreatableFormsByUserId = (
   );
 
 export const createForm =
-  (userId: string) => (formSpecId: FormSpecId) => (answers: unknown) =>
+  (userId: string) => (formSpecId: TemplateId) => (answers: unknown) =>
     FormsRepository.pipe(
       Effect.andThen((formsRepo) =>
         formsRepo

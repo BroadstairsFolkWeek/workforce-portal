@@ -3,8 +3,8 @@ import { getUserLoginPropertiesFromGraph } from "./user-service";
 import { ModelProfile, ModelProfileUpdates } from "../model/interfaces/profile";
 import { ProfilesRepository } from "../model/profiles-repository";
 import {
-  FormSpec,
-  FormSubmissionWithSpecAndActions,
+  Template,
+  FormSubmissionWithTemplateAndActions,
 } from "../model/interfaces/form";
 import { getCreatableFormsByUserId, getFormsByUserId } from "./forms-service";
 
@@ -56,8 +56,8 @@ const createNewUserLoginAndProfileForGraphUser = (graphUserId: string) => {
 
 type ProfileWithForms = {
   profile: ModelProfile;
-  forms: FormSubmissionWithSpecAndActions[];
-  creatableForms: FormSpec[];
+  forms: FormSubmissionWithTemplateAndActions[];
+  creatableForms: Template[];
 };
 
 const getProfileByUserId = (userId: string) =>

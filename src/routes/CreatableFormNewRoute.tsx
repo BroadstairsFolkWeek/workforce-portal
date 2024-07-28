@@ -2,7 +2,7 @@ import { useSelector } from "react-redux";
 import { Params, useLoaderData } from "react-router-dom";
 
 import { selectCreatableForm } from "../features/forms/forms-slice";
-import { FormSpecId } from "../interfaces/form";
+import { TemplateId } from "../interfaces/form";
 import CreatableFormNew from "../components/CreatableFormNew";
 
 export async function loader({ params }: { params: Params }) {
@@ -17,7 +17,7 @@ export const Component = () => {
 
   if (creatableFormId) {
     const creatableForm = useSelector(
-      selectCreatableForm(FormSpecId.make(creatableFormId))
+      selectCreatableForm(TemplateId.make(creatableFormId))
     );
     if (creatableForm) {
       return <CreatableFormNew creatableForm={creatableForm} />;

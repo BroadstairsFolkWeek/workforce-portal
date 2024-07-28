@@ -1,15 +1,15 @@
 import { Schema as S } from "@effect/schema";
 import {
-  FormSpec,
-  FormSubmissionWithSpecAndActions,
+  Template,
+  FormSubmissionWithTemplateAndActions,
 } from "../model/interfaces/form";
 
 export const PutProfileResponse = S.Struct({
-  data: FormSubmissionWithSpecAndActions,
+  data: FormSubmissionWithTemplateAndActions,
 });
 
 export const PostFormSubmissionActionResponse = S.Struct({
-  data: FormSubmissionWithSpecAndActions,
+  data: FormSubmissionWithTemplateAndActions,
 });
 
 export const PostNewFormRequestBody = S.Struct({
@@ -18,13 +18,13 @@ export const PostNewFormRequestBody = S.Struct({
 
 export const PostNewFormResponseBody = S.Struct({
   data: S.Struct({
-    form: FormSubmissionWithSpecAndActions,
-    creatableForms: S.Array(FormSpec),
+    form: FormSubmissionWithTemplateAndActions,
+    creatableForms: S.Array(Template),
   }),
 });
 
 export const DeleteFormResponseBody = S.Struct({
   data: S.Struct({
-    creatableForms: S.Array(FormSpec),
+    creatableForms: S.Array(Template),
   }),
 });

@@ -14,7 +14,7 @@ import {
   SaveFormResponse,
 } from "./interfaces/forms";
 import {
-  FormSpecId,
+  TemplateId,
   FormSubmissionAction,
   FormSubmissionId,
 } from "../interfaces/form";
@@ -70,7 +70,7 @@ export const apiDeleteForm = (formSubmissionId: FormSubmissionId) =>
     })
   );
 
-export const apiCreateForm = (formSpecId: FormSpecId) => (answers: unknown) =>
+export const apiCreateForm = (formSpecId: TemplateId) => (answers: unknown) =>
   apiPostJsonData(`/api/formNew/${formSpecId}`)({ answers })
     .pipe(Effect.andThen(S.decodeUnknown(CreateFormResponse)))
     .pipe(Effect.andThen((decoded) => decoded.data))

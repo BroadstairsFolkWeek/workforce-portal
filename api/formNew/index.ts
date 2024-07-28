@@ -3,7 +3,7 @@ import { Schema } from "@effect/schema";
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import { createLoggerLayer } from "../utilties/logging";
 import { getAuthenticatedUserId } from "../functions/authenticated-user";
-import { FormSpecId } from "../model/interfaces/form";
+import { TemplateId } from "../model/interfaces/form";
 import { PostNewFormRequestBody, PostNewFormResponseBody } from "../api/form";
 import { repositoriesLayerLive } from "../contexts/repositories-live";
 import { ApiInvalidRequest } from "../api/api";
@@ -13,7 +13,7 @@ const httpTrigger: AzureFunction = async function (
   context: Context,
   req: HttpRequest
 ): Promise<void> {
-  const formSpecIdEffect = Schema.decodeUnknown(FormSpecId)(
+  const formSpecIdEffect = Schema.decodeUnknown(TemplateId)(
     req.params["formSpecId"]
   ).pipe(
     Effect.catchTag("ParseError", () => Effect.fail(new ApiInvalidRequest()))
@@ -54,7 +54,7 @@ const httpTrigger: AzureFunction = async function (
             UserNotAuthenticated: () =>
               Effect.succeed({ status: 401 as const }),
             ApiInvalidRequest: () => Effect.succeed({ status: 400 as const }),
-            FormSpecNotFound: () => Effect.succeed({ status: 404 as const }),
+            TemplateNotFound: () => Effect.succeed({ status: 404 as const }),
           })
         )
     )

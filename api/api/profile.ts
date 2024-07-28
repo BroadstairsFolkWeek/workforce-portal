@@ -1,7 +1,7 @@
 import { Schema as S } from "@effect/schema";
 import {
-  FormSpec,
-  FormSubmissionWithSpecAndActions,
+  Template,
+  FormSubmissionWithTemplateAndActions,
 } from "../model/interfaces/form";
 
 export const ApiGetPhotoRequestQuery = S.Struct({
@@ -43,8 +43,8 @@ export const ApiProfile = S.Struct({
 
 export const ApiProfileWithForms = S.Struct({
   profile: ApiProfile,
-  forms: S.Array(FormSubmissionWithSpecAndActions),
-  creatableForms: S.Array(FormSpec),
+  forms: S.Array(FormSubmissionWithTemplateAndActions),
+  creatableForms: S.Array(Template),
 });
 
 export const GetProfileResponse = S.Struct({
