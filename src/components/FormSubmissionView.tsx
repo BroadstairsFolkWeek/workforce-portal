@@ -242,7 +242,7 @@ const FormSubmissionView: React.FC<FormSubmissionViewProps> = ({
     await deleteForm(formSubmission);
   }, [deleteForm, formSubmission]);
 
-  const survey = new Model(formSubmission.formSpec.questions);
+  const survey = new Model(formSubmission.template.questions);
   survey.data = formSubmission.answers;
   survey.applyTheme(ContrastDark);
   survey.mode = "display";

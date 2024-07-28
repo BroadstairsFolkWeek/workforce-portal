@@ -61,14 +61,14 @@ export type FormSubmissionDeleteableStatus = S.Schema.Type<
 
 export const FormSubmission = S.Struct({
   id: FormSubmissionId,
-  formSpecId: FormSpecId,
+  templateId: FormSpecId,
   profileId: ModelProfileId,
   answers: S.Unknown,
   answersModifiable: FormAnswersModifiableStatus,
   submissionDeletable: FormSubmissionDeleteableStatus,
   submissionStatus: FormSubmissionStatus,
   archiveStatus: FormSubmissionArchiveStatus,
-  formSpec: FormSpec,
+  template: FormSpec,
   availableActions: S.Array(FormSubmissionAction),
   createdDateTimeUtc: S.String,
   modifiedDateTimeUtc: S.String,

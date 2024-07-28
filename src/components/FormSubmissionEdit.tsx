@@ -37,7 +37,7 @@ const FormSubmissionEdit: React.FC<FormSubmissionEditProps> = ({
     [saveForm, formSubmission]
   );
 
-  const survey = new Model(formSubmission.formSpec.questions);
+  const survey = new Model(formSubmission.template.questions);
   survey.data = formSubmission.answers;
   survey.applyTheme(ContrastDark);
   survey.validate();

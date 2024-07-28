@@ -21,7 +21,7 @@ const ListItemHeader = ({
   return (
     <div className="bg-bfw-yellow">
       <div className="flex flex-row justify-between p-2 bg-bfw-yellow ">
-        <div>{formSubmission.formSpec.fullName}</div>
+        <div>{formSubmission.template.fullName}</div>
         <div className="text-xs">{formSubmission.submissionStatus}</div>
       </div>
       <div className="px-2">{children}</div>
@@ -91,7 +91,7 @@ const FormSubmissionListItem: React.FC<FormSubmissionListItemProps> = ({
   }, [deleteForm, formSubmission]);
 
   const questionsInError = useMemo(() => {
-    const m = new Model(formSubmission.formSpec.questions);
+    const m = new Model(formSubmission.template.questions);
     m.data = formSubmission.answers;
     const answersAreValid = m.validate();
 
@@ -119,7 +119,7 @@ const FormSubmissionListItem: React.FC<FormSubmissionListItemProps> = ({
 
   const actionRequiredComponent = useMemo(() => {
     const formProfileRequirementsOb =
-      formSubmission.formSpec.requirements.profileRequirements;
+      formSubmission.template.requirements.profileRequirements;
     const formRequiresProfile =
       formProfileRequirementsOb.displayName ||
       formProfileRequirementsOb.email ||
@@ -143,7 +143,7 @@ const FormSubmissionListItem: React.FC<FormSubmissionListItemProps> = ({
         );
       } else if (
         profile.meta.photoRequired &&
-        formSubmission.formSpec.requirements.profileRequirements.photo
+        formSubmission.template.requirements.profileRequirements.photo
       ) {
         return (
           <div>
