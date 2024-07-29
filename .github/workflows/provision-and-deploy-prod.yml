@@ -1,13 +1,10 @@
 # Workflow to re-provision the azure resources to host/support the workforce-portal Static Web App PROD environment.
 
-name: Workforce Portal Provision PROD
+name: Workforce Portal Provision and Deployment PROD
 on:
   push:
-    branches:
-      - "main"
-    paths:
-      - "infra/**"
-      - ".github/workflows/provision-prod.yml"
+    tags:
+      - prod
 
   workflow_dispatch:
 
@@ -17,7 +14,7 @@ env:
   AZURE_RESOURCE_UNIQUE_NAME_ELEMENT: ""
 
 jobs:
-  provision-azure-resources-dev:
+  provision-and-deploy:
     permissions:
       id-token: write
       contents: read
@@ -59,3 +56,15 @@ jobs:
             wfApiClientAuthClientId="${{ secrets.WF_API_CLIENT_AUTH_CLIENT_ID_PROD }}"
             wfApiClientAuthClientSecret="${{ secrets.WF_API_CLIENT_AUTH_CLIENT_SECRET_PROD }}"
             wfApiClientAuthScope="${{ secrets.WF_API_CLIENT_AUTH_SCOPE_PROD }}"
+
+      - name: Build And Deploy
+        id: builddeploy
+        uses: Azure/static-web-apps-deploy@c514ae36604047560e33605b78f71804967bfb7a
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_VICTORIOUS_DESERT_0F5216903 }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "/"
+          api_location: "api"
+          output_location: "build"
+          api_build_command: "npm run buildAndTest"
