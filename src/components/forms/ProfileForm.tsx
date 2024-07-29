@@ -14,7 +14,7 @@ import { ContrastDark } from "survey-core/themes";
 import { Profile, ProfileUpdate } from "../../interfaces/profile";
 import { useProfileHandlers } from "../../routes/ProfileHandlers";
 
-import formJson from "./profile-form.json?json";
+import formJson from "./profile-form.json";
 
 import "survey-core/defaultV2.min.css";
 
