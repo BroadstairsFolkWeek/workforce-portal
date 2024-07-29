@@ -10,7 +10,6 @@ import {
   IStyleFunctionOrObject,
 } from "@fluentui/react";
 
-import hoodenHorse from "../images/hoodenHorse.jpg";
 import { useSelector } from "react-redux";
 import {
   selectProfile,
@@ -46,7 +45,7 @@ const ProfileControl: React.FC = () => {
         <img
           alt="Profile"
           className="h-10"
-          src={profile?.photoUrl ? profile.photoUrl : hoodenHorse}
+          src={profile?.photoUrl ? profile.photoUrl : "/hoodenHorse.jpg"}
         />
       );
     } else {
