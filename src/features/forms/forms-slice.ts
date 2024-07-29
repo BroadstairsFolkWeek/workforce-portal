@@ -1,5 +1,7 @@
 import { Effect } from "effect";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { castDraft } from "immer";
+import { RootState } from "../../store";
 import {
   Template,
   TemplateId,
@@ -7,7 +9,6 @@ import {
   FormAction,
   FormId,
 } from "../../interfaces/form";
-import { RootState } from "../../store";
 import {
   apiActionForm,
   apiCreateForm,
@@ -232,8 +233,8 @@ export const formsSlice = createSlice({
   initialState,
   reducers: {
     setForms: (state, action: PayloadAction<SetFormsPayload>) => {
-      state.forms = [...action.payload.forms];
-      state.creatableForms = [...action.payload.creatableForms];
+      state.forms = castDraft(action.payload.forms);
+      state.creatableForms = castDraft(action.payload.creatableForms);
       state.formsLoadingStatus = "loaded";
     },
   },
@@ -244,7 +245,7 @@ export const formsSlice = createSlice({
 
     builder.addCase(createFormSubmission.fulfilled, (state, action) => {
       if (action.payload.result == "success") {
-        state.forms.push(action.payload.formSubmission);
+        state.forms.push(castDraft(action.payload.formSubmission));
         state.creatableForms = [...action.payload.creatableForms];
         state.formsSavingStatus = "saved";
       } else {
@@ -269,7 +270,7 @@ export const formsSlice = createSlice({
           (f) => f.id === updatedFormSubmission.id
         );
         if (index !== -1) {
-          state.forms[index] = updatedFormSubmission;
+          state.forms[index] = castDraft(updatedFormSubmission);
         }
         state.formsSavingStatus = "saved";
       } else {
@@ -294,7 +295,7 @@ export const formsSlice = createSlice({
           (f) => f.id === updatedFormSubmission.id
         );
         if (index !== -1) {
-          state.forms[index] = updatedFormSubmission;
+          state.forms[index] = castDraft(updatedFormSubmission);
         }
         state.formsSavingStatus = "saved";
       } else {
@@ -314,10 +315,11 @@ export const formsSlice = createSlice({
 
     builder.addCase(deleteFormSubmission.fulfilled, (state, action) => {
       if (action.payload.result === "success") {
+        const deletedFormSubmissionId = action.payload.deletedFormSubmissionId;
         state.formsSavingStatus = "saved";
         // Delete the form submission from the list
         state.forms = state.forms.filter(
-          (f) => f.id !== action.payload.deletedFormSubmissionId
+          (f) => f.id !== deletedFormSubmissionId
         );
         state.creatableForms = [...action.payload.creatableForms];
       } else {
@@ -339,9 +341,8 @@ export const selectFormsSavingStatus = (state: RootState) =>
 export const selectFormSubmissions = (state: RootState) => state.forms.forms;
 export const selectCreatableForms = (state: RootState) =>
   state.forms.creatableForms;
-export const selectFormSubmission =
-  (formSubmissionId: FormSubmissionId) => (state: RootState) =>
-    state.forms.forms.find((f) => f.id === formSubmissionId);
+export const selectFormSubmission = (formId: FormId) => (state: RootState) =>
+  state.forms.forms.find((f) => f.id === formId);
 export const selectCreatableForm =
   (formSpecId: TemplateId) => (state: RootState) =>
     state.forms.creatableForms.find((f) => f.id === formSpecId);
