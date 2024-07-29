@@ -1,5 +1,4 @@
 import { Config, Effect, Layer } from "effect";
-import { defaultGraphClient } from "../graph/default-graph-client";
 
 import { ProfilesRepository } from "../model/profiles-repository";
 import { profilesRepositoryLive } from "../model/profiles-repository-live";
@@ -22,10 +21,7 @@ test(
       )
     );
 
-    const layers = profilesRepositoryLive.pipe(
-      Layer.provide(defaultGraphClient),
-      Layer.provide(wfApiClientLive)
-    );
+    const layers = profilesRepositoryLive.pipe(Layer.provide(wfApiClientLive));
 
     const runnable = Effect.provide(program, layers);
 

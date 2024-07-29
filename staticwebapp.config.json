@@ -10,9 +10,9 @@
       "customOpenIdConnectProviders": {
         "bcauth": {
           "registration": {
-            "clientIdSettingName": "B2C_CLIENT_ID",
+            "clientIdSettingName": "AZURE_B2C_CLIENT_ID",
             "clientCredential": {
-              "clientSecretSettingName": "B2C_CLIENT_SECRET"
+              "clientSecretSettingName": "AZURE_B2C_CLIENT_SECRET"
             },
             "openIdConnectConfiguration": {
               "wellKnownOpenIdConfiguration": "https://bfwextapps.b2clogin.com/bfwextapps.onmicrosoft.com/B2C_1_SUSI/v2.0/.well-known/openid-configuration"
