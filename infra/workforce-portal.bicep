@@ -3,7 +3,6 @@
 param environmentName string
 
 @description('Element to form part of resource names to ensure uniqueness in Azure.')
-@minLength(5)
 @maxLength(10)
 param resourceUniqueNameElement string
 
