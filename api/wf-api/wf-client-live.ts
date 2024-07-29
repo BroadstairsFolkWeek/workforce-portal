@@ -9,6 +9,8 @@ import { ConfidentialClientApplication } from "@azure/msal-node";
 
 import { WfApiClient } from "./wf-client";
 
+import "isomorphic-fetch";
+
 const getConfidentialClientApp = (
   clientId: string,
   clientSecret: string,
