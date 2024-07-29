@@ -1,0 +1,61 @@
+# Workflow to re-provision the azure resources to host/support the workforce-portal Static Web App PROD environment.
+
+name: Workforce Portal Provision PROD
+on:
+  push:
+    branches:
+      - "main"
+    paths:
+      - "infra/**"
+      - ".github/workflows/provision-prod.yml"
+
+  workflow_dispatch:
+
+env:
+  AZURE_RESOURCE_GROUP_NAME: "${{ vars.AZURE_RESOURCE_GROUP_NAME_PROD }}"
+  AZURE_RESOURCE_GROUP_LOCATION: "${{ vars.AZURE_RESOURCE_GROUP_LOCATION_PROD }}"
+  AZURE_RESOURCE_UNIQUE_NAME_ELEMENT: ""
+
+jobs:
+  provision-azure-resources-dev:
+    permissions:
+      id-token: write
+      contents: read
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29
+
+      - name: Login to Azure
+        uses: azure/login@6c251865b4e6290e7b78be643ea2d005bc51f69a
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Create resource group (if needed)
+        run: |
+          az group create --resource-group "${{ env.AZURE_RESOURCE_GROUP_NAME }}" --location "${{ env.AZURE_RESOURCE_GROUP_LOCATION }}"
+
+      - name: Provision workforce-portal resources
+        uses: azure/arm-deploy@a1361c2c2cd398621955b16ca32e01c65ea340f5
+        with:
+          scope: resourcegroup
+          resourceGroupName: ${{ env.AZURE_RESOURCE_GROUP_NAME }}
+          deploymentName: ${{ github.run_number }}
+          template: ${{ github.workspace }}/infra/workforce-portal.bicep
+          parameters: >-
+            environmentName=prod
+            resourceUniqueNameElement="${{ env.AZURE_RESOURCE_UNIQUE_NAME_ELEMENT }}"
+            customDomainName="${{ secrets.CUSTOM_DOMAIN_NAME_PROD }}"
+            b2cClientId="${{ secrets.B2C_CLIENT_ID_PROD }}"
+            b2cClientSecret="${{ secrets.B2C_CLIENT_SECRET_PROD }}"
+            b2cTenantId="${{ secrets.B2C_TENANT_ID_PROD }}"
+            signUpSignInAuthority="${{ secrets.SIGN_UP_SIGN_IN_AUTHORITY_PROD }}"
+            wfApiUrl="${{ secrets.WF_API_URL_PROD }}"
+            wfApiClientAuthAuthority="${{ secrets.WF_API_CLIENT_AUTH_AUTHORITY_PROD }}"
+            wfApiClientAuthClientId="${{ secrets.WF_API_CLIENT_AUTH_CLIENT_ID_PROD }}"
+            wfApiClientAuthClientSecret="${{ secrets.WF_API_CLIENT_AUTH_CLIENT_SECRET_PROD }}"
+            wfApiClientAuthScope="${{ secrets.WF_API_CLIENT_AUTH_SCOPE_PROD }}"
