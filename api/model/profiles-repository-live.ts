@@ -10,17 +10,25 @@ import { ModelProfile, ModelProfileUpdates } from "./interfaces/profile";
 import { WfApiClient } from "../wf-api/wf-client";
 import { ModelUser } from "./interfaces/user";
 
-const SingleProfileApiResponseSchema = Schema.Struct({
+const ProfileAndUser = Schema.Struct({
+  profile: ModelProfile,
+  user: ModelUser,
+});
+
+const GetUserAndProfileApiResponseSchema = Schema.Struct({
+  data: ProfileAndUser,
+});
+
+const ProfileUpdateApiResponseSchema = Schema.Struct({
   data: ModelProfile,
 });
 
 const modelGetProfileByUserId = (userId: string) =>
   WfApiClient.pipe(
-    Effect.andThen((apiClient) =>
-      apiClient.getJson(`/api/users/${userId}/profile`)
-    ),
-    Effect.andThen(Schema.decodeUnknown(SingleProfileApiResponseSchema)),
-    Effect.andThen((response) => response.data)
+    Effect.andThen((apiClient) => apiClient.getJson(`/api/users/${userId}`)),
+    Effect.andThen(Schema.decodeUnknown(GetUserAndProfileApiResponseSchema)),
+    Effect.andThen((response) => response.data),
+    Effect.andThen((userAndProfile) => userAndProfile.profile)
   ).pipe(
     Effect.catchTags({
       RequestError: (e) => Effect.die("Failed to get profile by user id: " + e),
@@ -44,12 +52,14 @@ const modelUpdateProfileByUserId = (
 ) =>
   WfApiClient.pipe(
     Effect.andThen((apiClient) =>
-      apiClient.patchJsonDataJsonResponse(`/api/users/${userId}/profile`)({
+      apiClient.patchJsonDataJsonResponse(
+        `/api/users/${userId}/profile/properties`
+      )({
         version,
         updates,
       })
     ),
-    Effect.andThen(Schema.decodeUnknown(SingleProfileApiResponseSchema)),
+    Effect.andThen(Schema.decodeUnknown(ProfileUpdateApiResponseSchema)),
     Effect.andThen((response) => response.data)
   ).pipe(
     Effect.catchTags({
@@ -76,10 +86,12 @@ const modelUpdateProfileByUserId = (
 const modelCreateProfileForUser = (user: ModelUser) => {
   return WfApiClient.pipe(
     Effect.andThen((apiClient) =>
-      apiClient.postJsonDataJsonResponse("/api/users")(user)
+      apiClient.putJsonDataJsonResponse(`/api/users/${user.id}/properties`)(
+        user
+      )
     ),
-    Effect.andThen(Schema.decodeUnknown(SingleProfileApiResponseSchema)),
-    Effect.andThen((response) => response.data)
+    Effect.andThen(Schema.decodeUnknown(GetUserAndProfileApiResponseSchema)),
+    Effect.andThen((response) => response.data.profile)
   ).pipe(
     Effect.catchTags({
       RequestError: (e) =>
@@ -111,7 +123,7 @@ const modelSetProfilePhoto = (
         prepareProfilePhotoData(fileMimeType, fileBuffer)
       )
     ),
-    Effect.andThen(Schema.decodeUnknown(SingleProfileApiResponseSchema)),
+    Effect.andThen(Schema.decodeUnknown(ProfileUpdateApiResponseSchema)),
     Effect.andThen((response) => response.data)
   ).pipe(
     // Parse errors of data from Graph/SharePoint are considered unrecoverable.

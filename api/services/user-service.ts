@@ -82,7 +82,7 @@ export const getUserLoginPropertiesFromGraph = (userId: string) => {
   return GraphUsersRepository.pipe(
     Effect.andThen((repo) => repo.modelGetGraphUserById(userId)),
     Effect.andThen((graphUser) => ({
-      userId,
+      id: userId,
       displayName: displayNameFromGraphUser(graphUser),
       givenName: givenNameFromGraphUser(graphUser),
       surname: surnameFromGraphUser(graphUser),
