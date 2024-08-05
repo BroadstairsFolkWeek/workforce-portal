@@ -28,7 +28,7 @@ const ApiProfileMeta = S.Struct({
 export const ApiProfile = S.Struct({
   version: S.Number,
   displayName: S.String,
-  email: S.optional(S.String),
+  email: S.String,
   givenName: S.optional(S.String),
   surname: S.optional(S.String),
   address: S.optional(S.String),

@@ -37,21 +37,19 @@ const ModelProfileMeta = S.Struct({
 
 export const ModelProfile = S.Struct({
   profileId: ModelProfileId,
-  email: S.optional(S.String),
+  email: S.String,
   displayName: S.String,
   givenName: S.optional(S.String),
   surname: S.optional(S.String),
   address: S.optional(S.String),
   telephone: S.optional(S.String),
-  version: S.Number,
   photoUrl: S.optional(S.String),
-  photoIds: S.optional(S.Array(S.String)),
-  dbId: S.Number,
   meta: ModelProfileMeta,
+  version: S.Number,
 });
 
 export const ModelProfileUpdates = ModelProfile.pipe(
-  S.omit("profileId", "dbId", "photoUrl", "photoIds", "version"),
+  S.omit("profileId", "photoUrl", "version"),
   S.partial()
 );
 

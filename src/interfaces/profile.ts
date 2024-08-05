@@ -4,18 +4,18 @@ export const ModelProfileId = S.String.pipe(S.brand("ProfileId"));
 export type ModelProfileId = S.Schema.Type<typeof ModelProfileId>;
 
 export const Profile = S.Struct({
-  email: S.optional(S.String),
+  email: S.String,
   displayName: S.String,
   givenName: S.optional(S.String),
   surname: S.optional(S.String),
   address: S.optional(S.String),
   telephone: S.optional(S.String),
-  version: S.Number,
   photoUrl: S.optional(S.String),
   meta: S.Struct({
     photoRequired: S.Boolean,
     profileInformationRequired: S.Boolean,
   }),
+  version: S.Number,
 });
 
 export interface Profile extends S.Schema.Type<typeof Profile> {}
