@@ -22,14 +22,14 @@ const PhotoPage: React.FC<PhotoPanelProps> = () => {
   const [uppy, setUppy] = useState<Uppy | null>(null);
 
   const profileImage = useMemo(() => {
-    if (profile && profile.photoUrl) {
+    if (profile && profile.metadata.photoUrl) {
       return (
         <div className="">
           <p className="my-2">
             This is your current profile photo. We'll use it on you workforce ID
             badge.
           </p>
-          <img alt="Profile" className="h-60" src={profile.photoUrl} />
+          <img alt="Profile" className="h-60" src={profile.metadata.photoUrl} />
           <p>
             You can change your profile photo by taking or uploading a new photo
             using the options below.

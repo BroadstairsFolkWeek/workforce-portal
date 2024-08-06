@@ -30,7 +30,7 @@ const HomeWithProfile: React.FC<HomeWithProfileProps> = ({
   const formsLoadingStatus = useSelector(selectFormsLoadingStatus);
 
   const profileReminder = useMemo(() => {
-    if (profile.meta.photoRequired) {
+    if (profile.metadata.photoRequired) {
       return (
         <div className="m-4 p-4 bg-red-200 outline outline-4 outline-yellow-100 rounded-lg">
           Please{" "}
@@ -40,7 +40,7 @@ const HomeWithProfile: React.FC<HomeWithProfileProps> = ({
           as it may be needed as part of a form submission.
         </div>
       );
-    } else if (profile.meta.profileInformationRequired) {
+    } else if (profile.metadata.profileInformationRequired) {
       return (
         <div className="m-4 p-4 bg-red-200 outline outline-4 outline-yellow-100 rounded-lg">
           Please{" "}

@@ -128,7 +128,7 @@ const FormSubmissionListItem: React.FC<FormSubmissionListItemProps> = ({
       formProfileRequirementsOb.surname ||
       formProfileRequirementsOb.address;
     const profileNeeded =
-      formRequiresProfile && profile.meta.profileInformationRequired;
+      formRequiresProfile && profile.metadata.profileInformationRequired;
 
     if (formSubmission.submissionStatus === "draft") {
       if (questionsInError.length > 0) {
@@ -142,7 +142,7 @@ const FormSubmissionListItem: React.FC<FormSubmissionListItemProps> = ({
           </div>
         );
       } else if (
-        profile.meta.photoRequired &&
+        profile.metadata.photoRequired &&
         formSubmission.template.requirements.profileRequirements.photo
       ) {
         return (

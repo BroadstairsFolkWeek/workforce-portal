@@ -23,19 +23,18 @@ export const ApiProfileUpdateRequest = S.Struct({
 const ApiProfileMeta = S.Struct({
   photoRequired: S.Boolean,
   profileInformationRequired: S.Boolean,
+  version: S.Number,
+  photoUrl: S.optional(S.String),
+  photoThumbnailUrl: S.optional(S.String),
 });
 
 export const ApiProfile = S.Struct({
-  version: S.Number,
   displayName: S.String,
-  email: S.String,
   givenName: S.optional(S.String),
   surname: S.optional(S.String),
   address: S.optional(S.String),
   telephone: S.optional(S.String),
-  photoUrl: S.optional(S.String),
-  photoThumbnailUrl: S.optional(S.String),
-  meta: ApiProfileMeta,
+  metadata: ApiProfileMeta,
 });
 
 export const ApiProfileWithForms = S.Struct({

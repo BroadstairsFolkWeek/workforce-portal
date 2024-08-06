@@ -45,7 +45,11 @@ const ProfileControl: React.FC = () => {
         <img
           alt="Profile"
           className="h-10"
-          src={profile?.photoUrl ? profile.photoUrl : "/hoodenHorse.jpg"}
+          src={
+            profile?.metadata.photoUrl
+              ? profile.metadata.photoUrl
+              : "/hoodenHorse.jpg"
+          }
         />
       );
     } else {

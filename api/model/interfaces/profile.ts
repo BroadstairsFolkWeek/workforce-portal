@@ -3,8 +3,6 @@ import { Schema as S } from "@effect/schema";
 export const ModelProfileId = S.String.pipe(S.brand("ProfileId"));
 export type ModelProfileId = S.Schema.Type<typeof ModelProfileId>;
 
-const ModelPhotoIds = S.split("\n");
-
 const ModelCoreProfile = S.Struct({
   email: S.optional(S.String).pipe(S.fromKey("Email")),
   displayName: S.propertySignature(S.String).pipe(S.fromKey("Title")),
@@ -13,7 +11,6 @@ const ModelCoreProfile = S.Struct({
   address: S.optional(S.String).pipe(S.fromKey("Address")),
   telephone: S.optional(S.String).pipe(S.fromKey("Telephone")),
   version: S.propertySignature(S.Number).pipe(S.fromKey("Version")),
-  photoIds: S.optional(ModelPhotoIds).pipe(S.fromKey("PhotoIds")),
 });
 
 const ModelProfileMetadata = S.Struct({
@@ -33,23 +30,24 @@ export const ModelPersistedProfile = S.extend(
 const ModelProfileMeta = S.Struct({
   photoRequired: S.Boolean,
   profileInformationRequired: S.Boolean,
+  version: S.Number,
+  photoUrl: S.optional(S.String),
+  photoThumbnailUrl: S.optional(S.String),
 });
 
 export const ModelProfile = S.Struct({
-  profileId: ModelProfileId,
+  id: ModelProfileId,
   email: S.String,
   displayName: S.String,
   givenName: S.optional(S.String),
   surname: S.optional(S.String),
   address: S.optional(S.String),
   telephone: S.optional(S.String),
-  photoUrl: S.optional(S.String),
-  meta: ModelProfileMeta,
-  version: S.Number,
+  metadata: ModelProfileMeta,
 });
 
 export const ModelProfileUpdates = ModelProfile.pipe(
-  S.omit("profileId", "photoUrl", "version"),
+  S.omit("id", "metadata"),
   S.partial()
 );
 

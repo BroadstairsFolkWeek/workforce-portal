@@ -28,13 +28,13 @@ export const useProfileHandlers = () => {
       dispatch(
         actionSaveProfile({
           updates: profileUpdates,
-          version: profile?.version ?? 0,
+          version: profile?.metadata.version ?? 0,
         })
       );
 
       navigateHome();
     },
-    [dispatch, navigateHome, profile?.version]
+    [dispatch, navigateHome, profile?.metadata.version]
   );
 
   const cancelEditProfile = useCallback(() => {
