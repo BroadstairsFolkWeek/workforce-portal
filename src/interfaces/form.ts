@@ -21,16 +21,9 @@ export type FormArchiveStatus = S.Schema.Type<typeof FormArchiveStatus>;
 export const FormAction = S.Literal("submit", "retract", "delete");
 export type FormAction = S.Schema.Type<typeof FormAction>;
 
-export const TemplateRequirements = S.Struct({
-  profileRequirements: S.Struct({
-    firstName: S.optional(S.Boolean),
-    surname: S.optional(S.Boolean),
-    displayName: S.optional(S.Boolean),
-    address: S.optional(S.Boolean),
-    telephone: S.optional(S.Boolean),
-    email: S.optional(S.Boolean),
-    photo: S.optional(S.Boolean),
-  }),
+export const OtherDataRequirements = S.Struct({
+  profileRequirements: S.Array(S.String),
+  profilePhotoRequired: S.optional(S.Boolean),
 });
 
 export const Template = S.Struct({
@@ -39,7 +32,7 @@ export const Template = S.Struct({
   fullName: S.String,
   description: S.String,
   questions: S.Unknown,
-  requirements: TemplateRequirements,
+  otherDataRequirements: OtherDataRequirements,
   status: S.Literal("draft", "active", "archived"),
 });
 export type Template = S.Schema.Type<typeof Template>;

@@ -246,7 +246,7 @@ export const formsSlice = createSlice({
     builder.addCase(createFormSubmission.fulfilled, (state, action) => {
       if (action.payload.result == "success") {
         state.forms.push(castDraft(action.payload.formSubmission));
-        state.creatableForms = [...action.payload.creatableForms];
+        state.creatableForms = castDraft(action.payload.creatableForms);
         state.formsSavingStatus = "saved";
       } else {
         state.formsSavingStatus = action.payload.formsSavingStatus;
@@ -321,7 +321,7 @@ export const formsSlice = createSlice({
         state.forms = state.forms.filter(
           (f) => f.id !== deletedFormSubmissionId
         );
-        state.creatableForms = [...action.payload.creatableForms];
+        state.creatableForms = castDraft(action.payload.creatableForms);
       } else {
         state.formsSavingStatus = action.payload.formsSavingStatus;
         state.formsSavingError = action.payload.formsSavingError;

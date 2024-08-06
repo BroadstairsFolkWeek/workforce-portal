@@ -118,15 +118,9 @@ const FormSubmissionListItem: React.FC<FormSubmissionListItemProps> = ({
   }, [formSubmission]);
 
   const actionRequiredComponent = useMemo(() => {
-    const formProfileRequirementsOb =
-      formSubmission.template.requirements.profileRequirements;
-    const formRequiresProfile =
-      formProfileRequirementsOb.displayName ||
-      formProfileRequirementsOb.email ||
-      formProfileRequirementsOb.telephone ||
-      formProfileRequirementsOb.firstName ||
-      formProfileRequirementsOb.surname ||
-      formProfileRequirementsOb.address;
+    const formProfileRequirements =
+      formSubmission.template.otherDataRequirements.profileRequirements;
+    const formRequiresProfile = formProfileRequirements.length > 0;
     const profileNeeded =
       formRequiresProfile && profile.metadata.profileInformationRequired;
 
@@ -143,7 +137,7 @@ const FormSubmissionListItem: React.FC<FormSubmissionListItemProps> = ({
         );
       } else if (
         profile.metadata.photoRequired &&
-        formSubmission.template.requirements.profileRequirements.photo
+        formSubmission.template.otherDataRequirements.profilePhotoRequired
       ) {
         return (
           <div>
