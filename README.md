@@ -1,4 +1,4 @@
-# Broadstairs Folkweek Workforce Portal
+# Broadstairs Folk Week Workforce Portal
 
 Broadstairs Folk Week depends on its volunteer workforce for the running of the festival.
 
