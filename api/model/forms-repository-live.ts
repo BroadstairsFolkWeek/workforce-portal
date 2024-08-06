@@ -33,7 +33,7 @@ const CreatableFormsApiResponseSchema = Schema.Struct({
 
 const getFormsByUserId = (apiClient: WfApiClientType) => (userId: string) =>
   apiClient
-    .getJson(`/api/users/${userId}/profile/forms`)
+    .getJson(`/api/users/${userId}/forms`)
     .pipe(
       Effect.andThen(Schema.decodeUnknown(FormsApiResponseSchema)),
       Effect.andThen((response) => response.data)
@@ -59,9 +59,9 @@ const updateFormSubmission =
   (userId: string) =>
   (formId: FormId, answers: unknown) =>
     apiClient
-      .putJsonDataJsonResponse(`/api/users/${userId}/profile/forms/${formId}`)(
-        answers
-      )
+      .putJsonDataJsonResponse(`/api/users/${userId}/forms/${formId}/answers`)({
+        answers,
+      })
       .pipe(
         Effect.andThen(Schema.decodeUnknown(FormApiResponseSchema)),
         Effect.andThen((response) => response.data)
@@ -85,21 +85,19 @@ const updateFormSubmission =
 
 const deleteFormSubmission =
   (apiClient: WfApiClientType) => (userId: string) => (formId: FormId) =>
-    apiClient
-      .deleteNoResponse(`/api/users/${userId}/profile/forms/${formId}`)
-      .pipe(
-        Effect.catchTags({
-          RequestError: (e) => Effect.die("Failed to delete form: " + e),
-          ResponseError: (e) => {
-            switch (e.response.status) {
-              case 404:
-                return Effect.fail(new FormNotFound());
-              default:
-                return Effect.die("Failed to delete form: " + e);
-            }
-          },
-        })
-      );
+    apiClient.deleteNoResponse(`/api/users/${userId}/forms/${formId}`).pipe(
+      Effect.catchTags({
+        RequestError: (e) => Effect.die("Failed to delete form: " + e),
+        ResponseError: (e) => {
+          switch (e.response.status) {
+            case 404:
+              return Effect.fail(new FormNotFound());
+            default:
+              return Effect.die("Failed to delete form: " + e);
+          }
+        },
+      })
+    );
 
 const actionFormSubmission =
   (apiClient: WfApiClientType) =>
@@ -107,9 +105,9 @@ const actionFormSubmission =
   (formId: FormId) =>
   (action: FormAction) =>
     apiClient
-      .postJsonDataJsonResponse(
-        `/api/users/${userId}/profile/forms/${formId}/action`
-      )(action)
+      .postJsonDataJsonResponse(`/api/users/${userId}/forms/${formId}/action`)(
+        action
+      )
       .pipe(
         Effect.andThen(Schema.decodeUnknown(FormApiResponseSchema)),
         Effect.andThen((response) => response.data)
@@ -136,7 +134,7 @@ const actionFormSubmission =
 const getCreatableFormSpecsByUserId =
   (apiClient: WfApiClientType) => (userId: string) =>
     apiClient
-      .getJson(`/api/users/${userId}/profile/creatableforms`)
+      .getJson(`/api/users/${userId}/creatableforms`)
       .pipe(
         Effect.andThen(Schema.decodeUnknown(CreatableFormsApiResponseSchema)),
         Effect.andThen((response) => response.data)
@@ -163,7 +161,7 @@ const createFormSubmission =
   (templateId: TemplateId, answers: unknown) =>
     apiClient
       .postJsonDataJsonResponse(
-        `/api/users/${userId}/profile/creatableforms/${templateId}/create`
+        `/api/users/${userId}/creatableforms/${templateId}/create`
       )(answers)
       .pipe(
         Effect.andThen(Schema.decodeUnknown(FormApiResponseSchema)),
