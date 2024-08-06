@@ -52,11 +52,11 @@ const modelUpdateProfileByUserId = (
 ) =>
   WfApiClient.pipe(
     Effect.andThen((apiClient) =>
-      apiClient.patchJsonDataJsonResponse(
+      apiClient.putJsonDataJsonResponse(
         `/api/users/${userId}/profile/properties`
       )({
-        version,
-        updates,
+        applyToVersion: version,
+        properties: updates,
       })
     ),
     Effect.andThen(Schema.decodeUnknown(ProfileUpdateApiResponseSchema)),
