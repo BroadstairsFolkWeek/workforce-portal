@@ -1,6 +1,6 @@
 import { PropsWithChildren, useCallback } from "react";
 import { Template } from "../interfaces/form";
-import { useFormSubmissionHandlers } from "../routes/FormSubmissionHandlers";
+import { useFormHandlers } from "../routes/FormHandlers";
 import CreatableFormControls from "./CreatableFormControls";
 
 interface CreatableFormsListItemProps {
@@ -39,7 +39,7 @@ const ListItemFooter = ({
 const CreatableFormsListItem: React.FC<CreatableFormsListItemProps> = ({
   creatableForm,
 }) => {
-  const { displayNewForm: newForm } = useFormSubmissionHandlers();
+  const { displayNewForm: newForm } = useFormHandlers();
 
   const newFormHandler = useCallback(() => {
     newForm(creatableForm);

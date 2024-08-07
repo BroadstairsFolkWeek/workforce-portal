@@ -4,7 +4,7 @@ import { Survey } from "survey-react-ui";
 import { Template } from "../interfaces/form";
 import { ContrastDark } from "survey-core/themes";
 
-import { useFormSubmissionHandlers } from "../routes/FormSubmissionHandlers";
+import { useFormHandlers } from "../routes/FormHandlers";
 import { useCallback, useMemo } from "react";
 import SpinnerOverlay from "./SpinnerOverlay";
 import { selectFormsSavingStatus } from "../features/forms/forms-slice";
@@ -18,7 +18,7 @@ interface CreatableFormNewProps {
 const CreatableFormNew: React.FC<CreatableFormNewProps> = ({
   creatableForm,
 }) => {
-  const { createNewForm, cancelNewForm } = useFormSubmissionHandlers();
+  const { createNewForm, cancelNewForm } = useFormHandlers();
 
   const formsSavingStatus = useSelector(selectFormsSavingStatus);
 

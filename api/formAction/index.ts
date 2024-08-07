@@ -4,18 +4,16 @@ import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import { createLoggerLayer } from "../utilties/logging";
 import { getAuthenticatedUserId } from "../functions/authenticated-user";
 import { FormAction, FormId } from "../model/interfaces/form";
-import { PostFormSubmissionActionResponse } from "../api/form";
+import { PostFormActionResponse } from "../api/form";
 import { repositoriesLayerLive } from "../contexts/repositories-live";
 import { ApiInvalidRequest } from "../api/api";
-import { actionFormSubmission } from "../services/forms-service";
+import { actionForm } from "../services/forms-service";
 
 const httpTrigger: AzureFunction = async function (
   context: Context,
   req: HttpRequest
 ): Promise<void> {
-  const formSubmissionIdEffect = Schema.decodeUnknown(FormId)(
-    req.params["formSubmissionId"]
-  ).pipe(
+  const formIdEffect = Schema.decodeUnknown(FormId)(req.params["formId"]).pipe(
     Effect.catchTag("ParseError", () => Effect.fail(new ApiInvalidRequest()))
   );
 
@@ -28,19 +26,15 @@ const httpTrigger: AzureFunction = async function (
 
   const program = Effect.logTrace("formAction: entry").pipe(
     Effect.andThen(
-      Effect.all([
-        formSubmissionIdEffect,
-        formActionEffect,
-        authenticatedUserIdEffect,
-      ])
+      Effect.all([formIdEffect, formActionEffect, authenticatedUserIdEffect])
         .pipe(
-          Effect.andThen(([formSubmissionId, action, authenticedUserId]) =>
-            actionFormSubmission(authenticedUserId)(formSubmissionId)(action)
+          Effect.andThen(([formId, action, authenticedUserId]) =>
+            actionForm(authenticedUserId)(formId)(action)
           )
         )
         .pipe(
           Effect.andThen((form) => ({ data: form })),
-          Effect.andThen(Schema.encode(PostFormSubmissionActionResponse)),
+          Effect.andThen(Schema.encode(PostFormActionResponse)),
           Effect.andThen((body) => ({
             status: 200 as const,
             body,

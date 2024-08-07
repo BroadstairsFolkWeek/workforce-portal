@@ -5,7 +5,7 @@ export const PutProfileResponse = S.Struct({
   data: Form,
 });
 
-export const PostFormSubmissionActionResponse = S.Struct({
+export const PostFormActionResponse = S.Struct({
   data: Form,
 });
 

@@ -4,19 +4,19 @@ import HomeWithProfile from "../components/HomeWithProfile";
 import HomeWithoutProfile from "../components/HomeWithoutProfile";
 import {
   selectCreatableForms,
-  selectFormSubmissions,
+  selectForms,
 } from "../features/forms/forms-slice";
 
 const HomeRoute = () => {
   const profile = useSelector(selectProfile);
-  const forms = useSelector(selectFormSubmissions);
+  const forms = useSelector(selectForms);
   const creatableForms = useSelector(selectCreatableForms);
 
   if (profile) {
     return (
       <HomeWithProfile
         profile={profile}
-        formSubmissions={forms}
+        forms={forms}
         creatableForms={creatableForms}
       />
     );

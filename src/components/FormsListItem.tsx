@@ -2,27 +2,27 @@ import { PropsWithChildren, useCallback, useMemo } from "react";
 import { DateTime } from "luxon";
 import { Model, Question } from "survey-core";
 import { Form } from "../interfaces/form";
-import FormSubmissionControls from "./FormSubmissionControls";
-import { useFormSubmissionHandlers } from "../routes/FormSubmissionHandlers";
+import FormControls from "./FormControls";
+import { useFormHandlers } from "../routes/FormHandlers";
 import { Profile } from "../interfaces/profile";
 import { Link } from "react-router-dom";
 
-interface FormSubmissionListItemProps {
-  formSubmission: Form;
+interface FormsListItemProps {
+  form: Form;
   profile: Profile;
 }
 
 const ListItemHeader = ({
-  formSubmission,
+  form,
   children,
 }: PropsWithChildren<{
-  formSubmission: Form;
+  form: Form;
 }>) => {
   return (
     <div className="bg-bfw-yellow">
       <div className="flex flex-row justify-between p-2 bg-bfw-yellow ">
-        <div>{formSubmission.template.fullName}</div>
-        <div className="text-xs">{formSubmission.submissionStatus}</div>
+        <div>{form.template.fullName}</div>
+        <div className="text-xs">{form.submissionStatus}</div>
       </div>
       <div className="px-2">{children}</div>
     </div>
@@ -62,37 +62,34 @@ const ListItemFooter = ({
   );
 };
 
-const FormSubmissionListItem: React.FC<FormSubmissionListItemProps> = ({
-  formSubmission,
-  profile,
-}) => {
+const FormsListItem: React.FC<FormsListItemProps> = ({ form, profile }) => {
   const { viewForm, editForm, submitForm, retractForm, deleteForm } =
-    useFormSubmissionHandlers();
+    useFormHandlers();
 
   const viewFormHandler = useCallback(() => {
-    viewForm(formSubmission);
-  }, [viewForm, formSubmission]);
+    viewForm(form);
+  }, [viewForm, form]);
 
   const editFormHandler = useCallback(() => {
-    editForm(formSubmission);
-  }, [editForm, formSubmission]);
+    editForm(form);
+  }, [editForm, form]);
 
   const submitFormHandler = useCallback(async () => {
-    await submitForm(formSubmission);
-  }, [submitForm, formSubmission]);
+    await submitForm(form);
+  }, [submitForm, form]);
 
   const retractFormHandler = useCallback(async () => {
-    await retractForm(formSubmission);
-    editForm(formSubmission);
-  }, [retractForm, editForm, formSubmission]);
+    await retractForm(form);
+    editForm(form);
+  }, [retractForm, editForm, form]);
 
   const deleteFormHandler = useCallback(async () => {
-    await deleteForm(formSubmission);
-  }, [deleteForm, formSubmission]);
+    await deleteForm(form);
+  }, [deleteForm, form]);
 
   const questionsInError = useMemo(() => {
-    const m = new Model(formSubmission.template.questions);
-    m.data = formSubmission.answers;
+    const m = new Model(form.template.questions);
+    m.data = form.answers;
     const answersAreValid = m.validate();
 
     if (!answersAreValid) {
@@ -115,16 +112,16 @@ const FormSubmissionListItem: React.FC<FormSubmissionListItemProps> = ({
     } else {
       return [];
     }
-  }, [formSubmission]);
+  }, [form]);
 
   const actionRequiredComponent = useMemo(() => {
     const formProfileRequirements =
-      formSubmission.template.otherDataRequirements.profileRequirements;
+      form.template.otherDataRequirements.profileRequirements;
     const formRequiresProfile = formProfileRequirements.length > 0;
     const profileNeeded =
       formRequiresProfile && profile.metadata.profileInformationRequired;
 
-    if (formSubmission.submissionStatus === "draft") {
+    if (form.submissionStatus === "draft") {
       if (questionsInError.length > 0) {
         return (
           <div>
@@ -137,7 +134,7 @@ const FormSubmissionListItem: React.FC<FormSubmissionListItemProps> = ({
         );
       } else if (
         profile.metadata.photoRequired &&
-        formSubmission.template.otherDataRequirements.profilePhotoRequired
+        form.template.otherDataRequirements.profilePhotoRequired
       ) {
         return (
           <div>
@@ -159,7 +156,7 @@ const FormSubmissionListItem: React.FC<FormSubmissionListItemProps> = ({
           </div>
         );
       }
-    } else if (formSubmission.submissionStatus === "submittable") {
+    } else if (form.submissionStatus === "submittable") {
       return (
         <div>
           ACTION Required: If you are happy with the information provided, click{" "}
@@ -170,28 +167,26 @@ const FormSubmissionListItem: React.FC<FormSubmissionListItemProps> = ({
         </div>
       );
     }
-  }, [formSubmission, questionsInError]);
+  }, [form, questionsInError]);
 
   return (
     <div className="flex flex-col bg-yellow-100 rounded-lg overflow-hidden">
-      <ListItemHeader formSubmission={formSubmission}>
-        {actionRequiredComponent}
-      </ListItemHeader>
+      <ListItemHeader form={form}>{actionRequiredComponent}</ListItemHeader>
 
       <div className="flex flex-row">
         <div className="p-4 flex-grow overflow-hidden">
           <div className="text-sm">
             Last saved:{" "}
-            {DateTime.fromISO(
-              formSubmission.modifiedDateTimeUtc
-            ).toLocaleString(DateTime.DATETIME_MED)}
+            {DateTime.fromISO(form.modifiedDateTimeUtc).toLocaleString(
+              DateTime.DATETIME_MED
+            )}
           </div>
         </div>
         <div className="py-4 pr-2 w-40">
-          <FormSubmissionControls
+          <FormControls
             viewForm={viewFormHandler}
             editForm={editFormHandler}
-            formSubmission={formSubmission}
+            form={form}
             submitForm={submitFormHandler}
             retractForm={retractFormHandler}
             deleteForm={deleteFormHandler}
@@ -203,4 +198,4 @@ const FormSubmissionListItem: React.FC<FormSubmissionListItemProps> = ({
   );
 };
 
-export default FormSubmissionListItem;
+export default FormsListItem;

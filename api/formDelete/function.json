@@ -6,7 +6,7 @@
       "direction": "in",
       "name": "req",
       "methods": ["delete"],
-      "route": "formDelete/{formSubmissionId}"
+      "route": "formDelete/{formId}"
     },
     {
       "type": "http",

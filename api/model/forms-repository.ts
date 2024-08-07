@@ -27,18 +27,18 @@ export class FormsRepository extends Context.Tag("FormsRepository")<
       userId: string
     ) => Effect.Effect<readonly Form[], ProfileNotFound>;
 
-    readonly modelUpdateFormSubmission: (
+    readonly modelUpdateForm: (
       userId: string
     ) => (
       formId: FormId,
       answers: unknown
     ) => Effect.Effect<Form, FormNotFound>;
 
-    readonly modelDeleteFormSubmission: (
+    readonly modelDeleteForm: (
       userId: string
     ) => (formId: FormId) => Effect.Effect<void, FormNotFound>;
 
-    readonly modelActionFormSubmission: (
+    readonly modelActionForm: (
       userId: string
     ) => (
       formId: FormId
@@ -50,7 +50,7 @@ export class FormsRepository extends Context.Tag("FormsRepository")<
       userId: string
     ) => Effect.Effect<readonly Template[], ProfileNotFound>;
 
-    readonly modelCreateFormSubmission: (
+    readonly modelCreateForm: (
       userId: string
     ) => (
       templateId: TemplateId,

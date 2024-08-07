@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
-import FormSubmissionList from "./FormSubmissionsList";
+import FormsList from "./FormsList";
 import { Profile } from "../interfaces/profile";
 import { Template, Form } from "../interfaces/form";
 import CreatableFormsList from "./CreatableFormsList";
@@ -16,13 +16,13 @@ import { LoadProfileError } from "./errors/user-profile-errors";
 
 export interface HomeWithProfileProps {
   profile: Profile;
-  formSubmissions: readonly Form[];
+  forms: readonly Form[];
   creatableForms: readonly Template[];
 }
 
 const HomeWithProfile: React.FC<HomeWithProfileProps> = ({
   profile,
-  formSubmissions,
+  forms: forms,
   creatableForms,
 }) => {
   const profileLoadingStatus = useSelector(selectProfileLoadingStatus);
@@ -82,13 +82,10 @@ const HomeWithProfile: React.FC<HomeWithProfileProps> = ({
   return (
     <div>
       {profileReminder}
-      {formSubmissions.length > 0 ? (
+      {forms.length > 0 ? (
         <div className="space-y-2 text-left">
           <h1 className="text-xl">Your forms</h1>
-          <FormSubmissionList
-            formSubmissions={formSubmissions}
-            profile={profile}
-          />
+          <FormsList forms={forms} profile={profile} />
         </div>
       ) : null}
       {creatableForms.length > 0 ? (

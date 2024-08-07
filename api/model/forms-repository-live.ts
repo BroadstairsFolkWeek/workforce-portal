@@ -54,7 +54,7 @@ const getFormsByUserId = (apiClient: WfApiClientType) => (userId: string) =>
       })
     );
 
-const updateFormSubmission =
+const updateForm =
   (apiClient: WfApiClientType) =>
   (userId: string) =>
   (formId: FormId, answers: unknown) =>
@@ -83,7 +83,7 @@ const updateFormSubmission =
         })
       );
 
-const deleteFormSubmission =
+const deleteForm =
   (apiClient: WfApiClientType) => (userId: string) => (formId: FormId) =>
     apiClient.deleteNoResponse(`/api/users/${userId}/forms/${formId}`).pipe(
       Effect.catchTags({
@@ -99,7 +99,7 @@ const deleteFormSubmission =
       })
     );
 
-const actionFormSubmission =
+const actionForm =
   (apiClient: WfApiClientType) =>
   (userId: string) =>
   (formId: FormId) =>
@@ -155,7 +155,7 @@ const getCreatableFormSpecsByUserId =
         })
       );
 
-const createFormSubmission =
+const createForm =
   (apiClient: WfApiClientType) =>
   (userId: string) =>
   (templateId: TemplateId, answers: unknown) =>
@@ -190,12 +190,12 @@ export const formsRepositoryLive = Layer.effect(
     Effect.andThen(([wfApiClient]) =>
       FormsRepository.of({
         modelGetFormsByUserId: getFormsByUserId(wfApiClient),
-        modelUpdateFormSubmission: updateFormSubmission(wfApiClient),
-        modelDeleteFormSubmission: deleteFormSubmission(wfApiClient),
-        modelActionFormSubmission: actionFormSubmission(wfApiClient),
+        modelUpdateForm: updateForm(wfApiClient),
+        modelDeleteForm: deleteForm(wfApiClient),
+        modelActionForm: actionForm(wfApiClient),
         modelGetCreatableFormSpecsByUserId:
           getCreatableFormSpecsByUserId(wfApiClient),
-        modelCreateFormSubmission: createFormSubmission(wfApiClient),
+        modelCreateForm: createForm(wfApiClient),
       })
     )
   )

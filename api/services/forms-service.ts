@@ -20,17 +20,17 @@ export const getFormsByUserId = (
     Effect.andThen((formsRepo) => formsRepo.modelGetFormsByUserId(userId))
   );
 
-export const updateFormSubmission =
+export const updateForm =
   (userId: string) =>
   (formId: FormId) =>
   (answers: unknown): Effect.Effect<Form, FormNotFound, FormsRepository> =>
     FormsRepository.pipe(
       Effect.andThen((formsRepo) =>
-        formsRepo.modelUpdateFormSubmission(userId)(formId, answers)
+        formsRepo.modelUpdateForm(userId)(formId, answers)
       )
     );
 
-export const actionFormSubmission =
+export const actionForm =
   (userId: string) =>
   (formId: FormId) =>
   (
@@ -42,11 +42,11 @@ export const actionFormSubmission =
   > =>
     FormsRepository.pipe(
       Effect.andThen((formsRepo) =>
-        formsRepo.modelActionFormSubmission(userId)(formId)(action)
+        formsRepo.modelActionForm(userId)(formId)(action)
       )
     );
 
-export const deleteFormSubmission =
+export const deleteForm =
   (userId: string) =>
   (
     formId: FormId
@@ -56,9 +56,7 @@ export const deleteFormSubmission =
     FormsRepository
   > =>
     FormsRepository.pipe(
-      Effect.andThen((formsRepo) =>
-        formsRepo.modelDeleteFormSubmission(userId)(formId)
-      ),
+      Effect.andThen((formsRepo) => formsRepo.modelDeleteForm(userId)(formId)),
       Effect.andThen(() => getCreatableFormsByUserId(userId))
     );
 
@@ -76,7 +74,7 @@ export const createForm =
     FormsRepository.pipe(
       Effect.andThen((formsRepo) =>
         formsRepo
-          .modelCreateFormSubmission(userId)(formSpecId, answers)
+          .modelCreateForm(userId)(formSpecId, answers)
           .pipe(
             Effect.andThen((form) =>
               getCreatableFormsByUserId(userId).pipe(

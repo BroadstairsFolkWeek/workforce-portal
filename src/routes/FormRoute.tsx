@@ -1,38 +1,34 @@
 import { useSelector } from "react-redux";
-import { selectFormSubmission } from "../features/forms/forms-slice";
+import { selectForm } from "../features/forms/forms-slice";
 import { useLoaderData, useNavigate } from "react-router-dom";
-import FormSubmissionView from "../components/FormSubmissionView";
+import FormView from "../components/FormView";
 import { FormId } from "../interfaces/form";
 
 import { Params } from "react-router-dom";
 import { useCallback } from "react";
 
 export async function loader({ params }: { params: Params }) {
-  const formSubmissionId = params.formSubmissionId;
-  return { formSubmissionId };
+  const formId = params.formId;
+  return { formId };
 }
 
 export const Component = () => {
-  const { formSubmissionId } = useLoaderData() as Awaited<
-    ReturnType<typeof loader>
-  >;
+  const { formId } = useLoaderData() as Awaited<ReturnType<typeof loader>>;
 
   const navigate = useNavigate();
 
   const handler = useCallback(() => {}, []);
 
   const editHandler = useCallback(() => {
-    navigate(`/formSubmissions/${formSubmissionId}/edit`);
-  }, [formSubmissionId]);
+    navigate(`/forms/${formId}/edit`);
+  }, [formId]);
 
-  if (formSubmissionId) {
-    const formSubmission = useSelector(
-      selectFormSubmission(FormId.make(formSubmissionId))
-    );
-    if (formSubmission) {
+  if (formId) {
+    const form = useSelector(selectForm(FormId.make(formId)));
+    if (form) {
       return (
-        <FormSubmissionView
-          formSubmission={formSubmission}
+        <FormView
+          form={form}
           editButtonClicked={editHandler}
           submitButtonClicked={handler}
           retractButtonClicked={handler}
@@ -47,4 +43,4 @@ export const Component = () => {
   }
 };
 
-Component.displayName = "FormSubmissionRoute";
+Component.displayName = "FormRoute";

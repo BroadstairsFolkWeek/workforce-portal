@@ -1,20 +1,17 @@
 import { useSelector } from "react-redux";
 import { Form } from "../interfaces/form";
-import FormSubmissionListItem from "./FormSubmissionsListItem";
+import FormsListItem from "./FormsListItem";
 import SpinnerOverlay from "./SpinnerOverlay";
 import { selectFormsSavingStatus } from "../features/forms/forms-slice";
 import { useMemo } from "react";
 import { Profile } from "../interfaces/profile";
 
-interface FormSubmissionListProps {
-  formSubmissions: readonly Form[];
+interface FormsListProps {
+  forms: readonly Form[];
   profile: Profile;
 }
 
-const FormSubmissionList: React.FC<FormSubmissionListProps> = ({
-  formSubmissions,
-  profile,
-}) => {
+const FormsList: React.FC<FormsListProps> = ({ forms, profile }) => {
   const formsSavingStatus = useSelector(selectFormsSavingStatus);
 
   const spinnerOverlay = useMemo(
@@ -25,12 +22,8 @@ const FormSubmissionList: React.FC<FormSubmissionListProps> = ({
   return (
     <div className="relative">
       <div>
-        {formSubmissions.map((formSubmission) => (
-          <FormSubmissionListItem
-            key={formSubmission.id}
-            formSubmission={formSubmission}
-            profile={profile}
-          />
+        {forms.map((form) => (
+          <FormsListItem key={form.id} form={form} profile={profile} />
         ))}
       </div>
 
@@ -39,4 +32,4 @@ const FormSubmissionList: React.FC<FormSubmissionListProps> = ({
   );
 };
 
-export default FormSubmissionList;
+export default FormsList;

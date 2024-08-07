@@ -1,9 +1,3 @@
-import { Model } from "survey-core";
-import { Survey } from "survey-react-ui";
-import { Form } from "../interfaces/form";
-import { ContrastDark } from "survey-core/themes";
-
-import "survey-core/defaultV2.min.css";
 import {
   DefaultButton,
   Dialog,
@@ -13,24 +7,16 @@ import {
   PrimaryButton,
 } from "@fluentui/react";
 import { useCallback, useMemo, useState } from "react";
-import { useFormSubmissionHandlers } from "../routes/FormSubmissionHandlers";
-import { useSelector } from "react-redux";
-import { selectFormsSavingStatus } from "../features/forms/forms-slice";
+import { Form } from "../interfaces/form";
 
-interface FormSubmissionViewProps {
-  formSubmission: Form;
-  editButtonClicked: () => void;
-  submitButtonClicked: () => void;
-  retractButtonClicked: () => void;
-  deleteButtonClicked: () => void;
-}
-
-interface FormSubmissionViewControlsProps {
-  formSubmission: Form;
-  editButtonClicked: () => void;
-  submitButtonClicked: () => void;
-  retractButtonClicked: () => void;
-  deleteButtonClicked: () => void;
+interface FormControlsProps {
+  form: Form;
+  inhibitViewControl?: boolean;
+  viewForm: () => void;
+  editForm: () => void;
+  submitForm: () => void;
+  retractForm: () => void;
+  deleteForm: () => void;
 }
 
 const deleteDialogContentProps: IDialogContentProps = {
@@ -54,15 +40,17 @@ const modalProps = {
   dragOptions: undefined,
 };
 
-const isEditable = (formSubmission: Form): boolean =>
-  formSubmission.submissionStatus === "draft" ||
-  formSubmission.submissionStatus === "submittable";
+const isEditable = (form: Form): boolean =>
+  form.answersModifiable === "modifiable";
 
-const isSubmittable = (formSubmission: Form): boolean =>
-  formSubmission.submissionStatus === "submittable";
+const isDeletable = (form: Form): boolean =>
+  form.submissionDeletable === "deletable";
 
-const isRetractable = (formSubmission: Form): boolean =>
-  formSubmission.submissionStatus === "submitted";
+const isSubmittable = (form: Form): boolean =>
+  form.submissionStatus === "submittable";
+
+const isRetractable = (form: Form): boolean =>
+  form.submissionStatus === "submitted";
 
 interface ControlsButtonProps {
   text: string;
@@ -94,61 +82,77 @@ const ControlsButton: React.FC<ControlsButtonProps> = ({
   );
 };
 
-const FormSubmissionViewControls = ({
-  formSubmission,
-  editButtonClicked,
-  submitButtonClicked,
-  retractButtonClicked,
-  deleteButtonClicked,
-}: FormSubmissionViewControlsProps) => {
+const FormControls = ({
+  form,
+  inhibitViewControl = false,
+  viewForm,
+  editForm,
+  submitForm: submitButtonClicked,
+  retractForm: retractButtonClicked,
+  deleteForm: deleteButtonClicked,
+}: FormControlsProps) => {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmRetract, setConfirmRetract] = useState(false);
 
+  const viewElement = useMemo(() => {
+    if (inhibitViewControl) {
+      return null;
+    }
+    return (
+      <ControlsButton
+        text="View"
+        className="bg-green-400"
+        onClicked={viewForm}
+      />
+    );
+  }, [form, inhibitViewControl]);
+
   const editElement = useMemo(
     () =>
-      isEditable(formSubmission) ? (
+      isEditable(form) ? (
         <ControlsButton
           text="Edit"
           className="bg-yellow-400"
-          onClicked={editButtonClicked}
+          onClicked={editForm}
         />
       ) : null,
-    [formSubmission, editButtonClicked]
+    [form]
   );
 
   const deleteElement = useMemo(
-    () => (
-      <ControlsButton
-        text="Delete"
-        className="bg-red-400"
-        onClicked={() => setConfirmDelete(true)}
-      />
-    ),
-    [formSubmission]
+    () =>
+      isDeletable(form) ? (
+        <ControlsButton
+          text="Delete"
+          className="bg-red-400"
+          onClicked={() => setConfirmDelete(true)}
+        />
+      ) : null,
+    [form]
   );
 
   const submitElement = useMemo(
     () =>
-      isSubmittable(formSubmission) ? (
+      isSubmittable(form) ? (
         <ControlsButton
           text="Submit form"
           className="bg-blue-300"
           onClicked={submitButtonClicked}
         />
       ) : null,
-    [formSubmission, submitButtonClicked]
+    [form, submitButtonClicked]
   );
 
   const retractElement = useMemo(
     () =>
-      isRetractable(formSubmission) ? (
+      isRetractable(form) ? (
         <ControlsButton
           text="Edit/Retract form"
           className="bg-yellow-400"
           onClicked={() => setConfirmRetract(true)}
         />
       ) : null,
-    [formSubmission]
+    [form]
   );
 
   const messageBoxElement = useMemo(() => {
@@ -161,7 +165,13 @@ const FormSubmissionViewControls = ({
           modalProps={modalProps}
         >
           <DialogFooter>
-            <PrimaryButton onClick={deleteButtonClicked} text="Delete" />
+            <PrimaryButton
+              onClick={() => {
+                setConfirmDelete(false);
+                deleteButtonClicked();
+              }}
+              text="Delete"
+            />
             <DefaultButton
               onClick={() => setConfirmDelete(false)}
               text="Cancel"
@@ -208,6 +218,7 @@ const FormSubmissionViewControls = ({
   return (
     <>
       <div className="flex flex-col gap-2 text-center">
+        {viewElement}
         {editElement}
         {deleteElement}
         {submitElement}
@@ -218,52 +229,4 @@ const FormSubmissionViewControls = ({
   );
 };
 
-const FormSubmissionView: React.FC<FormSubmissionViewProps> = ({
-  formSubmission,
-}) => {
-  const { editForm, submitForm, retractForm, deleteForm } =
-    useFormSubmissionHandlers();
-  const formsSavingStatus = useSelector(selectFormsSavingStatus);
-
-  const editFormHandler = useCallback(() => {
-    editForm(formSubmission);
-  }, [editForm, formSubmission]);
-
-  const submitFormHandler = useCallback(async () => {
-    await submitForm(formSubmission);
-  }, [submitForm, formSubmission]);
-
-  const retractFormHandler = useCallback(async () => {
-    await retractForm(formSubmission);
-    editForm(formSubmission);
-  }, [retractForm, editForm, formSubmission]);
-
-  const deleteFormHandler = useCallback(async () => {
-    await deleteForm(formSubmission);
-  }, [deleteForm, formSubmission]);
-
-  const survey = new Model(formSubmission.template.questions);
-  survey.data = formSubmission.answers;
-  survey.applyTheme(ContrastDark);
-  survey.mode = "display";
-
-  if (!survey) {
-    console.log("No survey model");
-    return null;
-  }
-
-  return (
-    <div>
-      <FormSubmissionViewControls
-        formSubmission={formSubmission}
-        editButtonClicked={editFormHandler}
-        submitButtonClicked={submitFormHandler}
-        retractButtonClicked={retractFormHandler}
-        deleteButtonClicked={deleteFormHandler}
-      />
-      <Survey model={survey} />
-    </div>
-  );
-};
-
-export default FormSubmissionView;
+export default FormControls;

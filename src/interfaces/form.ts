@@ -1,7 +1,7 @@
 import { Schema as S } from "@effect/schema";
 import { ModelProfileId } from "./profile";
 
-export const FormId = S.String.pipe(S.brand("FormSubmissionId"));
+export const FormId = S.String.pipe(S.brand("FormId"));
 export type FormId = S.Schema.Type<typeof FormId>;
 
 export const TemplateId = S.String.pipe(S.brand("TemplateId"));

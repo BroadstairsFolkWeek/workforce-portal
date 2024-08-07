@@ -3,7 +3,7 @@ import { Schema } from "@effect/schema";
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import { createLoggerLayer } from "../utilties/logging";
 import { getAuthenticatedUserId } from "../functions/authenticated-user";
-import { updateFormSubmission } from "../services/forms-service";
+import { updateForm } from "../services/forms-service";
 import { FormId } from "../model/interfaces/form";
 import { PutProfileResponse } from "../api/form";
 import { repositoriesLayerLive } from "../contexts/repositories-live";
@@ -12,13 +12,13 @@ const httpTrigger: AzureFunction = async function (
   context: Context,
   req: HttpRequest
 ): Promise<void> {
-  const formSubmissionId: string = req.params["formSubmissionId"];
+  const formId: string = req.params["formId"];
 
   const program = Effect.logTrace("forms: entry")
     .pipe(
       Effect.andThen(getAuthenticatedUserId(req)),
       Effect.andThen((userId) =>
-        updateFormSubmission(userId)(FormId.make(formSubmissionId))(req.body)
+        updateForm(userId)(FormId.make(formId))(req.body)
       ),
       Effect.andThen((form) => ({ data: form })),
       Effect.andThen(Schema.encode(PutProfileResponse)),

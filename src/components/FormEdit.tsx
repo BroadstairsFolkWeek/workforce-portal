@@ -4,21 +4,19 @@ import { Survey } from "survey-react-ui";
 import { Form } from "../interfaces/form";
 import { ContrastDark } from "survey-core/themes";
 
-import { useFormSubmissionHandlers } from "../routes/FormSubmissionHandlers";
+import { useFormHandlers } from "../routes/FormHandlers";
 import { useCallback, useMemo } from "react";
 import SpinnerOverlay from "./SpinnerOverlay";
 import { selectFormsSavingStatus } from "../features/forms/forms-slice";
 
 import "survey-core/defaultV2.min.css";
 
-interface FormSubmissionEditProps {
-  formSubmission: Form;
+interface FormEditProps {
+  form: Form;
 }
 
-const FormSubmissionEdit: React.FC<FormSubmissionEditProps> = ({
-  formSubmission,
-}) => {
-  const { saveForm } = useFormSubmissionHandlers();
+const FormEdit: React.FC<FormEditProps> = ({ form }) => {
+  const { saveForm } = useFormHandlers();
 
   const formsSavingStatus = useSelector(selectFormsSavingStatus);
 
@@ -32,13 +30,13 @@ const FormSubmissionEdit: React.FC<FormSubmissionEditProps> = ({
 
   const saveFormHandler = useCallback(
     async (answers: unknown) => {
-      saveForm(formSubmission, answers);
+      saveForm(form, answers);
     },
-    [saveForm, formSubmission]
+    [saveForm, form]
   );
 
-  const survey = new Model(formSubmission.template.questions);
-  survey.data = formSubmission.answers;
+  const survey = new Model(form.template.questions);
+  survey.data = form.answers;
   survey.applyTheme(ContrastDark);
   survey.validate();
 
@@ -59,4 +57,4 @@ const FormSubmissionEdit: React.FC<FormSubmissionEditProps> = ({
   );
 };
 
-export default FormSubmissionEdit;
+export default FormEdit;

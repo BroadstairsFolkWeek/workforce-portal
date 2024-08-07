@@ -6,16 +6,14 @@ import { getAuthenticatedUserId } from "../functions/authenticated-user";
 import { FormId } from "../model/interfaces/form";
 import { repositoriesLayerLive } from "../contexts/repositories-live";
 import { ApiInvalidRequest } from "../api/api";
-import { deleteFormSubmission } from "../services/forms-service";
+import { deleteForm } from "../services/forms-service";
 import { DeleteFormResponseBody } from "../api/form";
 
 const httpTrigger: AzureFunction = async function (
   context: Context,
   req: HttpRequest
 ): Promise<void> {
-  const formSubmissionIdEffect = Schema.decodeUnknown(FormId)(
-    req.params["formSubmissionId"]
-  ).pipe(
+  const formIdEffect = Schema.decodeUnknown(FormId)(req.params["formId"]).pipe(
     Effect.catchTag("ParseError", () => Effect.fail(new ApiInvalidRequest()))
   );
 
@@ -23,10 +21,10 @@ const httpTrigger: AzureFunction = async function (
 
   const program = Effect.logTrace("formDelete: entry").pipe(
     Effect.andThen(
-      Effect.all([formSubmissionIdEffect, authenticatedUserIdEffect])
+      Effect.all([formIdEffect, authenticatedUserIdEffect])
         .pipe(
-          Effect.andThen(([formSubmissionId, authenticedUserId]) =>
-            deleteFormSubmission(authenticedUserId)(formSubmissionId)
+          Effect.andThen(([formId, authenticedUserId]) =>
+            deleteForm(authenticedUserId)(formId)
           ),
           Effect.andThen((creatableForms) => ({ data: { creatableForms } })),
           Effect.andThen(Schema.encode(DeleteFormResponseBody)),

@@ -1,16 +1,16 @@
 import { useDispatch } from "react-redux";
 import {
-  actionFormSubmission,
-  createFormSubmission,
-  deleteFormSubmission,
-  saveExistingFormSubmission,
+  actionForm,
+  createForm,
+  deleteForm as deleteFormAction,
+  saveExistingForm,
 } from "../features/forms/forms-slice";
 import { useCallback } from "react";
 import { Template, Form } from "../interfaces/form";
 import { AppDispatch } from "../store";
 import { useNavigate } from "react-router-dom";
 
-export const useFormSubmissionHandlers = () => {
+export const useFormHandlers = () => {
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -20,14 +20,14 @@ export const useFormSubmissionHandlers = () => {
 
   const viewForm = useCallback(
     (form: Form) => {
-      navigate(`/formSubmissions/${form.id}`);
+      navigate(`/forms/${form.id}`);
     },
     [navigate]
   );
 
   const editForm = useCallback(
     (form: Form) => {
-      navigate(`/formSubmissions/${form.id}/edit`);
+      navigate(`/forms/${form.id}/edit`);
     },
     [navigate]
   );
@@ -35,8 +35,8 @@ export const useFormSubmissionHandlers = () => {
   const saveForm = useCallback(
     async (form: Form, answers: unknown) => {
       dispatch(
-        saveExistingFormSubmission({
-          formSubmissionId: form.id,
+        saveExistingForm({
+          formId: form.id,
           answers,
         })
       );
@@ -49,9 +49,9 @@ export const useFormSubmissionHandlers = () => {
   const submitForm = useCallback(
     async (form: Form) => {
       dispatch(
-        actionFormSubmission({
-          formSubmissionId: form.id,
-          formSubmissionAction: "submit",
+        actionForm({
+          formId: form.id,
+          formAction: "submit",
         })
       );
 
@@ -63,9 +63,9 @@ export const useFormSubmissionHandlers = () => {
   const retractForm = useCallback(
     async (form: Form) => {
       dispatch(
-        actionFormSubmission({
-          formSubmissionId: form.id,
-          formSubmissionAction: "retract",
+        actionForm({
+          formId: form.id,
+          formAction: "retract",
         })
       );
 
@@ -77,8 +77,8 @@ export const useFormSubmissionHandlers = () => {
   const deleteForm = useCallback(
     async (form: Form) => {
       dispatch(
-        deleteFormSubmission({
-          formSubmissionId: form.id,
+        deleteFormAction({
+          formId: form.id,
         })
       );
 
@@ -100,7 +100,7 @@ export const useFormSubmissionHandlers = () => {
 
   const createNewForm = useCallback(
     async (template: Template, answers: unknown) => {
-      dispatch(createFormSubmission({ templateId: template.id, answers }));
+      dispatch(createForm({ templateId: template.id, answers }));
       navigateHome();
     },
     [dispatch, navigateHome]

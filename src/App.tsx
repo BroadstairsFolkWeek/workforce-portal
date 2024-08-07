@@ -5,13 +5,12 @@ import { Provider } from "react-redux";
 import RootWithProfileLoading from "./routes/RootWithProfileLoading";
 import store from "./store";
 import { fetchProfile } from "./features/profile/profile-slice";
-import ProfileForm from "./components/forms/ProfileForm";
 import PhotoPage from "./components/PhotoPage";
 import PrivacyPolicy from "./components/PrivacyPolicy";
 import TermsAndConditions from "./components/TermsAndConditions";
 import RootWithoutProfileLoading from "./routes/RootWithoutProfileLoading";
 import ErrorPage from "./components/ErrorPage";
-import FormSubmissionsRoute from "./routes/FormSubmissionsRoute";
+import FormRoute from "./routes/FormsRoute";
 import CreatableFormsRoute from "./routes/CreateableFormsRoute";
 import HomeRoute from "./routes/HomeRoute";
 
@@ -27,20 +26,20 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <HomeRoute /> },
       {
-        path: "formSubmissions",
+        path: "forms",
         children: [
-          { index: true, element: <FormSubmissionsRoute /> },
+          { index: true, element: <FormRoute /> },
           {
-            path: ":formSubmissionId",
+            path: ":formId",
 
             children: [
               {
                 index: true,
-                lazy: () => import("./routes/FormSubmissionRoute"),
+                lazy: () => import("./routes/FormRoute"),
               },
               {
                 path: "edit",
-                lazy: () => import("./routes/FormSubmissionEditRoute"),
+                lazy: () => import("./routes/FormEditRoute"),
               },
             ],
           },
