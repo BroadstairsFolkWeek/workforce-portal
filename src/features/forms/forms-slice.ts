@@ -128,8 +128,8 @@ export const saveExistingForm = createAsyncThunk<
 export const createForm = createAsyncThunk<
   NewFormFullfilledPayload,
   { answers: unknown; templateId: TemplateId }
->("forms/createForm", async ({ templateId: formSpecId, answers }) => {
-  const program = apiCreateForm(formSpecId)(answers)
+>("forms/createForm", async ({ templateId, answers }) => {
+  const program = apiCreateForm(templateId)(answers)
     .pipe(
       Effect.andThen((newFormResult) => ({
         result: "success" as const,
@@ -335,5 +335,5 @@ export const selectCreatableForms = (state: RootState) =>
 export const selectForm = (formId: FormId) => (state: RootState) =>
   state.forms.forms.find((f) => f.id === formId);
 export const selectCreatableForm =
-  (formSpecId: TemplateId) => (state: RootState) =>
-    state.forms.creatableForms.find((f) => f.id === formSpecId);
+  (templateId: TemplateId) => (state: RootState) =>
+    state.forms.creatableForms.find((f) => f.id === templateId);

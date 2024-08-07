@@ -6,7 +6,7 @@
       "direction": "in",
       "name": "req",
       "methods": ["post"],
-      "route": "formNew/{formSpecId}"
+      "route": "formNew/{templateId}"
     },
     {
       "type": "http",

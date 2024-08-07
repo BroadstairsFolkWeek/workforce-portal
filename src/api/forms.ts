@@ -64,8 +64,8 @@ export const apiDeleteForm = (formId: FormId) =>
     })
   );
 
-export const apiCreateForm = (formSpecId: TemplateId) => (answers: unknown) =>
-  apiPostJsonData(`/api/formNew/${formSpecId}`)({ answers })
+export const apiCreateForm = (templateId: TemplateId) => (answers: unknown) =>
+  apiPostJsonData(`/api/formNew/${templateId}`)({ answers })
     .pipe(Effect.andThen(S.decodeUnknown(CreateFormResponse)))
     .pipe(Effect.andThen((decoded) => decoded.data))
     .pipe(

@@ -131,7 +131,7 @@ const actionForm =
         })
       );
 
-const getCreatableFormSpecsByUserId =
+const getCreatableFormTemplatesByUserId =
   (apiClient: WfApiClientType) => (userId: string) =>
     apiClient
       .getJson(`/api/users/${userId}/creatableforms`)
@@ -193,8 +193,8 @@ export const formsRepositoryLive = Layer.effect(
         modelUpdateForm: updateForm(wfApiClient),
         modelDeleteForm: deleteForm(wfApiClient),
         modelActionForm: actionForm(wfApiClient),
-        modelGetCreatableFormSpecsByUserId:
-          getCreatableFormSpecsByUserId(wfApiClient),
+        modelGetCreatableFormTemplatesByUserId:
+          getCreatableFormTemplatesByUserId(wfApiClient),
         modelCreateForm: createForm(wfApiClient),
       })
     )

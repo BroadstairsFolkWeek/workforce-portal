@@ -65,20 +65,20 @@ export const getCreatableFormsByUserId = (
 ): Effect.Effect<readonly Template[], ProfileNotFound, FormsRepository> =>
   FormsRepository.pipe(
     Effect.andThen((formsRepo) =>
-      formsRepo.modelGetCreatableFormSpecsByUserId(userId)
+      formsRepo.modelGetCreatableFormTemplatesByUserId(userId)
     )
   );
 
 export const createForm =
-  (userId: string) => (formSpecId: TemplateId) => (answers: unknown) =>
+  (userId: string) => (templateId: TemplateId) => (answers: unknown) =>
     FormsRepository.pipe(
       Effect.andThen((formsRepo) =>
         formsRepo
-          .modelCreateForm(userId)(formSpecId, answers)
+          .modelCreateForm(userId)(templateId, answers)
           .pipe(
             Effect.andThen((form) =>
               getCreatableFormsByUserId(userId).pipe(
-                Effect.andThen((formSpecs) => ({ form, formSpecs }))
+                Effect.andThen((templates) => ({ form, templates }))
               )
             )
           )

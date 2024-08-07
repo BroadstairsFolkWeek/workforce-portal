@@ -13,8 +13,8 @@ const httpTrigger: AzureFunction = async function (
   context: Context,
   req: HttpRequest
 ): Promise<void> {
-  const formSpecIdEffect = Schema.decodeUnknown(TemplateId)(
-    req.params["formSpecId"]
+  const templateIdEffect = Schema.decodeUnknown(TemplateId)(
+    req.params["templateId"]
   ).pipe(
     Effect.catchTag("ParseError", () => Effect.fail(new ApiInvalidRequest()))
   );
@@ -29,18 +29,18 @@ const httpTrigger: AzureFunction = async function (
   const program = Effect.logTrace("formAction: entry").pipe(
     Effect.andThen(
       Effect.all([
-        formSpecIdEffect,
+        templateIdEffect,
         requestBodyEffect,
         authenticatedUserIdEffect,
       ])
         .pipe(
-          Effect.andThen(([formSpecId, requestBody, authenticedUserId]) =>
-            createForm(authenticedUserId)(formSpecId)(requestBody)
+          Effect.andThen(([templateId, requestBody, authenticedUserId]) =>
+            createForm(authenticedUserId)(templateId)(requestBody)
           )
         )
         .pipe(
           Effect.andThen((result) => ({
-            data: { form: result.form, creatableForms: result.formSpecs },
+            data: { form: result.form, creatableForms: result.templates },
           })),
           Effect.andThen(Schema.encode(PostNewFormResponseBody)),
           Effect.andThen((body) => ({

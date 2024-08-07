@@ -46,7 +46,7 @@ export class FormsRepository extends Context.Tag("FormsRepository")<
       action: FormAction
     ) => Effect.Effect<Form, FormNotFound | UnprocessableFormAction>;
 
-    readonly modelGetCreatableFormSpecsByUserId: (
+    readonly modelGetCreatableFormTemplatesByUserId: (
       userId: string
     ) => Effect.Effect<readonly Template[], ProfileNotFound>;
 
